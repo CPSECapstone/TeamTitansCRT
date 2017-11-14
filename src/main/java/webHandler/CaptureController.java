@@ -17,7 +17,7 @@ public class CaptureController {
     }
 
     @RequestMapping(value = "/capture/{capture}/status", method = RequestMethod.GET)
-    public ResponseEntity<String> CaptureStatus(@PathVariable("capture") String capture) {
-        return new ResponseEntity<String>(capture + " - status", HttpStatus.OK);
+    public ResponseEntity<Status> CaptureStatus(@PathVariable("capture") String capture) {
+        return new ResponseEntity<Status>(new Status("Capturing", new StatusMetrics(0.0,1.0,2.0)), HttpStatus.OK);
     }
 }
