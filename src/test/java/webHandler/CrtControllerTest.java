@@ -8,7 +8,13 @@ public class CrtControllerTest {
     @Test
     public void index() throws Exception {
         CrtController crtCon = new CrtController();
-        assertEquals("Welcome to MyCRT!", crtCon.index());
+        assertEquals("settingsPage.html", crtCon.index());
+    }
+
+    @Test
+    public void main() throws Exception {
+        CrtController crtCon = new CrtController();
+        assertEquals("index.html", crtCon.main());
     }
 
 }
