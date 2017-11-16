@@ -1,0 +1,30 @@
+body {
+    background: #0;
+}
+
+.wrapper {
+        display: flex;
+}
+
+#sidebar {
+        margin-right: 20px;
+        background-color: grey;
+}
+
+.navbar-custom {
+    color: white;
+    margin-bottom: 0px;
+}
+
+li {
+    margin-top: 5px;
+}
+
+.title {
+    color: white;
+}
+
+.navbar-right {
+    margin-right: 10px;
+    color: white;
+}

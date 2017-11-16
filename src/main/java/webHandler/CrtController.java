@@ -1,14 +1,17 @@
 package webHandler;
 
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-@RestController
+@Controller
+@RequestMapping("/")
 public class CrtController {
 
-    @RequestMapping("/")
-    public String index() {
-        return "Welcome to MyCRT!";
-    }
+    @GetMapping
+    public String index() { return "settingsPage.html"; }
+
+    @GetMapping("main")
+    public String main() { return "index.html"; }
 
 }
