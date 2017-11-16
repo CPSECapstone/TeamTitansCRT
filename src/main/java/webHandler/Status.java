@@ -8,4 +8,12 @@ public class Status {
         this.status = status;
         this.metrics = metrics;
     }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public StatusMetrics getMetrics() {
+        return metrics;
+    }
 }

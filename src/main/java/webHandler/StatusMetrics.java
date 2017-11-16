@@ -10,4 +10,16 @@ public class StatusMetrics {
         this.ram = ram;
         this.disk = disk;
     }
+
+    public double getCpu() {
+        return cpu;
+    }
+
+    public double getRam() {
+        return ram;
+    }
+
+    public double getDisk() {
+        return disk;
+    }
 }
