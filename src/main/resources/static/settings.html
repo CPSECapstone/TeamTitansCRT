@@ -25,7 +25,7 @@
     <link rel="stylesheet" href="style2.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.css">
     <link href="css/mdb.css" rel="stylesheet">
-    <link href="css/settingsPage.css" rel="stylesheet">
+    <link href="css/allPages.css" rel="stylesheet">
 
 
 </head>
@@ -37,7 +37,7 @@
         <div id="nav-container">
             <div class="navbar-header">
                 <a class="navbar-brand page-scroll" href="#page-top">
-                    <span class="h1 title">Settings</span>
+                    <span class="h1 title">Analyze Results</span>
                 </a>
             </div>
 
@@ -48,13 +48,13 @@
                     </a>
                     <ul role="menu" class="dropdown-menu">
                         <li>
-                            <a class="page-scroll" href="#capture">View Logs</a>
+                            <a class="page-scroll" id="btnViewLogs">View Logs</a>
                         </li>
                         <li>
-                            <a class="page-scroll" href="#replay">Settings</a>
+                            <a class="page-scroll" id="btnSettings">Settings</a>
                         </li>
                         <li>
-                            <a class="page-scroll" href="#analyze">Logout</a>
+                            <a class="page-scroll" id="btnLogout">Logout</a>
                         </li>
                     </ul>
                 </li>
@@ -69,10 +69,10 @@
         <!-- Sidebar Holder -->
         <nav id="sidebar" class="light-grey z-depth-0 navbar-left col-sm-3 col-md-2">
             <ul class="list-unstyled">
-                <li><a href="#" class="btn btn-primary btn-block">Dashboard</a></li>
-                <li><a href="#" class="btn btn-primary btn-block">Capture</a></li>
-                <li><a href="#" class="btn btn-primary btn-block">Replay</a></li>
-                <li><a href="#" class="btn btn-primary btn-block">Analyze Results</a></li>
+                <li><a id="btnDashboard" class="btn btn-primary btn-block">Dashboard</a></li>
+                <li><a id="btnCapture" class="btn btn-primary btn-block">Capture</a></li>
+                <li><a id="btnReplay" class="btn btn-primary btn-block">Replay</a></li>
+                <li><a id="btnAnalyze" class="btn btn-primary btn-block">Analyze Results</a></li>
             </ul>
         </nav>
 
@@ -114,7 +114,7 @@
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDo0B-2fjSnS4eo0T0KGtWKccCau77NkI"></script>
 
     <!-- Theme JavaScript -->
-    <script src="js/libs/grayscale.js"></script>
+    <script src="js/allPages.js"></script>
 
 </body>
 
