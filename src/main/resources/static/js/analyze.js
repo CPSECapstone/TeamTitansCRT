@@ -8,7 +8,7 @@ function getRand(min, max) {
 
 function generateData(arr) {
     var now = new Date();
-    for (var d = new Date(); d <= now.getTime() + convert(60); d.setTime(d.getTime() +
+    for (var d = new Date(); d <= now.getTime() + convert(90); d.setTime(d.getTime() +
             convert(10))) {
         arr.push([d, getRand(40, 80)]);
     }
@@ -55,7 +55,7 @@ Highcharts.chart('container', {
     plotOptions: {
         spline: {
             marker: {
-                enabled: true
+                enabled: false
             }
         }
     },
@@ -72,9 +72,10 @@ Highcharts.chart('container', {
     }]
 });
 
+// builds an html string, then injects it
 var dataString = "";
 for (var i = 0; i < cpuData.length; i++) {
-    var time = cpuData[i][0].toLocaleString();
+    var time = cpuData[i][0].toLocaleTimeString();
     var cpu = cpuData[i][1];
     var ram = ramData[i][1];
     var disk = diskData[i][1];

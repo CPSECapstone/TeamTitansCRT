@@ -1,14 +1,14 @@
 $(document).ready(function() {
     $("#btnSettings").on("click", function() {
-        window.location.href = "settings.html";
+        window.location.href = "settings";
     });
     $("#btnAnalyze").on("click", function() {
-        window.location.href = "analyze.html";
+        window.location.href = "analyze";
     });
     $("#btnSettings").on("click", function() {
-        window.location.href = "settings.html";
+        window.location.href = "settings";
     });
     $("#btnSettings").on("click", function() {
-        window.location.href = "settings.html";
+        window.location.href = "settings";
     });
 });
