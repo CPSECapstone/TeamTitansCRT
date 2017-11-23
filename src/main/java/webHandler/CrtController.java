@@ -16,5 +16,10 @@ public class CrtController {
 
     @GetMapping("analyze")
     public String analyze() { return "analyzePage.html"; }
+    
+    @GetMapping("login")
+    public String login() { return "setupPage.html"; }
 
+    @GetMapping("dashboard")
+    public String dashboard() { return "dashboardPage.html"; }
 }

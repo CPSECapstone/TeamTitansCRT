@@ -5,10 +5,10 @@ $(document).ready(function() {
     $("#btnAnalyze").on("click", function() {
         window.location.href = "analyze";
     });
-    $("#btnSettings").on("click", function() {
-        window.location.href = "settings";
+    $("#btnDashboard").on("click", function() {
+        window.location.href = "dashboard";
     });
-    $("#btnSettings").on("click", function() {
-        window.location.href = "settings";
+    $("#btnLogout").on("click", function() {
+        window.location.href = "login";
     });
 });

@@ -22,5 +22,16 @@ public class CrtControllerTest {
         CrtController crtCon = new CrtController();
         assertEquals("analyzePage.html", crtCon.analyze());
     }
-
+    
+    @Test
+    public void login() throws Exception {
+        CrtController crtCon = new CrtController();
+        assertEquals("setupPage.html", crtCon.login());
+    }
+    
+    @Test
+    public void dashboard() throws Exception {
+        CrtController crtCon = new CrtController();
+        assertEquals("dashboardPage.html", crtCon.dashboard());
+    }
 }
