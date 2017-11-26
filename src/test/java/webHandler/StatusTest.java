@@ -18,5 +18,4 @@ public class StatusTest {
         Status status = new Status("online", statusMetrics);
         assertNotNull(status.getMetrics());
     }
-
 }
