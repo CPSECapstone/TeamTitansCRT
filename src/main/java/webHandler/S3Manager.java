@@ -5,9 +5,14 @@ import java.io.InputStream;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
+import com.amazonaws.services.rds.AmazonRDSClientBuilder;
+import com.amazonaws.services.rds.model.DownloadDBLogFilePortionResult;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
@@ -20,16 +25,21 @@ public class S3Manager {
     public S3Manager()
     {
         this.s3Client = (AmazonS3ClientBuilder.standard())
-                .withRegion("us-west-2")
+                .withRegion("us-west-1")
                 .withCredentials(InstanceProfileCredentialsProvider.getInstance()).build();
+
+        /* Testing outside of EC2 Instance:
+        BasicAWSCredentials awsCredentials = new BasicAWSCredentials("accesskey", "secretkey");
+        this.s3Client = AmazonS3ClientBuilder.standard().withRegion("us-west-1").withCredentials(new AWSStaticCredentialsProvider(awsCredentials)).build();*/
+
     }
 
-    public void uploadFile(String bucketName, String fileName, File file)
+    public void uploadFile(String bucketName, String fileName, InputStream file, ObjectMetadata metadata)
     {
        try
        {
            System.out.println("Starting the upload of a file to S3.");
-           s3Client.putObject(new PutObjectRequest(bucketName, fileName, file));
+           s3Client.putObject(new PutObjectRequest(bucketName, fileName, file, metadata));
            System.out.println("Uploaded file to S3");
        } catch (AmazonServiceException ase)
        {
