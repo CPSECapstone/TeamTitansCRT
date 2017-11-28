@@ -28,7 +28,6 @@ public class CloudWatchManager {
                     .withRegion(Regions.US_WEST_2)
                     .build();
 
-
             return cloudWatch;
         } catch (SdkClientException e) {
             e.printStackTrace();
