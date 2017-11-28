@@ -23,8 +23,8 @@ public class CloudWatchManager {
 
     public AmazonCloudWatch getConnection() throws SdkClientException {
         try {
-            BasicAWSCredentials awsCredentials = new BasicAWSCredentials("access_key", "secret_key");
             AmazonCloudWatch cloudWatch = AmazonCloudWatchClientBuilder.standard()
+                    .withCredentials(InstanceProfileCredentialsProvider.getInstance())
                     .withRegion(Regions.US_WEST_2)
                     .build();
 
