@@ -14,13 +14,38 @@ import java.util.HashMap;
 @RestController
 public class CaptureController {
 
-    HashMap<String, Capture> captures = new HashMap<>();
+    private HashMap<String, Capture> captures = new HashMap<>();
 
     @RequestMapping(value = "/capture/start", method = RequestMethod.POST)
-    public ResponseEntity<String> CaptureCommand(@RequestBody Capture capture) {
+    public ResponseEntity<String> CaptureStart(@RequestBody Capture capture) {
 
-        capture.setStartTime(new Date());
-        capture.setStatus("Running");
+        if (capture.getId() == null || capture.getS3() == null || capture.getRds() == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        if (capture.getStartTime() == null) {
+            capture.setStartTime(new Date());
+        }
+
+        captures.put(capture.getId(), capture);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/capture/stop", method = RequestMethod.POST)
+    public ResponseEntity<String> CaptureStop(@RequestBody Capture capture) {
+
+        Capture targetCapture = captures.get(capture.getId());
+
+        if (targetCapture == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        if (capture.getEndTime() == null) {
+            targetCapture.setEndTime(new Date());
+        } else {
+            targetCapture.setEndTime(capture.getEndTime());
+        }
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

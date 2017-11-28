@@ -32,13 +32,22 @@ public class Capture {
         this.status = "Running";
     }
 
-    public String getId() {
-        return id;
+    public void updateStatus() {
+        Date currTime = new Date();
+        if (startTime != null && startTime.compareTo(currTime) >= 0) {
+            if (endTime != null && endTime.compareTo(currTime) <= 0) {
+                this.status = "Finished";
+            } else {
+                this.status = "Running";
+            }
+        } else {
+            this.status = "Queued";
+        }
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
+    public String getId() { return id; }
+
+    public void setId(String id) { this.id = id; }
 
     public String getRds() {
         return rds;
@@ -61,6 +70,7 @@ public class Capture {
     }
 
     public void setStartTime(Date startTime) {
+        updateStatus();
         this.startTime = startTime;
     }
 
@@ -69,6 +79,7 @@ public class Capture {
     }
 
     public void setEndTime(Date endTime) {
+        updateStatus();
         this.endTime = endTime;
     }
 
