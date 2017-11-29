@@ -34,8 +34,8 @@ public class Capture {
 
     public void updateStatus() {
         Date currTime = new Date();
-        if (startTime != null && startTime.compareTo(currTime) >= 0) {
-            if (endTime != null && endTime.compareTo(currTime) <= 0) {
+        if (startTime != null && currTime.compareTo(startTime) >= 0) {
+            if (endTime != null && currTime.compareTo(endTime) >= 0) {
                 this.status = "Finished";
             } else {
                 this.status = "Running";
