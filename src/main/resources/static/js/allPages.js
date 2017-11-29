@@ -5,6 +5,9 @@ $(document).ready(function() {
     $("#btnAnalyze").on("click", function() {
         window.location.href = "analyze";
     });
+    $("#btnCapture").on("click", function() {
+        window.location.href = "settings";
+    });
     $("#btnDashboard").on("click", function() {
         window.location.href = "dashboard";
     });
