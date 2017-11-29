@@ -70,8 +70,8 @@ public class Capture {
     }
 
     public void setStartTime(Date startTime) {
-        updateStatus();
         this.startTime = startTime;
+        updateStatus();
     }
 
     public Date getEndTime() {
@@ -79,8 +79,8 @@ public class Capture {
     }
 
     public void setEndTime(Date endTime) {
-        updateStatus();
         this.endTime = endTime;
+        updateStatus();
     }
 
     public String getStatus() {

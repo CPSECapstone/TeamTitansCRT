@@ -17,7 +17,7 @@ public class CaptureControllerTest {
     @Test
     public void captureStatus() throws Exception {
         CaptureController captureController = new CaptureController();
-        Status status = captureController.CaptureStatus("capture").getBody();
-        assertEquals("Capturing",status.getStatus());
+        HttpStatus status = captureController.CaptureStatus().getStatusCode();
+        assertEquals(HttpStatus.OK,status);
     }
 }

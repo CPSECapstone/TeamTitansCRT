@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -71,7 +72,7 @@ public class CaptureController {
     }
 
     @RequestMapping(value = "/capture/status", method = RequestMethod.GET)
-    public ResponseEntity<Status> CaptureStatus(@PathVariable("capture") String capture) {
-        return new ResponseEntity<>(new Status("Capturing", new StatusMetrics(0.0,1.0,2.0)), HttpStatus.OK);
+    public ResponseEntity<Collection<Capture>> CaptureStatus() {
+        return new ResponseEntity<>(captures.values(), HttpStatus.OK);
     }
 }
