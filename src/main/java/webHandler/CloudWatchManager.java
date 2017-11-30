@@ -2,6 +2,8 @@ package webHandler;
 
 import java.util.*;
 import com.amazonaws.SdkClientException;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
@@ -25,6 +27,10 @@ public class CloudWatchManager {
                     .withCredentials(InstanceProfileCredentialsProvider.getInstance())
                     .withRegion(Regions.US_WEST_2)
                     .build();
+
+            /* Testing outside of EC2 Instance:
+            BasicAWSCredentials awsCredentials = new BasicAWSCredentials("accesskey", "secretkey");
+            cloudWatch = AmazonCloudWatchClientBuilder.standard().withRegion("us-west-1").withCredentials(new AWSStaticCredentialsProvider(awsCredentials)).build();*/
 
             return cloudWatch;
         } catch (SdkClientException e) {
@@ -68,7 +74,7 @@ public class CloudWatchManager {
                 .withStartTime(start)
                 .withEndTime(end)
                 .withStatistics(Statistic.Sum, Statistic.Average)
-                .withUnit(StandardUnit.Seconds);
+                .withPeriod(60);
 
 
         return cw.getMetricStatistics(request);

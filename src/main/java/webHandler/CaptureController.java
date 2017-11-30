@@ -6,11 +6,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -60,12 +61,14 @@ public class CaptureController {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
 
-            //CloudWatchManager cloudManager = new CloudWatchManager();
-            //GetMetricStatisticsResult stats = cloudManager.getMetricStatistics(targetCapture.getRds(), targetCapture.getStartTime(), targetCapture.getEndTime(), "CPUUtilization");
+            CloudWatchManager cloudManager = new CloudWatchManager();
+            GetMetricStatisticsResult stats = cloudManager.getMetricStatistics(targetCapture.getRds(), targetCapture.getStartTime(), targetCapture.getEndTime(), "CPUUtilization");
+            InputStream statStream = new ByteArrayInputStream(stats.toString().getBytes(StandardCharsets.UTF_8));
 
             // Store RDS workload in S3
             S3Manager s3Manager = new S3Manager();
             s3Manager.uploadFile(targetCapture.getS3(), targetCapture.getId() + "-Workload.log", stream, new ObjectMetadata());
+            s3Manager.uploadFile(targetCapture.getS3(), targetCapture.getId() + "-Performance.log", statStream, new ObjectMetadata());
 
             //TODO: Add check for file upload
         }
