@@ -10,8 +10,7 @@ $(document).ready(function() {
                 startTime: null,
                 endTime: null,
                 status: ""
-            }
-        console.log(body);
+            };
         sendCapture("/capture/start", body);
     });
 
@@ -24,25 +23,26 @@ $(document).ready(function() {
                 startTime: null,
                 endTime: null,
                 status: ""
-            }
-        console.log(body);
+            };
         sendCapture("/capture/stop", body);
     });
 
     $("#btnStatus").on("click", function() {
-        console.log("getting status of captures...");
         $.ajax({
             url: domain + "/capture/status",
             type: "GET",
             success: function(data) {
-                var status;
+                var targetID = $("#txtID").val();
+
                 for (var i = 0; i < data.length; i++) {
                     var capture = data[i];
                     var id = capture["id"];
-                    status = capture["status"];
+                    var status = capture["status"];
                     console.log("ID: " + id + "\nStatus: " + status);
+                    if(id === targetID) {
+                        $("#lblStatus").html(status);
+                    }
                 }
-                $("#lblStatus").html(status);
             },
             error: function(err) {
                 console.log(err);
@@ -52,17 +52,15 @@ $(document).ready(function() {
 });
 
 function sendCapture(url, body) {
-    console.log("sending capture...");
     $.ajax({
         url: domain + url,
         type: "POST",
         headers: {
             "Content-Type": "application/json",
         },
-        dataType: "json",
         data: JSON.stringify(body),
         success: function() {
-            console.log("success");
+            $("#lblStatus").html("Successful.");
         },
         error: function(err) {
             console.log(err);
