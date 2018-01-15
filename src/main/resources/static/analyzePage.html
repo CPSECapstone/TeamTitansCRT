@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -24,6 +25,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.css">
     <link href="css/mdb.css" rel="stylesheet">
     <link href="css/allPages.css" rel="stylesheet">
+
+
 </head>
 
 <body>
@@ -73,47 +76,23 @@
 
         <!-- Page Content Holder -->
         <div id="content" class="col-xs-10">
-            <h3 class="text-center">Capture Configuration</h3>
-            <div class="">
-                <label>RDS Endpoint:<input id="txtRDS" type="text" value="testdb"></label>
-            </div>
-            <div class="">
-                <label>S3 Endpoint:<input id="txtS3" type="text" value="teamtitans-test-mycrt"></label>
-            </div>
-            <div class="">
-                <label>Capture ID:<input id="txtID" type="text" value="MyCapture"></label>
-            </div>
-            <a href="#" id="btnCaptureStart" class="btn btn-default green">Start Capture</a>
-            <a href="#" id="btnCaptureStop" class="btn btn-default red">Stop Capture</a>
-            <a href="#" id="btnStatus" class="btn btn-default blue">Update Status</a>
+            <h3 class="text-center">Capture Results</h3>
 
-            <div class="container-fluid">
-                <h3 id="lblStatus"></h3>
-                <table id="statusTable" class="table">
-                    <thead>
-                        <tr class="">
-                            <th>Name</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-            </div>
 
-            <!--
-            <h3 class="text-center">Replay Configuration</h3>
-            <div class="">
-                <label>RDS Endpoint:<input type="text" value=""></label>
-            </div>
-            <div class="">
-                <label>S3 Endpoint:<input type="text" value=""></label>
-            </div>
-            <div class="">
-                <label>Name of Capture:<input type="text" value=""></label>
-            </div>
-            <a href="#" class="btn btn-default green">Start Replay</a>
-            -->
+            <div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+
+            <table id="captureTable" class="table">
+                <thead>
+                    <tr class="">
+                        <th>Time</th>
+                        <th>CPU</th>
+                        <th>RAM</th>
+                        <th>Disk I/O</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -132,8 +111,10 @@
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDo0B-2fjSnS4eo0T0KGtWKccCau77NkI"></script>
 
     <!-- Theme JavaScript -->
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
     <script src="js/allPages.js"></script>
-    <script src="js/settingsPage.js"></script>
+    <script src="js/analyze.js"></script>
 
 </body>
 
