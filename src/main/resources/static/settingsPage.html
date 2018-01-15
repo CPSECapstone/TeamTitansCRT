@@ -85,11 +85,20 @@
             </div>
             <a href="#" id="btnCaptureStart" class="btn btn-default green">Start Capture</a>
             <a href="#" id="btnCaptureStop" class="btn btn-default red">Stop Capture</a>
-            <a href="#" id="btnStatus" class="btn btn-default blue">Get Status</a>
+            <a href="#" id="btnStatus" class="btn btn-default blue">Update Status</a>
 
             <div class="container-fluid">
-                <label>Status: </label>
-                <label id="lblStatus"></label>
+                <h3 id="lblStatus"></h3>
+                <table id="statusTable" class="table">
+                    <thead>
+                        <tr class="">
+                            <th>Name</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
             </div>
 
             <!--
