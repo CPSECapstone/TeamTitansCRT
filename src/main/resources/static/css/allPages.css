@@ -1,5 +1,20 @@
+:root {
+    --primary: #455a64;
+    --p-light: #708690;
+    --p-dark: #1b3039;
+    /* --secondary: #ffc107; */
+    --secondary: #ff8f00;
+    /* --s-light: #fff350; */
+    --s-light: #ffc107;
+    --s-dark: #c79100;
+    --grey-light: #cfd8dc;
+    --grey-dark: #9ea7aa;
+    --white: #ffffff;
+}
+
 body {
-    background: #0;
+    /* background-color: var(--grey-light); */
+    background-color: var(--white);
 }
 
 .wrapper {
@@ -8,12 +23,45 @@ body {
 
 #sidebar {
         margin-right: 20px;
-        background-color: grey;
+        background-color: var(--primary);
+        height: 100vh;
+}
+
+.btn-primary {
+    background-color: var(--secondary);
+    color: black;
+}
+
+.btn-primary:hover {
+    background-color: var(--s-light) !important;
+    color: black !important;
+}
+
+.btn-default {
+    background-color: var(--secondary);
+    color: black;
+}
+
+.btn-default:hover {
+    background-color: var(--s-light) !important;
+    color: black !important;
 }
 
 .navbar-custom {
     color: white;
     margin-bottom: 0px;
+    background-color: var(--p-dark);
+}
+
+#content > div.input > label {
+    width: 50%;
+    color: black;
+}
+
+#content > div.input > label > input:focus {
+    border-bottom: 1px solid #000;
+    border-right-style: none;
+    box-shadow: 1px 0 0 #000;
 }
 
 li {

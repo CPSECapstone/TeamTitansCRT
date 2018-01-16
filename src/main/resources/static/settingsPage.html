@@ -24,13 +24,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.css">
     <link href="css/mdb.css" rel="stylesheet">
     <link href="css/allPages.css" rel="stylesheet">
+    <link href="css/materialTheme.css" rel="stylesheet">
 </head>
 
 <body>
 
 
     <!-- Navigation -->
-    <nav class="navbar navbar-custom blue z-depth-1" role="navigation">
+    <nav class="navbar navbar-custom z-depth-1" role="navigation">
         <div id="nav-container">
             <div class="navbar-header">
                 <a class="navbar-brand page-scroll" href="#page-top">
@@ -62,30 +63,47 @@
 
     <div class="wrapper">
         <!-- Sidebar Holder -->
-        <nav id="sidebar" class="light-grey z-depth-0 navbar-left col-sm-3 col-md-2">
+        <nav id="sidebar" class="z-depth-0 navbar-left col-sm-3 col-md-2">
             <ul class="list-unstyled">
                 <li><a id="btnDashboard" class="btn btn-primary btn-block">Dashboard</a></li>
                 <li><a id="btnCapture" class="btn btn-primary btn-block">Capture</a></li>
                 <li><a id="btnReplay" class="btn btn-primary btn-block">Replay</a></li>
                 <li><a id="btnAnalyze" class="btn btn-primary btn-block">Analyze Results</a></li>
             </ul>
+            <div>
+        <!--
+        <div class="mdc-component mdc-component__buttons">
+          <p>Buttons</p>
+          <div class="mdc-component__section">
+            <div class="mdc-component__containers">
+              <div class="mdc-component__containers__primary">
+                <p>Primary</p><button class="mdc-fab material-icons" aria-label="Add"><span class="mdc-fab__icon">add</span></button> <button class="mdc-fab material-icons mdc-fab--plain" aria-label="Add"><span class="mdc-fab__icon">add</span></button>
+                <button
+                  type="button" class="mdc-button mdc-button--plain">Normal</button> <button type="button" class="mdc-button mdc-button--raised">Normal</button></div>
+              <div class="mdc-component__containers__secondary">
+                <p>Secondary</p><button class="mdc-fab material-icons" aria-label="Add"><span class="mdc-fab__icon">add</span></button> <button class="mdc-fab material-icons mdc-fab--plain" aria-label="Add"><span class="mdc-fab__icon">add</span></button>                <button type="button" class="mdc-button mdc-button--plain">Normal</button> <button type="button" class="mdc-button mdc-button--raised">Normal</button></div>
+            </div>
+          </div>
+        </div>
+        -->
+      </div>
         </nav>
 
         <!-- Page Content Holder -->
         <div id="content" class="col-xs-10">
-            <h3 class="text-center">Capture Configuration</h3>
-            <div class="">
+            <h3 class="text-center"><b>Capture Configuration</b></h3>
+            <div class="input">
                 <label>RDS Endpoint:<input id="txtRDS" type="text" value="testdb"></label>
             </div>
-            <div class="">
+            <div class="input">
                 <label>S3 Endpoint:<input id="txtS3" type="text" value="teamtitans-test-mycrt"></label>
             </div>
-            <div class="">
+            <div class="input">
                 <label>Capture ID:<input id="txtID" type="text" value="MyCapture"></label>
             </div>
-            <a href="#" id="btnCaptureStart" class="btn btn-default green">Start Capture</a>
-            <a href="#" id="btnCaptureStop" class="btn btn-default red">Stop Capture</a>
-            <a href="#" id="btnStatus" class="btn btn-default blue">Update Status</a>
+            <a href="#" id="btnCaptureStart" class="btn btn-default">Start Capture</a>
+            <a href="#" id="btnCaptureStop" class="btn btn-default">Stop Capture</a>
+            <a href="#" id="btnStatus" class="btn btn-default">Update Status</a>
 
             <div class="container-fluid">
                 <h3 id="lblStatus"></h3>
