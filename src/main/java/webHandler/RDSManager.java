@@ -19,7 +19,7 @@ import java.nio.charset.StandardCharsets;
 
 public class RDSManager extends AmazonWebServiceResult{
 
-    private static AmazonRDS rdsClient;
+    private AmazonRDS rdsClient;
 
     public RDSManager() {
         this.rdsClient = AmazonRDSClientBuilder.standard().withRegion("us-west-1").withCredentials(InstanceProfileCredentialsProvider.getInstance()).build();
@@ -29,7 +29,7 @@ public class RDSManager extends AmazonWebServiceResult{
         this.rdsClient = AmazonRDSClientBuilder.standard().withRegion("us-west-1").withCredentials(new AWSStaticCredentialsProvider(awsCredentials)).build();*/
     }
 
-    public static InputStream downloadLog(String DBInstance, String logFile){
+    public InputStream downloadLog(String DBInstance, String logFile){
         try {
             DownloadDBLogFilePortionRequest request = new DownloadDBLogFilePortionRequest().withDBInstanceIdentifier(DBInstance).withLogFileName(
                      logFile);
