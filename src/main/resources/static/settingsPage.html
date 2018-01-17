@@ -45,13 +45,13 @@
                         <span class="glyphicon glyphicon-th-large" style="color: white"></span>
                     </a>
                     <ul role="menu" class="dropdown-menu">
-                        <li>
+                        <li class="pad-top">
                             <a class="page-scroll" id="btnViewLogs">View Logs</a>
                         </li>
-                        <li>
+                        <li class="pad-top">
                             <a class="page-scroll" id="btnSettings">Settings</a>
                         </li>
-                        <li>
+                        <li class="pad-top">
                             <a class="page-scroll" id="btnLogout">Logout</a>
                         </li>
                     </ul>
@@ -65,41 +65,37 @@
         <!-- Sidebar Holder -->
         <nav id="sidebar" class="z-depth-0 navbar-left col-sm-3 col-md-2">
             <ul class="list-unstyled">
-                <li><a id="btnDashboard" class="btn btn-primary btn-block">Dashboard</a></li>
-                <li><a id="btnCapture" class="btn btn-primary btn-block">Capture</a></li>
-                <li><a id="btnReplay" class="btn btn-primary btn-block">Replay</a></li>
-                <li><a id="btnAnalyze" class="btn btn-primary btn-block">Analyze Results</a></li>
+                <li class="pad-top"><a id="btnDashboard" class="btn btn-primary btn-block">Dashboard</a></li>
+                <li class="pad-top"><a id="btnCapture" class="btn btn-primary btn-block">Capture</a></li>
+                <li class="pad-top"><a id="btnReplay" class="btn btn-primary btn-block">Replay</a></li>
+                <li class="pad-top"><a id="btnAnalyze" class="btn btn-primary btn-block">Analyze Results</a></li>
             </ul>
-            <div>
-        <!--
-        <div class="mdc-component mdc-component__buttons">
-          <p>Buttons</p>
-          <div class="mdc-component__section">
-            <div class="mdc-component__containers">
-              <div class="mdc-component__containers__primary">
-                <p>Primary</p><button class="mdc-fab material-icons" aria-label="Add"><span class="mdc-fab__icon">add</span></button> <button class="mdc-fab material-icons mdc-fab--plain" aria-label="Add"><span class="mdc-fab__icon">add</span></button>
-                <button
-                  type="button" class="mdc-button mdc-button--plain">Normal</button> <button type="button" class="mdc-button mdc-button--raised">Normal</button></div>
-              <div class="mdc-component__containers__secondary">
-                <p>Secondary</p><button class="mdc-fab material-icons" aria-label="Add"><span class="mdc-fab__icon">add</span></button> <button class="mdc-fab material-icons mdc-fab--plain" aria-label="Add"><span class="mdc-fab__icon">add</span></button>                <button type="button" class="mdc-button mdc-button--plain">Normal</button> <button type="button" class="mdc-button mdc-button--raised">Normal</button></div>
-            </div>
-          </div>
-        </div>
-        -->
-      </div>
         </nav>
 
         <!-- Page Content Holder -->
         <div id="content" class="col-xs-10">
             <h3 class="text-center"><b>Capture Configuration</b></h3>
-            <div class="input">
-                <label>RDS Endpoint:<input id="txtRDS" type="text" value="testdb"></label>
+            <div class="col-xs-6">
+                <div class="input">
+                    <label class="input-label">RDS Endpoint:<input id="txtRDS" type="text" value="testdb"></label>
+                </div>
+                <div class="input">
+                    <label class="input-label">S3 Endpoint:<input id="txtS3" type="text" value="teamtitans-test-mycrt"></label>
+                </div>
+                <div class="input">
+                    <label class="input-label">Capture ID:<input id="txtID" type="text" value="MyCapture"></label>
+                </div>
             </div>
-            <div class="input">
-                <label>S3 Endpoint:<input id="txtS3" type="text" value="teamtitans-test-mycrt"></label>
-            </div>
-            <div class="input">
-                <label>Capture ID:<input id="txtID" type="text" value="MyCapture"></label>
+            <div class="col-xs-6">
+                <div class="input">
+                    <label class="input-label">RDS Endpoint:<input id="txtRDS" type="text" value="testdb"></label>
+                </div>
+                <div class="input">
+                    <label class="input-label">S3 Endpoint:<input id="txtS3" type="text" value="teamtitans-test-mycrt"></label>
+                </div>
+                <div class="input">
+                    <label class="input-label">Capture ID:<input id="txtID" type="text" value="MyCapture"></label>
+                </div>
             </div>
             <a href="#" id="btnCaptureStart" class="btn btn-default">Start Capture</a>
             <a href="#" id="btnCaptureStop" class="btn btn-default">Stop Capture</a>
@@ -118,20 +114,6 @@
                     </tbody>
                 </table>
             </div>
-
-            <!--
-            <h3 class="text-center">Replay Configuration</h3>
-            <div class="">
-                <label>RDS Endpoint:<input type="text" value=""></label>
-            </div>
-            <div class="">
-                <label>S3 Endpoint:<input type="text" value=""></label>
-            </div>
-            <div class="">
-                <label>Name of Capture:<input type="text" value=""></label>
-            </div>
-            <a href="#" class="btn btn-default green">Start Replay</a>
-            -->
         </div>
     </div>
 
