@@ -16,41 +16,55 @@
 /* =============== Layout ================================*/
 /* ================ Main ================================ */
 .wrapper {
-        display: flex;
+    display: flex;
 }
 
 .input-label {
     width: 100%;
 }
 
-/* =============== Navbar ================================*/
-.navbar-custom {
-    margin-bottom: 0px;
-}
-
-.navbar-right {
-    margin-right: 10px;
-}
-
 .pad-top {
     margin-top: 5px;
 }
 
+#content {
+    padding-left: 5em;
+    padding-right: 5em;
+}
+
+/* =============== Navbar ================================*/
+.navbar {
+    margin-bottom: 0px;
+    padding-bottom: 5px;
+}
+
+.nav {
+    margin-right: 10px;
+}
+
 /* =============== Sidebar ================================*/
 #sidebar {
-        margin-right: 20px;
-        height: 100vh;
-        background-color: var(--primary);
+    margin-right: 20px;
+    height: 100vh;
 }
 
 /* ======================= Styles ================= */
 /* ======================= Main ================= */
 body {
-    background-color: var(--white);
+    background-color: white;
+    font-family: 'Raleway', sans-serif;
+    color: black;
+}
+
+.h1.title {
+    color: white;
 }
 
 .title {
-    color: white;
+    font-family: 'Roboto', sans-serif;
+    letter-spacing: 4px;
+    font-weight: 300;
+    padding-bottom: 10px;
 }
 
 .btn-primary,
@@ -67,7 +81,8 @@ body {
     color: black !important;
 }
 
-.input-label {
+.input-label,
+.input-label-checkbox {
     color: black;
 }
 
@@ -78,11 +93,16 @@ body {
 }
 
 /* ======================= Navbar ================= */
-.navbar-right {
+.navbar,
+.nav {
     color: white;
 }
 
-.navbar-custom {
-    color: white;
+.navbar {
     background-color: var(--p-dark);
+}
+
+/* =============== Sidebar ================================*/
+#sidebar {
+        background-color: var(--primary);
 }
