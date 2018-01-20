@@ -45,6 +45,7 @@ dependencies {
     compile('com.amazonaws:aws-java-sdk-cloudwatch')
     compile("com.amazonaws:aws-java-sdk-s3")
     compile("com.amazonaws:aws-java-sdk-rds")
+    compile("com.googlecode.json-simple:json-simple:1.1.1")
     runtime("mysql:mysql-connector-java:5.1.44")
     // end::actuator[]
     testCompile("junit:junit")

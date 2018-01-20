@@ -1,7 +1,8 @@
 package webHandler;
 
+import java.io.File;
+import java.io.FileReader;
 import java.util.*;
-import com.amazonaws.SdkClientException;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
@@ -9,35 +10,42 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatchClientBuilder;
 import com.amazonaws.services.cloudwatch.model.*;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.JSONObject;
 
 import java.util.Date;
 
 
 public class CloudWatchManager {
 
-    AmazonCloudWatch cw;
+    private AmazonCloudWatch cwClient;
 
     public CloudWatchManager() {
-        this.cw = getConnection();
-    }
 
-    public AmazonCloudWatch getConnection() throws SdkClientException {
+        JSONParser parser = new JSONParser();
+
         try {
-            AmazonCloudWatch cloudWatch = AmazonCloudWatchClientBuilder.standard()
-                    .withCredentials(InstanceProfileCredentialsProvider.getInstance())
-                    .withRegion(Regions.US_WEST_2)
+            // Running outside EC2 Instance:
+            FileReader reader = new FileReader(new File(".privateKeys"));
+            Object obj = parser.parse(reader);
+            JSONObject jsonObject = (JSONObject) obj;
+
+            String accessKey = (String) jsonObject.get("accessKey");
+            String secretKey = (String) jsonObject.get("secretKey");
+
+            BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
+
+            this.cwClient = AmazonCloudWatchClientBuilder.standard()
+                    .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
+                    .withRegion(Regions.US_WEST_1)
                     .build();
-
-            /* Testing outside of EC2 Instance:
-            BasicAWSCredentials awsCredentials = new BasicAWSCredentials("accesskey", "secretkey");
-            cloudWatch = AmazonCloudWatchClientBuilder.standard().withRegion("us-west-1").withCredentials(new AWSStaticCredentialsProvider(awsCredentials)).build();*/
-
-            return cloudWatch;
-        } catch (SdkClientException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            // Running inside EC2 Instance:
+            this.cwClient = AmazonCloudWatchClientBuilder.standard()
+                    .withCredentials(InstanceProfileCredentialsProvider.getInstance())
+                    .withRegion(Regions.US_WEST_1)
+                    .build();
         }
-
-        return null;
     }
 
 
@@ -77,6 +85,6 @@ public class CloudWatchManager {
                 .withPeriod(60);
 
 
-        return cw.getMetricStatistics(request);
+        return cwClient.getMetricStatistics(request);
     }
 }

@@ -6,12 +6,14 @@ import com.amazonaws.AmazonWebServiceResult;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.rds.AmazonRDSClientBuilder;
 import com.amazonaws.services.rds.AmazonRDS;
 import com.amazonaws.services.rds.model.DownloadDBLogFilePortionRequest;
 import com.amazonaws.services.rds.model.DownloadDBLogFilePortionResult;
 import com.amazonaws.services.rds.model.DBLogFileNotFoundException;
-import com.amazonaws.services.s3.model.ObjectMetadata;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -22,11 +24,31 @@ public class RDSManager extends AmazonWebServiceResult{
     private AmazonRDS rdsClient;
 
     public RDSManager() {
-        this.rdsClient = AmazonRDSClientBuilder.standard().withRegion("us-west-1").withCredentials(InstanceProfileCredentialsProvider.getInstance()).build();
 
-        /* Testing outside of EC2 Instance:
-        BasicAWSCredentials awsCredentials = new BasicAWSCredentials("accesskey", "secretkey");
-        this.rdsClient = AmazonRDSClientBuilder.standard().withRegion("us-west-1").withCredentials(new AWSStaticCredentialsProvider(awsCredentials)).build();*/
+        JSONParser parser = new JSONParser();
+
+        try {
+            // Running outside EC2 Instance:
+            FileReader reader = new FileReader(new File(".privateKeys"));
+            Object obj = parser.parse(reader);
+            JSONObject jsonObject = (JSONObject) obj;
+
+            String accessKey = (String) jsonObject.get("accessKey");
+            String secretKey = (String) jsonObject.get("secretKey");
+
+            BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
+
+            this.rdsClient = AmazonRDSClientBuilder.standard()
+                    .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
+                    .withRegion(Regions.US_WEST_1)
+                    .build();
+        } catch (Exception e) {
+            // Running inside EC2 Instance:
+            this.rdsClient = AmazonRDSClientBuilder.standard()
+                    .withCredentials(InstanceProfileCredentialsProvider.getInstance())
+                    .withRegion(Regions.US_WEST_1)
+                    .build();
+        }
     }
 
     public InputStream downloadLog(String DBInstance, String logFile){
