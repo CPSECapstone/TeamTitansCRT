@@ -9,7 +9,7 @@ jdk:
 notifications:
   email: false
   slack:
-	rooms: 
-	- cpcapstone:T6lYfxXQZG0TOKNEysN5jyLk#travis
+    rooms:
+    - cpcapstone:T6lYfxXQZG0TOKNEysN5jyLk#travis
     on_failure: always
     on_success: never
