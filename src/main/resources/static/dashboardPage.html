@@ -32,23 +32,39 @@
     <!-- Navigation -->
     <nav class="navbar navbar-custom z-depth-1" role="navigation">
         <div id="nav-container">
-            <div class="navbar-header">
-                <a class="navbar-brand page-scroll" href="#page-top">
-                    <span class="h1 title">MyCRT Dashboard</span>
-                </a>
-            </div>
 
-            <ul class="nav navbar-nav navbar-right">
+            <ul class="nav navbar-nav navbar-left">
                 <li class="dropdown">
                     <a href="#" role="button" class="dropdown-toggle hoverable" data-toggle="dropdown">
                         <span class="glyphicon glyphicon-th-large" style="color: white"></span>
                     </a>
                     <ul role="menu" class="dropdown-menu">
                         <li>
-                            <a class="page-scroll" id="btnViewLogs">View Logs</a>
+                            <a class="page-scroll" id="btnDashboard">Dashboard</a>
+                        </li>
+                        <li>
+                            
+                                <a class="page-scoll" id="btnCapture">Capture
+                                  <i class="fa fa-caret-down"></i></a>
+                                <div class="dropdown-content bar-block">
+                                  <a href="#" class="bar-item button">Link</a>
+                                  <a href="#" class="bar-item button">Link</a>
+                                </div>
+                            
+                           
+                            
+                        </li>
+                        <li>
+                            <a class="page-scroll" id="btnReplay">Replay</a>
+                        </li>
+                         <li>
+                            <a class="page-scroll" id="btnAnalyze">Analyze Results</a>
                         </li>
                         <li>
                             <a class="page-scroll" id="btnSettings">Settings</a>
+                        </li>
+                        <li>
+                            <a class="page-scroll" id="btnHelp">Help</a>
                         </li>
                         <li>
                             <a class="page-scroll" id="btnLogout">Logout</a>
@@ -56,21 +72,19 @@
                     </ul>
                 </li>
             </ul>
+            
+            <div class="navbar-header" id="bootstrap-override">
+                <a class="navbar-brand page-scroll" href="#page-top">
+                    <span class="h1 title">MyCRT Dashboard</span>
+                </a>
+            </div>
+            
+            
         </div>
     </nav>
 
 
     <div class="wrapper">
-        <!-- Sidebar Holder -->
-        <nav id="sidebar" class="light-grey z-depth-0 navbar-left col-sm-3 col-md-2">
-            <ul class="list-unstyled">
-                <li><a id="btnDashboard" class="btn btn-primary btn-block">Dashboard</a></li>
-                <li><a id="btnCapture" class="btn btn-primary btn-block">Capture</a></li>
-                <li><a id="btnReplay" class="btn btn-primary btn-block">Replay</a></li>
-                <li><a id="btnAnalyze" class="btn btn-primary btn-block">Analyze Results</a></li>
-            </ul>
-        </nav>
-
         <!-- Page Content Holder -->
         <div id="content" class="col-xs-10">
             <h3 class="text-center">Devices</h3>
