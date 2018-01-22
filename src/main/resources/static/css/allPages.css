@@ -42,6 +42,11 @@
     margin-right: 10px;
 }
 
+#bootstrap-override{
+    float: right;
+    margin-right: 40%;
+}
+
 /* =============== Sidebar ================================*/
 #sidebar {
     margin-right: 20px;
@@ -58,6 +63,7 @@ body {
 
 .h1.title {
     color: white;
+
 }
 
 .title {
