@@ -1,12 +1,21 @@
 package webHandler;
 
+import org.junit.Before;
 import org.junit.Test;
+
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Scanner;
 import static org.junit.Assert.*;
 
 public class RDSManagerTest {
+
+    @Before
+    public void beforeMethod() {
+        File f = new File(".privateKeys");
+        org.junit.Assume.assumeTrue(f.exists() && f.isFile());
+    }
 
     @Test
     public void downloadLog() throws Exception {
