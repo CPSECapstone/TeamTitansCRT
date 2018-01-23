@@ -12,9 +12,7 @@ import org.springframework.http.HttpStatus;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
+import java.util.*;
 
 @RestController
 public class CaptureController {
@@ -32,6 +30,15 @@ public class CaptureController {
             capture.setStartTime(new Date());
         }
 
+        if (capture.getEndTime() != null) {
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    CaptureStop(capture);
+                }
+            }, capture.getEndTime());
+        }
+
         captures.put(capture.getId(), capture);
 
         return new ResponseEntity<>(HttpStatus.OK);
@@ -41,6 +48,7 @@ public class CaptureController {
     public ResponseEntity<String> CaptureStop(@RequestBody Capture capture) {
 
         Capture targetCapture = captures.get(capture.getId());
+        targetCapture.updateStatus();
 
         if (targetCapture == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -79,5 +87,11 @@ public class CaptureController {
     @RequestMapping(value = "/capture/status", method = RequestMethod.GET)
     public ResponseEntity<Collection<Capture>> CaptureStatus() {
         return new ResponseEntity<>(captures.values(), HttpStatus.OK);
+    }
+
+    public void updateCaptures() {
+        for (Map.Entry<String, Capture> entry : captures.entrySet()) {
+            entry.getValue().updateStatus();
+        }
     }
 }

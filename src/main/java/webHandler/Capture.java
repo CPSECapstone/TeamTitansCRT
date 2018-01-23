@@ -84,6 +84,7 @@ public class Capture {
     }
 
     public String getStatus() {
+        updateStatus();
         return status;
     }
 
