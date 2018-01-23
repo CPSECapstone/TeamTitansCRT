@@ -6,7 +6,7 @@ $(document).ready(function() {
         window.location.href = "analyze";
     });
     $("#btnCapture").on("click", function() {
-        window.location.href = "settings";
+        window.location.href = "capture";
     });
     $("#btnDashboard").on("click", function() {
         window.location.href = "dashboard";
