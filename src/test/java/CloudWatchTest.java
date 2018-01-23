@@ -8,7 +8,6 @@ public class CloudWatchTest {
 
     @Test
     public void testCloudWatch() throws SdkClientException {
-        CloudWatchManager cm = new CloudWatchManager();
-        assertNotNull(cm.getConnection());
+        assertNotNull(new CloudWatchManager());
     }
 }

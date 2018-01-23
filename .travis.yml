@@ -4,4 +4,12 @@ before_install:
     - chmod +x gradlew
 
 jdk:
-    - oraclejdk8 
+    - oraclejdk8
+
+notifications:
+  email: false
+  slack:
+    rooms:
+    - cpcapstone:T6lYfxXQZG0TOKNEysN5jyLk#travis
+    on_failure: always
+    on_success: never
