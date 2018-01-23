@@ -30,87 +30,101 @@
 
 
     <!-- Navigation -->
+    
     <nav class="navbar navbar-custom z-depth-1" role="navigation">
         <div id="nav-container">
-
-            <ul class="nav navbar-nav navbar-left">
-                <li class="dropdown">
-                    <a href="#" role="button" class="dropdown-toggle hoverable" data-toggle="dropdown">
-                        <span class="glyphicon glyphicon-th-large" style="color: white"></span>
-                    </a>
-                    <ul role="menu" class="dropdown-menu">
-                        <li>
-                            <a class="page-scroll" id="btnDashboard">Dashboard</a>
-                        </li>
-                        <li>
-                            
-                                <a class="page-scoll" id="btnCapture">Capture
-                                  <i class="fa fa-caret-down"></i></a>
-                                <div class="dropdown-content bar-block">
-                                  <a href="#" class="bar-item button">Link</a>
-                                  <a href="#" class="bar-item button">Link</a>
-                                </div>
-                            
-                           
-                            
-                        </li>
-                        <li>
-                            <a class="page-scroll" id="btnReplay">Replay</a>
-                        </li>
-                         <li>
-                            <a class="page-scroll" id="btnAnalyze">Analyze Results</a>
-                        </li>
-                        <li>
-                            <a class="page-scroll" id="btnSettings">Settings</a>
-                        </li>
-                        <li>
-                            <a class="page-scroll" id="btnHelp">Help</a>
-                        </li>
-                        <li>
-                            <a class="page-scroll" id="btnLogout">Logout</a>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
-            
-            <div class="navbar-header" id="bootstrap-override">
+            <div class="navbar-header">
                 <a class="navbar-brand page-scroll" href="#page-top">
-                    <span class="h1 title">MyCRT Dashboard</span>
                 </a>
             </div>
-            
-            
+
         </div>
     </nav>
+    
+    <div id="wrapper">
+        <div class="overlay"></div>
+    
+        <!-- Sidebar -->
+        <nav class="navbar navbar-inverse navbar-fixed-top" id="sidebar-wrapper" role="navigation">
+            <ul class="nav sidebar-nav">
+                <li class="sidebar-brand">
+                    <a href="#">
+                       MyCRT
+                    </a>
+                </li>
+                <li>
+                    <a href="#" id="#btnDashboard">Dashboard</a>
+                </li>
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Capture <span class="caret"></span></a>
+                  <ul class="dropdown-menu" role="menu">
+                    <li><a href="#" id="#btnCapture">Start Capture</a></li>
+                    <li><a href="#" id="#btnDashboard">Manage Capture</a></li>
+                  </ul>
+                </li>
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Replay <span class="caret"></span></a>
+                  <ul class="dropdown-menu" role="menu">
+                    <li><a href="#" id="#btnReplay">Start Replay</a></li>
+                    <li><a href="#" id="#btnDashboard">Manage Replay</a></li>
+                  </ul>
+                </li>
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Analyze Results <span class="caret"></span></a>
+                  <ul class="dropdown-menu" role="menu">
+                    <li class="dropdown-header">Analyze Results Options</li>
+                    <li><a href="#" id="#btnAnalyze">Compare Results</a></li>
+                    <li><a href="#">Histroy</a></li>
+                  </ul>
+                </li>
+                <li>
+                    <a href="#" id="#btnSettings">Settings</a>
+                </li>
+                <li>
+                    <a href="#">Help</a>
+                </li>
+                <li>
+                    <a href="#" id="#btnLogout">Logout</a>
+                </li>        
+            </ul>
+        </nav>
+        <!-- /#sidebar-wrapper -->
 
+        <!-- Page Content -->
+        <div id="page-content-wrapper">
+            <button type="button" class="hamburger is-closed" data-toggle="offcanvas">
+                <span class="hamb-top"></span>
+    			<span class="hamb-middle"></span>
+				<span class="hamb-bottom"></span>
+            </button>
+            <div id="content" class="col-xs-10">
+                <h3 class="text-center title">Dashboard</h3>
+                <h4 class="text-center"><b>Status of Recent Captured and Replayed Workloads</b></h4>
+                
+                <a href="#" id="btnCaptureStop" class="btn btn-default">Stop Capture</a>
+                <a href="#" id="btnStatus" class="btn btn-default">Update Status</a>
 
-    <div class="wrapper">
-        <!-- Page Content Holder -->
-        <div id="content" class="col-xs-10">
-            <h3 class="text-center">Devices</h3>
-            <table id="dashboardTable" class="table">
-                <thead>
-                    <tr class="">
-                        <th>Device</th>
-                        <th>Status</th>
-                        <th>Log</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Device 1</td>
-                        <td>running</td>
-                        <td> running </td>
-                    </tr>
-                    <tr>
-                        <td>Device 2</td>
-                        <td>finished</td>
-                        <td><a href="#">View Log</a></td>
-                    </tr>
-                </tbody>
-            </table>
+                <div class="container-fluid">
+                    <h3 id="lblStatus"></h3>
+                    <table id="statusTable" class="table">
+                        <thead>
+                            <tr class="">
+                                <th>Name</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
+        <!-- /#page-content-wrapper -->
+
     </div>
+    <!-- /#wrapper -->
+
+   
 
     <!-- jQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
@@ -127,7 +141,8 @@
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDo0B-2fjSnS4eo0T0KGtWKccCau77NkI"></script>
 
     <!-- Theme JavaScript -->
-    <script src="js/allPages.js"></script>
+    <script src="js/sideBar.js"></script>
+    <script src="js/allPages.js"></script>    
 
 </body>
 
