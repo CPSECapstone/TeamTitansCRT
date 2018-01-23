@@ -12,10 +12,7 @@ import org.springframework.http.HttpStatus;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 public class CaptureController {
@@ -31,6 +28,15 @@ public class CaptureController {
 
         if (capture.getStartTime() == null) {
             capture.setStartTime(new Date());
+        }
+
+        if (capture.getEndTime() != null) {
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    CaptureStop(capture);
+                }
+            }, capture.getEndTime());
         }
 
         captures.put(capture.getId(), capture);
