@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 public class CaptureController {
@@ -79,5 +80,11 @@ public class CaptureController {
     @RequestMapping(value = "/capture/status", method = RequestMethod.GET)
     public ResponseEntity<Collection<Capture>> CaptureStatus() {
         return new ResponseEntity<>(captures.values(), HttpStatus.OK);
+    }
+
+    public void updateCaptures() {
+        for (Map.Entry<String, Capture> entry : captures.entrySet()) {
+            entry.getValue().updateStatus();
+        }
     }
 }
