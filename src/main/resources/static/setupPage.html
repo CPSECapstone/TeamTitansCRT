@@ -59,10 +59,48 @@
                     <div class="modal-content">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal">&times;</button>
-                            <h4 class="modal-title">Modal Header</h4>
+                            <h4 class="modal-title">Instance Profile Instructions</h4>
                         </div>
                         <div class="modal-body">
-                            <p>Some text in the modal.</p>
+                            <p><b>Getting to IAM</b></p>
+                            <ul>
+                                <li>Go to https://aws.amazon.com</li>
+                                <li>In top right corner, click My Account then click AWS Management Console from the drop down</li>
+                                <li>Under Services click IAM</li>
+                            </ul>
+                            <p><b>Creating a Policy</b></p>
+                            <ul>
+                                <li>Click Policies in the sidebar</li>
+                                <li>Click Create Policy</li>
+                                <li>Click the JSON tab and replace “Statement: []” with the following text:
+                                    <i>See the Policy JSON document ###Only Copy the “Statement” key###</i></li>
+                                <li>Click Review Policy</li>
+                                <li>Name the policy mycrt</li>
+                                <li>Click Create Policy</li>
+                            </ul>
+                            <p><b>Creating a Role</b></p>
+                            <ul>
+                                <li>Click on Roles in the sidebar</li>
+                                <li>Click Create role</li>
+                                <li>Under AWS service click EC2</li>
+                                <li>Click EC2 under use case</li>
+                                <li>Click Next</li>
+                                <li>Search for the mycrt policy created in the steps above</li>
+                                <li>Click Next</li>
+                                <li>Name the role mycrt</li>
+                                <li>Click Create role</li>
+                            </ul>
+                            <p><b>Applying Role to EC2 Instance</b></p>
+                            <ul>
+                                <li>Under Services click EC2</li>
+                                <li>Click Instances in the sidebar</li>
+                                <li>Right-click the instance the program will run on and under Instance Settings click Attach/Replace IAM Role</li>
+                                                        <ul>
+                                                            <li>You can attach an IAM role when creating the EC2 instance in Step 3</li>
+                                                        </ul>
+                                <li>Attach the mycrt IAM role</li>
+                                <li>Apply changes</li>
+                            </ul>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-default gray" data-dismiss="modal">Close</button>
