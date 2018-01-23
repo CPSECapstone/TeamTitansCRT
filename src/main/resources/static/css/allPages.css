@@ -53,6 +53,36 @@
     height: 100vh;
 }
 
+/* ================= Notifications ===================== */
+.notifications-panel {
+    width: 20em;
+}
+
+.notification-item {
+
+}
+
+.notification-header {
+    padding-left: .5em;
+}
+
+.notification-header p {
+    font-size: 1em;
+}
+
+.notification-body {
+    padding-left: 1em;
+    display: flex;
+}
+
+.notification-body .notification-icon {
+    margin-right: 1em;
+}
+
+.notification-body p {
+    font-size: .75em;
+}
+
 /* ======================= Styles ================= */
 /* ======================= Main ================= */
 body {
