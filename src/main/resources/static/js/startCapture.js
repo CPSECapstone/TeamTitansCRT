@@ -58,12 +58,23 @@ function updateStatus() {
                 var capture = data[i];
                 var id = capture["id"];
                 var status = capture["status"];
+                var noButton = "";
                 console.log("ID: " + id +
                     "\nStatus: " + status);
-                dataString = dataString.concat(
-                    "<tr><td>" + id +
-                    "</td><td>" + status +
-                    "</td></tr>");
+                if (status = "Running") {
+                    dataString = dataString.concat(
+                        "<tr><td>" + id +
+                        "</td><td>" + status +
+                        "</td><td>" + "<a href=\"#\" id=\"btnCaptureStop\" class=\"btn btn-default\">Stop Capture</a>" +
+                        "</td></tr>");
+                } else {
+                     dataString = dataString.concat(
+                        "<tr><td>" + id +
+                        "</td><td>" + status +
+                        "</td><td>" + noButton +
+                        "</td></tr>");
+                }
+                    
             }
             $('#statusTable > tbody').append(
                 dataString);
