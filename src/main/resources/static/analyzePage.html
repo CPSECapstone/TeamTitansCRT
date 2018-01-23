@@ -32,51 +32,112 @@
 <body>
 
 
-    <!-- Navigation -->
-    <nav class="navbar navbar-custom blue z-depth-1" role="navigation">
+<!-- Navigation -->    
+    <nav class="navbar navbar-custom z-depth-1" role="navigation">
         <div id="nav-container">
             <div class="navbar-header">
                 <a class="navbar-brand page-scroll" href="#page-top">
-                    <span class="h1 title">Analyze Results</span>
                 </a>
             </div>
-
             <ul class="nav navbar-nav navbar-right">
                 <li class="dropdown">
-                    <a href="#" role="button" class="dropdown-toggle hoverable" data-toggle="dropdown">
+                    <!-- <a href="#" role="button" class="dropdown-toggle hoverable" data-toggle="dropdown">
                         <span class="glyphicon glyphicon-th-large" style="color: white"></span>
+                    </a> -->
+                    <a href="" class="dropdown-toggle" data-toggle="dropdown">
+                        <span class="glyphicon glyphicon-bell notification-icon"></span>
                     </a>
-                    <ul role="menu" class="dropdown-menu">
-                        <li>
-                            <a class="page-scroll" id="btnViewLogs">View Logs</a>
+                    <ul role="menu" class="dropdown-menu notifications-panel">
+                        <li class="notification-item">
+                            <div class="notification-header">
+                                <p>Lorem ipsum dolor sit amet</p>
+                            </div>
+                            <div class="notification-body">
+                                <span class="glyphicon glyphicon-bell notification-icon"></span>
+                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do</p>
+                            </div>
                         </li>
-                        <li>
-                            <a class="page-scroll" id="btnSettings">Settings</a>
+                        <li class="notification-item">
+                            <div class="notification-header">
+                                <p>Lorem ipsum dolor sit amet</p>
+                            </div>
+                            <div class="notification-body">
+                                <span class="glyphicon glyphicon-bell notification-icon"></span>
+                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do</p>
+                            </div>
                         </li>
-                        <li>
-                            <a class="page-scroll" id="btnLogout">Logout</a>
+                        <li class="notification-item">
+                            <div class="notification-header">
+                                <p>Lorem ipsum dolor sit amet</p>
+                            </div>
+                            <div class="notification-body">
+                                <span class="glyphicon glyphicon-bell notification-icon"></span>
+                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do</p>
+                            </div>
                         </li>
                     </ul>
                 </li>
             </ul>
         </div>
     </nav>
-
-
-    <div class="wrapper">
-        <!-- Sidebar Holder -->
-        <nav id="sidebar" class="light-grey z-depth-0 navbar-left col-sm-3 col-md-2">
-            <ul class="list-unstyled">
-                <li><a id="btnDashboard" class="btn btn-primary btn-block">Dashboard</a></li>
-                <li><a id="btnCapture" class="btn btn-primary btn-block">Capture</a></li>
-                <li><a id="btnReplay" class="btn btn-primary btn-block">Replay</a></li>
-                <li><a id="btnAnalyze" class="btn btn-primary btn-block">Analyze Results</a></li>
+    
+    <div id="wrapper">
+        <div class="overlay"></div>
+    
+        <!-- Sidebar -->
+        <nav class="navbar navbar-inverse navbar-fixed-top" id="sidebar-wrapper" role="navigation">
+            <ul class="nav sidebar-nav">
+                <li class="sidebar-brand">
+                    <a href="#">
+                       MyCRT
+                    </a>
+                </li>
+                <li>
+                    <a href="#" id="#btnDashboard">Dashboard</a>
+                </li>
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Capture <span class="caret"></span></a>
+                  <ul class="dropdown-menu" role="menu">
+                    <li><a href="#" id="#btnCapture">Start Capture</a></li>
+                    <li><a href="#" id="#btnDashboard">Manage Capture</a></li>
+                  </ul>
+                </li>
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Replay <span class="caret"></span></a>
+                  <ul class="dropdown-menu" role="menu">
+                    <li><a href="#" id="#btnReplay">Start Replay</a></li>
+                    <li><a href="#" id="#btnDashboard">Manage Replay</a></li>
+                  </ul>
+                </li>
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Analyze Results <span class="caret"></span></a>
+                  <ul class="dropdown-menu" role="menu">
+                    <li><a href="#" id="#btnAnalyze">Compare Results</a></li>
+                    <li><a href="#">Histroy</a></li>
+                  </ul>
+                </li>
+                <li>
+                    <a href="#" id="#btnSettings">Settings</a>
+                </li>
+                <li>
+                    <a href="#">Help</a>
+                </li>
+                <li>
+                    <a href="#" id="#btnLogout">Logout</a>
+                </li>        
             </ul>
         </nav>
+        <!-- /#sidebar-wrapper -->
 
-        <!-- Page Content Holder -->
+        <!-- Page Content -->
+        <div id="page-content-wrapper">
+            <button type="button" class="hamburger is-closed" data-toggle="offcanvas">
+                <span class="hamb-top"></span>
+    			<span class="hamb-middle"></span>
+				<span class="hamb-bottom"></span>
+            </button>
         <div id="content" class="col-xs-10">
-            <h3 class="text-center">Capture Results</h3>
+            <h3 class="text-center">Compare Results</h3>
 
 
             <div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
@@ -113,6 +174,7 @@
     <!-- Theme JavaScript -->
     <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="js/sideBar.js"></script>
     <script src="js/allPages.js"></script>
     <script src="js/analyze.js"></script>
 

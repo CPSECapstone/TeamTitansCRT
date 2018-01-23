@@ -14,9 +14,12 @@ public class CrtController {
     @GetMapping("settings")
     public String settings() { return "settingsPage.html"; }
 
+    @GetMapping("capture")
+    public String capture() { return "startCapture.html"; }
+
     @GetMapping("analyze")
     public String analyze() { return "analyzePage.html"; }
-    
+
     @GetMapping("login")
     public String login() { return "setupPage.html"; }
 
