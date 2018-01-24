@@ -41,7 +41,7 @@ function startCapture(url, body) {
         data: JSON.stringify(body),
         success: function() {
             $("#lblStatus").html("Started Successful.");
-            updateStatus();
+            window.location.href = "dashboard";
         },
         error: function(err) {
             $("#lblStatus").html("Startup failure.");
