@@ -1,88 +1,107 @@
-function convert(minutes) {
-    return minutes * 60000; // TODO fix hardcoded conversion
-}
+$(document).ready(function() {
+    $("#btnGetMetrics").on("click", function() {
+        var body = {
+            id: $("#txtID").val(),
+            s3: $("#txtS3").val()
+        };
 
-function getRand(min, max) {
-    return Math.floor(Math.random() * (max - min)) + min;
-}
+        $.ajax({
+            url: "/analysis",
+            type: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            data: JSON.stringify(body),
+            dataType: 'json',
+            success: function(data) {
+                var metricData = []
+                for (var index = 0; index < data.length; index++) {
+                    var metricObj = data[index];
+                    var metric = metricObj["Metric"];
+                    var dataPoints = metricObj["DataPoints"];
 
-function generateData(arr) {
-    var now = new Date();
-    for (var d = new Date(); d <= now.getTime() + convert(90); d.setTime(d.getTime() +
-            convert(10))) {
-        arr.push([d, getRand(40, 80)]);
-    }
-}
-
-var cpuData = [];
-var ramData = [];
-var diskData = [];
-generateData(cpuData);
-generateData(ramData);
-generateData(diskData);
-
-Highcharts.chart('container', {
-    chart: {
-        type: 'spline'
-    },
-    title: {
-        text: 'Performance Metrics'
-    },
-    subtitle: {
-        text: '10 minute interval'
-    },
-    xAxis: {
-        type: 'datetime',
-        dateTimeLabelFormats: {
-            hour: '%I %p',
-            minute: '%I:%M %p'
-        },
-        title: {
-            text: 'Date'
-        }
-    },
-    yAxis: {
-        title: {
-            text: 'Percent Usage'
-        },
-        min: 0
-    },
-    tooltip: {
-        headerFormat: '<b>{series.name}</b><br>',
-        pointFormat: '{point.x:%e. %b}: {point.y:.2f} m'
-    },
-
-    plotOptions: {
-        spline: {
-            marker: {
-                enabled: false
+                    var points = []
+                    for (var i = 0; i < dataPoints.length; i++) {
+                        var point = dataPoints[i];
+                        points.push([point["Timestamp"], point["Average"]]);
+                    }
+                    metricData.push({name: metric, data: points.sort(compareTimes)});
+                }
+                createChart(metricData);
+            },
+            error: function(err) {
+                console.log(err);
             }
-        }
-    },
-
-    series: [{
-        name: 'CPU',
-        data: cpuData
-    }, {
-        name: 'RAM',
-        data: ramData
-    }, {
-        name: 'Disk I/O',
-        data: diskData
-    }]
+        });
+    });
 });
 
-// builds an html string, then injects it
-var dataString = "";
-for (var i = 0; i < cpuData.length; i++) {
-    var time = cpuData[i][0].toLocaleTimeString();
-    var cpu = cpuData[i][1];
-    var ram = ramData[i][1];
-    var disk = diskData[i][1];
-
-    dataString = dataString.concat(
-        "<tr><td>" + time + "</td><td>" + cpu + "</td><td>" + ram +
-        "</td><td>" + disk + "</td></tr>");
+function compareTimes(a,b) {
+  if (a[0] < b[0])
+    return -1;
+  if (a[0] > b[0])
+    return 1;
+  return 0;
 }
 
-$('#captureTable > tbody').append(dataString);
+function createChart(data) {
+    Highcharts.chart('container', {
+        chart: {
+            type: 'spline',
+            zoomType: 'x'
+        },
+        title: {
+            text: 'Performance Metrics'
+        },
+        xAxis: {
+            type: 'datetime',
+            dateTimeLabelFormats: {
+                hour: '%I %p',
+                minute: '%I:%M %p'
+            },
+            title: {
+                text: 'Time'
+            }
+        },
+        yAxis: {
+            title: {
+                text: 'Percent Usage'
+            },
+            min: 0
+        },
+        tooltip: {
+            headerFormat: '<b>{series.name}</b><br>',
+            pointFormat: '{point.x:%I:%M %p} - {point.y:.2f}%'
+        },
+
+        plotOptions: {
+            spline: {
+                marker: {
+                    enabled: false
+                }
+            }
+        },
+
+        series: data
+    });
+}
+
+function createTable(data) {
+    // builds an html string, then injects it
+    var dataString = "";
+    for (var i = 0; i < data.length; i++) {
+        var time = data[i][0].toLocaleTimeString();
+        var metric = data[i][1];
+
+        dataString = dataString.concat(
+            "<tr><td>" + time + "</td><td>" + metric + "</td></tr>");
+    }
+
+    $('#captureTable > tbody').append(dataString);
+}
+
+Highcharts.setOptions({
+    global: {
+        useUTC: false
+    }
+});
