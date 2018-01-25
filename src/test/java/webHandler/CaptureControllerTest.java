@@ -19,13 +19,13 @@ public class CaptureControllerTest {
 
     @Test
     public void captureCommand() throws Exception {
-        HttpStatus actual = captureController.CaptureStart(new Capture("id", "testRDS", "testS3")).getStatusCode();
+        HttpStatus actual = captureController.captureStart(new Capture("id", "testRDS", "testS3")).getStatusCode();
         assertEquals(HttpStatus.OK,actual);
     }
 
     @Test
     public void captureStatus() throws Exception {
-        HttpStatus status = captureController.CaptureStatus().getStatusCode();
+        HttpStatus status = captureController.captureStatus().getStatusCode();
         assertEquals(HttpStatus.OK,status);
     }
 

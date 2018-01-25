@@ -1,6 +1,5 @@
 package webHandler;
 
-import com.amazonaws.services.cloudwatch.model.GetMetricStatisticsResult;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +19,7 @@ public class CaptureController {
     private HashMap<String, Capture> captures = new HashMap<>();
 
     @RequestMapping(value = "/capture/start", method = RequestMethod.POST)
-    public ResponseEntity<String> CaptureStart(@RequestBody Capture capture) {
+    public ResponseEntity<String> captureStart(@RequestBody Capture capture) {
 
         if (capture.getId() == null || capture.getS3() == null || capture.getRds() == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -34,7 +33,7 @@ public class CaptureController {
             new Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    CaptureStop(capture);
+                    captureStop(capture);
                 }
             }, capture.getEndTime());
         }
@@ -45,7 +44,7 @@ public class CaptureController {
     }
 
     @RequestMapping(value = "/capture/stop", method = RequestMethod.POST)
-    public ResponseEntity<String> CaptureStop(@RequestBody Capture capture) {
+    public ResponseEntity<String> captureStop(@RequestBody Capture capture) {
 
         Capture targetCapture = captures.get(capture.getId());
         targetCapture.updateStatus();
@@ -70,8 +69,8 @@ public class CaptureController {
             }
 
             CloudWatchManager cloudManager = new CloudWatchManager();
-            GetMetricStatisticsResult stats = cloudManager.getMetricStatistics(targetCapture.getRds(), targetCapture.getStartTime(), targetCapture.getEndTime(), "CPUUtilization");
-            InputStream statStream = new ByteArrayInputStream(stats.toString().getBytes(StandardCharsets.UTF_8));
+            String stats = cloudManager.getMetricStatisticsAsJson(targetCapture.getRds(), targetCapture.getStartTime(), targetCapture.getEndTime(), "CPUUtilization");
+            InputStream statStream = new ByteArrayInputStream(stats.getBytes(StandardCharsets.UTF_8));
 
             // Store RDS workload in S3
             S3Manager s3Manager = new S3Manager();
@@ -85,7 +84,7 @@ public class CaptureController {
     }
 
     @RequestMapping(value = "/capture/status", method = RequestMethod.GET)
-    public ResponseEntity<Collection<Capture>> CaptureStatus() {
+    public ResponseEntity<Collection<Capture>> captureStatus() {
         return new ResponseEntity<>(captures.values(), HttpStatus.OK);
     }
 
