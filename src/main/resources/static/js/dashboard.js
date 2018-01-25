@@ -12,13 +12,6 @@ function updateStatus() {
         url: domain + "/capture/status",
         type: "GET",
         success: function(data) {
-            /*
-            
-            TODO bug related to status not being updated
-            Michael is looking into it
-            
-            */
-            console.log(data);
             $('#statusTable > tbody').html("");
             for (var i = 0; i < data.length; i++) {
                 var capture = data[i];
@@ -34,8 +27,8 @@ function updateStatus() {
                 }
                 addToTable(id, status, button);
                 // adds stop functionality to each button added
-                $(String('#' + id)).on("click", function(id) {
-                    stopCapture(id);
+                $(String('#' + id)).on("click", function() {
+                    stopCapture(this.id);
                 });
             }
         },
