@@ -201,6 +201,11 @@
 /*       Hamburger-Cross         */
 /*-------------------------------*/
 
+#mdb-override {
+    color: white;
+    background: transparent;
+}
+
 .hamburger {
   position: fixed;
   top: 20px;  

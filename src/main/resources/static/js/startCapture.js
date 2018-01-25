@@ -1,23 +1,18 @@
 var domain = "http://localhost:8080";
 
 $(document).ready(function() {
-    var now = new Date();
-    $("#txtStartTime").val(String(now.toISOString().replace("Z", "")));
-    // TODO: fix bug about 24 + 2
-    now.setHours(now.getHours() + 2);
-    $("#txtEndTime").val(String(now.toISOString().replace("Z", "")));
+    setDateFields();
 
     $("#btnCaptureStart").on("click", function() {
         var startTime = null;
         if ($("#txtStartTime").val()) {
-            startTime = String($("#txtStartTime").val());
+            startTime = new Date(String($("#txtStartTime").val()));
         }
 
         var endTime = null;
-        if ($("#txtStartTime").val()) {
-            endTime = String($("#txtEndTime").val());
+        if ($("#txtEndTime").val()) {
+            endTime = new Date(String($("#txtEndTime").val()));
         }
-
         var body = {
             id: $("#txtID").val(),
             rds: $("#txtRDS").val(),
@@ -29,60 +24,16 @@ $(document).ready(function() {
         startCapture("/capture/start", body);
     });
 
-    $("#btnCaptureStop").on("click", function() {
-        var body = {
-            id: $("#txtID").val(),
-            rds: $("#txtRDS").val(),
-            s3: $("#txtS3").val(),
-            startTime: null,
-            endTime: null,
-            status: ""
-        };
-        stopCapture("/capture/stop", body);
-    });
-
-    $("#btnStatus").on("click", function() {
-        updateStatus();
-    });
 });
 
-function updateStatus() {
-    $.ajax({
-        url: domain + "/capture/status",
-        type: "GET",
-        success: function(data) {
-            // var targetID = $("#txtID").val();
-            $('#statusTable > tbody').html("");
-            var dataString = "";
-            for (var i = 0; i < data.length; i++) {
-                var capture = data[i];
-                var id = capture["id"];
-                var status = capture["status"];
-                var noButton = "";
-                console.log("ID: " + id +
-                    "\nStatus: " + status);
-                if (status = "Running") {
-                    dataString = dataString.concat(
-                        "<tr><td>" + id +
-                        "</td><td>" + status +
-                        "</td><td>" + "<a href=\"#\" id=\"btnCaptureStop\" class=\"btn btn-default\">Stop Capture</a>" +
-                        "</td></tr>");
-                } else {
-                     dataString = dataString.concat(
-                        "<tr><td>" + id +
-                        "</td><td>" + status +
-                        "</td><td>" + noButton +
-                        "</td></tr>");
-                }
-                    
-            }
-            $('#statusTable > tbody').append(
-                dataString);
-        },
-        error: function(err) {
-            console.log(err);
-        }
-    });
+function setDateFields() {
+    var now = new Date();
+    // TODO i think this is bc Pacific Time Zone
+    now.setHours(now.getHours() - 8);
+    $("#txtStartTime").val(String(now.toISOString().replace("Z", "")));
+    // TODO: fix bug about 24 + 2
+    now.setHours(now.getHours() + 2);
+    $("#txtEndTime").val(String(now.toISOString().replace("Z", "")));
 }
 
 function startCapture(url, body) {
@@ -95,27 +46,10 @@ function startCapture(url, body) {
         data: JSON.stringify(body),
         success: function() {
             $("#lblStatus").html("Started Successful.");
-            updateStatus();
+            // window.location.href = "dashboard";
         },
         error: function(err) {
-            console.log(err);
-        }
-    });
-}
-
-function stopCapture(url, body) {
-    $.ajax({
-        url: domain + url,
-        type: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        data: JSON.stringify(body),
-        success: function() {
-            $("#lblStatus").html("Stopped Successfully.");
-            updateStatus();
-        },
-        error: function(err) {
+            $("#lblStatus").html("Startup failure.");
             console.log(err);
         }
     });

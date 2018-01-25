@@ -9,13 +9,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class CrtController {
 
     @GetMapping
-    public String index() { return "indexPage.html"; }
+    public String index() { return "setupPage.html"; }
 
     @GetMapping("settings")
     public String settings() { return "settingsPage.html"; }
 
     @GetMapping("capture")
-    public String capture() { return "startCapture.html"; }
+    public String capture() { return "startCapturePage.html"; }
 
     @GetMapping("analyze")
     public String analyze() { return "analyzePage.html"; }
