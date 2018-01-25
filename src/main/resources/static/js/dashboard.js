@@ -1,21 +1,10 @@
 var domain = "http://localhost:8080";
 
 $(document).ready(function() {
-    $("#btnCaptureStop").on("click", function() {
-        var body = {
-            id: $("#txtID").val(),
-            rds: $("#txtRDS").val(),
-            s3: $("#txtS3").val(),
-            startTime: null,
-            endTime: null,
-            status: ""
-        };
-        stopCapture("/capture/stop", body);
-    });
-
     $("#btnStatus").on("click", function() {
         updateStatus();
     });
+    updateStatus();
 });
 
 function updateStatus() {
@@ -23,34 +12,32 @@ function updateStatus() {
         url: domain + "/capture/status",
         type: "GET",
         success: function(data) {
-            // var targetID = $("#txtID").val();
+            /*
+            
+            TODO bug related to status not being updated
+            Michael is looking into it
+            
+            */
+            console.log(data);
             $('#statusTable > tbody').html("");
-            var dataString = "";
             for (var i = 0; i < data.length; i++) {
                 var capture = data[i];
                 var id = capture["id"];
                 var status = capture["status"];
-                var noButton = "";
+                var button = "";
                 console.log("ID: " + id +
                     "\nStatus: " + status);
-                if (status = "Running") {
-                    dataString = dataString.concat(
-                        "<tr><td>" + id +
-                        "</td><td>" + status +
-                        "</td><td>" +
-                        "<a href=\"#\" id=\"btnCaptureStop\" class=\"btn btn-default\">Stop Capture</a>" +
-                        "</td></tr>");
-                } else {
-                    dataString = dataString.concat(
-                        "<tr><td>" + id +
-                        "</td><td>" + status +
-                        "</td><td>" + noButton +
-                        "</td></tr>");
+                if (status == "Running") {
+                    button =
+                        "<a href=\"#\" id=\"" + id +
+                        "\" class=\"btn btn-default btn-stop\">Stop Capture</a>";
                 }
-
+                addToTable(id, status, button);
+                // adds stop functionality to each button added
+                $(String('#' + id)).on("click", function(id) {
+                    stopCapture(id);
+                });
             }
-            $('#statusTable > tbody').append(
-                dataString);
         },
         error: function(err) {
             console.log(err);
@@ -58,7 +45,25 @@ function updateStatus() {
     });
 }
 
-function stopCapture(url, body) {
+function addToTable(id, status, button) {
+    // manually append html string
+    $('#statusTable > tbody').append(
+        "<tr><td>" + id +
+        "</td><td>" + status +
+        "</td><td>" + button +
+        "</td></tr>");
+}
+
+function stopCapture(id) {
+    var url = "/capture/stop";
+    var body = {
+        id: id,
+        rds: null,
+        s3: null,
+        startTime: null,
+        endTime: null,
+        status: ""
+    };
     $.ajax({
         url: domain + url,
         type: "POST",
