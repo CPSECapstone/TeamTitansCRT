@@ -1,23 +1,17 @@
 var domain = "http://localhost:8080";
 
 $(document).ready(function() {
-    var now = new Date();
-    // TODO i think this is bc Pacific Time Zone
-    now.setHours(now.getHours() - 8);
-    $("#txtStartTime").val(String(now.toISOString().replace("Z", "")));
-    // TODO: fix bug about 24 + 2
-    now.setHours(now.getHours() + 2);
-    $("#txtEndTime").val(String(now.toISOString().replace("Z", "")));
+    setDateFields();
 
     $("#btnCaptureStart").on("click", function() {
         var startTime = null;
         if ($("#txtStartTime").val()) {
-            startTime = String($("#txtStartTime").val());
+            startTime = new Date(String($("#txtStartTime").val()));
         }
 
         var endTime = null;
-        if ($("#txtStartTime").val()) {
-            endTime = String($("#txtEndTime").val());
+        if ($("#txtEndTime").val()) {
+            endTime = new Date(String($("#txtEndTime").val()));
         }
         var body = {
             id: $("#txtID").val(),
@@ -31,6 +25,16 @@ $(document).ready(function() {
     });
 
 });
+
+function setDateFields() {
+    var now = new Date();
+    // TODO i think this is bc Pacific Time Zone
+    now.setHours(now.getHours() - 8);
+    $("#txtStartTime").val(String(now.toISOString().replace("Z", "")));
+    // TODO: fix bug about 24 + 2
+    now.setHours(now.getHours() + 2);
+    $("#txtEndTime").val(String(now.toISOString().replace("Z", "")));
+}
 
 function startCapture(url, body) {
     $.ajax({
