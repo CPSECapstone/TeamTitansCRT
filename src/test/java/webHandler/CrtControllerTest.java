@@ -17,7 +17,7 @@ public class CrtControllerTest {
 
     @Test
     public void index() throws Exception {
-        assertEquals("indexPage.html", crtCon.index());
+        assertEquals("setupPage.html", crtCon.index());
     }
 
     @Test
