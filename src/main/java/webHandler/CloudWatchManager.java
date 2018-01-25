@@ -10,6 +10,7 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatchClientBuilder;
 import com.amazonaws.services.cloudwatch.model.*;
+import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.JSONObject;
 
@@ -48,6 +49,18 @@ public class CloudWatchManager {
         }
     }
 
+    /**
+     *
+     * @param dbID      The database to get data from
+     * @param start     The start time
+     * @param end       The end time
+     * @param metrics   One or more metric names to request
+     * @return          A string containing json for the metric results
+     */
+    public String getMetricStatisticsAsJson(String dbID, Date start, Date end, String... metrics) {
+        ArrayList<GetMetricStatisticsResult> results = getMetricStatistics(dbID, start, end, metrics);
+        return convertMetricStatisticsToJson(results).toJSONString();
+    }
 
     /**
      *
@@ -86,5 +99,66 @@ public class CloudWatchManager {
 
 
         return cwClient.getMetricStatistics(request);
+    }
+
+    /**
+     *
+     * @param results Arraylist of GetMetricStaticsResults to obtain json for
+     * @return JSONArray of the provided results
+     */
+    @SuppressWarnings("unchecked")
+    public static JSONArray convertMetricStatisticsToJson(ArrayList<GetMetricStatisticsResult> results) {
+        JSONArray arr = new JSONArray();
+        for (GetMetricStatisticsResult result : results) {
+            arr.add(convertMetricStatisticsToJson(result));
+        }
+        return arr;
+    }
+
+    /**
+     *
+     * @param result GetMetricStaticsResult to obtain json for
+     * @return JSONObject of the provided result
+     */
+    @SuppressWarnings("unchecked")
+    public static JSONObject convertMetricStatisticsToJson(GetMetricStatisticsResult result) {
+        JSONObject obj = new JSONObject();
+        obj.put("Metric", result.getLabel());
+
+        JSONArray dataPoints = new JSONArray();
+
+        for (Datapoint point : result.getDatapoints()) {
+            JSONObject jsonPoint = new JSONObject();
+
+            jsonPoint.put("Timestamp", point.getTimestamp().getTime());
+
+            if (point.getAverage() != null) {
+                jsonPoint.put("Average", point.getAverage());
+            }
+
+            if (point.getSum() != null) {
+                jsonPoint.put("Sum", point.getSum());
+            }
+
+            if (point.getMaximum() != null) {
+                jsonPoint.put("Max", point.getMaximum());
+            }
+
+            if (point.getMinimum() != null) {
+                jsonPoint.put("Min", point.getMinimum());
+            }
+
+            if (point.getSampleCount() != null) {
+                jsonPoint.put("SampleCount", point.getSampleCount());
+            }
+
+            if (point.getUnit() != null) {
+                jsonPoint.put("Unit", point.getUnit());
+            }
+            dataPoints.add(jsonPoint);
+        }
+
+        obj.put("DataPoints", dataPoints);
+        return obj;
     }
 }
