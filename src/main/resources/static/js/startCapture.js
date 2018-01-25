@@ -2,6 +2,8 @@ var domain = "http://localhost:8080";
 
 $(document).ready(function() {
     var now = new Date();
+    // TODO i think this is bc Pacific Time Zone
+    now.setHours(now.getHours() - 8);
     $("#txtStartTime").val(String(now.toISOString().replace("Z", "")));
     // TODO: fix bug about 24 + 2
     now.setHours(now.getHours() + 2);
@@ -17,7 +19,6 @@ $(document).ready(function() {
         if ($("#txtStartTime").val()) {
             endTime = String($("#txtEndTime").val());
         }
-
         var body = {
             id: $("#txtID").val(),
             rds: $("#txtRDS").val(),
@@ -41,7 +42,7 @@ function startCapture(url, body) {
         data: JSON.stringify(body),
         success: function() {
             $("#lblStatus").html("Started Successful.");
-            window.location.href = "dashboard";
+            // window.location.href = "dashboard";
         },
         error: function(err) {
             $("#lblStatus").html("Startup failure.");
