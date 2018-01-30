@@ -41,10 +41,21 @@ function updateStatus() {
 function addToTable(id, status, button) {
     // manually append html string
     $('#statusTable > tbody').append(
-        "<tr><td>" + id +
+        "<tr data-toggle=\"collapse\" data-target=\"#accordion\" class=\"clickable\">" +
+        "<td>" + id +
         "</td><td>" + status +
         "</td><td>" + button +
-        "</td></tr>");
+        "</td></tr>" +
+        "<tr>" +
+            "<td colspan=\"3\">" +
+                "<div id=\"accordion\" class=\"collapse\">" +
+                    "<ul class=\"stats-list\">" +
+                        "<li>CPU: </li>" +
+                        "<li>RAM: </li>" +
+                    "</ul>" +
+                "</div>" +
+            "</td>" +
+        "</tr>");
 }
 
 function stopCapture(id) {
