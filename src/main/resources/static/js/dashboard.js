@@ -18,14 +18,19 @@ function updateStatus() {
                 var id = capture["id"];
                 var status = capture["status"];
                 var button = "";
+                var icon = "";
                 console.log("ID: " + id +
                     "\nStatus: " + status);
                 if (status == "Running") {
+                    icon = "<img src=\"../img/running.png\" alt=\"running\">";
                     button =
                         "<a href=\"#\" id=\"" + id +
                         "\" class=\"btn btn-default btn-stop\">Stop Capture</a>";
                 }
-                addToTable(id, status, button);
+                else {
+                    icon = "<img src=\"../img/finished.png\" alt=\"finished\">";
+                }
+                addToTable(icon, id, status, button);
                 // adds stop functionality to each button added
                 $(String('#' + id)).on("click", function() {
                     stopCapture(this.id);
@@ -38,13 +43,16 @@ function updateStatus() {
     });
 }
 
-function addToTable(id, status, button) {
+function addToTable(icon, id, status, button) {
     // manually append html string
     $('#statusTable > tbody').append(
         "<tr data-toggle=\"collapse\" data-target=\"#accordion\" class=\"clickable\">" +
-        "<td>" + id +
-        "</td><td>" + status +
-        "</td><td>" + button +
+        "<td width=\"(100/12)%\">" + icon +
+        "</td><td width=\"(100/4)%\">" + id +
+        "</td><td width=\"(100/6)%\">" + status +
+        "</td><td width=\"(100/6)%\">" +
+        "</td><td width=\"(100/6)%\">" +
+        "</td><td width=\"(100/6)%\">" + button +
         "</td></tr>" +
         "<tr>" +
             "<td colspan=\"3\">" +
