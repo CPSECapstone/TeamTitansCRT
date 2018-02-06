@@ -6,6 +6,8 @@ import org.json.simple.JSONObject;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import webHandler.CloudWatchManager;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -62,6 +64,8 @@ public class CloudWatchTest {
 
     @Test
     public void calculateAverage() throws Exception {
+        File f = new File(".privateKeys");
+        org.junit.Assume.assumeTrue(f.exists() && f.isFile());
         Date start = new Date(System.currentTimeMillis() - 1000 * 60 * 60);
         Date end = new Date(System.currentTimeMillis());
         CloudWatchManager cwManger = new CloudWatchManager();
