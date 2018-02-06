@@ -140,13 +140,27 @@
             <div id="content" class="col-xs-10">
                 <h3 class="text-center">Compare Results</h3>
 
-                <div class="input">
-                    <label class="input-label">Capture ID:<input id="txtID" class="form-control" type="text" value="MyCapture"></label>
+                <label class="input-label"> Number of Captures:
+                    <select class="form-control" id="captureSelector">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                    </select>
+                </label>
+
+                <div id="captureInputs">
+                    <div class="input">
+                        <label class="input-label">Capture1 ID:<input id="txtID-1" class="form-control" type="text" value="MyCapture1"></label>
+                    </div>
+                    <div class="input">
+                        <label class="input-label">S3 Endpoint:<input id="txtS3-1" class="form-control" type="text" value="teamtitans-test-mycrt"></label>
+                    </div>
                 </div>
-                <div class="input">
-                    <label class="input-label">S3 Endpoint:<input id="txtS3" class="form-control" type="text" value="teamtitans-test-mycrt"></label>
-                </div>
+
                 <a href="#" id="btnGetMetrics" class="btn btn-default">Get Metrics</a>
+
+                <div id="metricSelectorDiv"></div>
 
                 <div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
 
