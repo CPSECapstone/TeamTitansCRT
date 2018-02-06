@@ -1,3 +1,6 @@
+var defaultMetric = "CPUUtilization"
+var metricData = {};
+
 $(document).ready(function() {
     $("#btnGetMetrics").on("click", function() {
         var body = {
@@ -14,20 +17,31 @@ $(document).ready(function() {
             data: JSON.stringify(body),
             dataType: 'json',
             success: function(data) {
-                var metricData = []
+                metricData = {};
+
+                var selector = "<div><select id='metricSelector' class='btn btn-secondary'>";
                 for (var index = 0; index < data.length; index++) {
                     var metricObj = data[index];
                     var metric = metricObj["Metric"];
                     var dataPoints = metricObj["DataPoints"];
+                    var unit = ""
 
-                    var points = []
+                    var points = [];
                     for (var i = 0; i < dataPoints.length; i++) {
                         var point = dataPoints[i];
                         points.push([point["Timestamp"], point["Average"]]);
                     }
-                    metricData.push({name: metric, data: points.sort(compareTimes)});
+                    if (points.length > 0) {
+                        unit = dataPoints[0]["Unit"]
+                        selector += "<option value='" + metric +"'>" + metric + "</option>";
+                        metricData[metric] = {metric: metric, units: unit, data: [{name: body['id'], data: points.sort(compareTimes)}]};
+                    }
                 }
-                createChart(metricData);
+
+                selector += "</select></div>";
+                $("#btnGetMetrics").after(selector);
+                $('#metricSelector option[value="' + defaultMetric + '"]').prop("selected", "selected");
+                createChart(metricData[defaultMetric]);
             },
             error: function(err) {
                 console.log(err);
@@ -51,7 +65,7 @@ function createChart(data) {
             zoomType: 'x'
         },
         title: {
-            text: 'Performance Metrics'
+            text: data['metric']
         },
         xAxis: {
             type: 'datetime',
@@ -65,13 +79,13 @@ function createChart(data) {
         },
         yAxis: {
             title: {
-                text: 'Percent Usage'
+                text: data['units'] + ' Usage'
             },
             min: 0
         },
         tooltip: {
             headerFormat: '<b>{series.name}</b><br>',
-            pointFormat: '{point.x:%I:%M %p} - {point.y:.2f}%'
+            pointFormat: '{point.x:%I:%M %p} - {point.y:.2f}'
         },
 
         plotOptions: {
@@ -82,7 +96,7 @@ function createChart(data) {
             }
         },
 
-        series: data
+        series: data['data']
     });
 }
 
@@ -105,3 +119,7 @@ Highcharts.setOptions({
         useUTC: false
     }
 });
+
+$('body').on('change', '#metricSelector' , function() {
+    createChart(metricData[this.value]);
+})

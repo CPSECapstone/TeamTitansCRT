@@ -69,7 +69,7 @@ public class CaptureController {
             }
 
             CloudWatchManager cloudManager = new CloudWatchManager();
-            String stats = cloudManager.getMetricStatisticsAsJson(targetCapture.getRds(), targetCapture.getStartTime(), targetCapture.getEndTime(), "CPUUtilization");
+            String stats = cloudManager.getAllMetricStatisticsAsJson(targetCapture.getRds(), targetCapture.getStartTime(), targetCapture.getEndTime());
             InputStream statStream = new ByteArrayInputStream(stats.getBytes(StandardCharsets.UTF_8));
 
             // Store RDS workload in S3
