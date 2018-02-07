@@ -7,10 +7,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import webHandler.CloudWatchManager;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-
 import static org.junit.Assert.*;
 
 public class CloudWatchTest {
@@ -60,5 +60,16 @@ public class CloudWatchTest {
         testArr.add(testJson);
 
         assertEquals(testArr.toJSONString(), arr.toJSONString());
+    }
+
+    @Test
+    public void calculateAverage() throws Exception {
+        File f = new File(".privateKeys");
+        org.junit.Assume.assumeTrue(f.exists() && f.isFile());
+        Date start = new Date(System.currentTimeMillis() - 1000 * 60 * 60);
+        Date end = new Date(System.currentTimeMillis());
+        CloudWatchManager cwManger = new CloudWatchManager();
+        double average = cwManger.calculateAverage("testdb", start, end, "CPUUtilization");
+        assertNotNull(average);
     }
 }

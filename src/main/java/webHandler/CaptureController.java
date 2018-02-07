@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -62,7 +63,19 @@ public class CaptureController {
         if (targetCapture.getStatus().equals("Finished")) {
             // Grab RDS workload
             RDSManager rdsManager = new RDSManager();
-            InputStream stream = rdsManager.downloadLog(targetCapture.getRds(),  "general/mysql-general.log");
+            String logData = rdsManager.downloadLog(targetCapture.getRds(),  "general/mysql-general.log");
+
+            LogParser parser = new LogParser();
+
+            String parsedLogData = parser.parseLogData(logData, capture.getFilterStatements(), capture.getFilterUsers());
+
+            InputStream stream = null;
+            try
+            {
+                stream = new ByteArrayInputStream(parsedLogData.getBytes(StandardCharsets.UTF_8.name()));
+            } catch (UnsupportedEncodingException enc) {
+                enc.printStackTrace();
+            }
 
             if (stream == null) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
