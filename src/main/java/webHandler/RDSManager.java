@@ -16,7 +16,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
+
 
 
 public class RDSManager extends AmazonWebServiceResult{
@@ -51,14 +51,13 @@ public class RDSManager extends AmazonWebServiceResult{
         }
     }
 
-    public InputStream downloadLog(String DBInstance, String logFile){
+    public String downloadLog(String DBInstance, String logFile){
         try {
             DownloadDBLogFilePortionRequest request = new DownloadDBLogFilePortionRequest().withDBInstanceIdentifier(DBInstance).withLogFileName(
                      logFile);
             DownloadDBLogFilePortionResult response = rdsClient.downloadDBLogFilePortion(request);
-            InputStream inResponse = new ByteArrayInputStream(response.getLogFileData().getBytes(StandardCharsets.UTF_8.name()));
 
-            return inResponse;
+            return response.getLogFileData();
 
         } catch (DBLogFileNotFoundException e) {
             e.printStackTrace();
@@ -69,9 +68,8 @@ public class RDSManager extends AmazonWebServiceResult{
         } catch (AmazonClientException ace) {
             System.out.println("Caught an AmazonClientException");
             System.out.println("Error Message: " + ace.getMessage());
-        } catch (UnsupportedEncodingException enc) {
-            enc.printStackTrace();
         }
         return null;
     }
+
 }
