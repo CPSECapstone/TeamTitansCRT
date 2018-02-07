@@ -17,20 +17,30 @@ function updateStatus() {
                 var capture = data[i];
                 var id = capture["id"];
                 var status = capture["status"];
+                var startTime = capture["startTime"];
+                var endTime = capture["endTime"];
                 var button = "";
                 var icon = "";
                 console.log("ID: " + id +
                     "\nStatus: " + status);
+                
                 if (status == "Running") {
                     icon = "<img src=\"../img/running.png\" alt=\"running\">";
                     button =
                         "<a href=\"#\" id=\"" + id +
                         "\" class=\"btn btn-default btn-stop\">Stop Capture</a>";
+                }                
+                else if (status == "Queued") {
+                    icon = "<img src=\"../img/queued.png\" alt=\"queued\">";
                 }
-                else {
+                else if (status == "Finished") {
                     icon = "<img src=\"../img/finished.png\" alt=\"finished\">";
                 }
-                addToTable(icon, id, status, button);
+                else {
+                    icon = "<img src=\"../img/failed.png\" alt=\"failed\">";
+                }
+                
+                addToTable(icon, id, status, startTime, endTime, button);
                 // adds stop functionality to each button added
                 $(String('#' + id)).on("click", function() {
                     stopCapture(this.id);
@@ -43,15 +53,15 @@ function updateStatus() {
     });
 }
 
-function addToTable(icon, id, status, button) {
+function addToTable(icon, id, status, startTime, endTime, button) {
     // manually append html string
     $('#statusTable > tbody').append(
         "<tr data-toggle=\"collapse\" data-target=\"#accordion\" class=\"clickable\">" +
         "<td width=\"(100/12)%\">" + icon +
         "</td><td width=\"(100/4)%\">" + id +
         "</td><td width=\"(100/6)%\">" + status +
-        "</td><td width=\"(100/6)%\">" +
-        "</td><td width=\"(100/6)%\">" +
+        "</td><td width=\"(100/6)%\">" + startTime.toLocaleString() +
+        "</td><td width=\"(100/6)%\">" + endTime.toLocaleString() +
         "</td><td width=\"(100/6)%\">" + button +
         "</td></tr>" +
         "<tr>" +
