@@ -1,6 +1,7 @@
 package webHandler;
 
 import java.util.Date;
+import java.util.List;
 
 public class Capture {
     private String id;
@@ -9,6 +10,8 @@ public class Capture {
     private Date startTime;
     private Date endTime;
     private String status;
+    private List<String> filterStatements;
+    private List<String> filterUsers;
 
     public Capture() {
 
@@ -90,5 +93,25 @@ public class Capture {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public List<String> getFilterStatements()
+    {
+        return this.filterStatements;
+    }
+
+    public void setFilterStatements(List<String> filterStatements)
+    {
+        this.filterStatements = filterStatements;
+    }
+
+    public List<String> getFilterUsers()
+    {
+        return this.filterUsers;
+    }
+
+    public void setFilterUsers(List<String> filterUsers)
+    {
+        this.filterUsers = filterUsers;
     }
 }

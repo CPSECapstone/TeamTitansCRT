@@ -21,9 +21,8 @@ public class RDSManagerTest {
 
     @Test
     public void downloadLog() throws Exception {
-        InputStream inputStream = rdsManager.downloadLog("testdb", "general/mysql-general.log");
-        inputStream.close();
-        assertNotNull(inputStream);
+        String logData = rdsManager.downloadLog("testdb", "general/mysql-general.log");
+        assertNotNull(logData);
     }
 
     @After
