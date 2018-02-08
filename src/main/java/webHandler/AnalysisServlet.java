@@ -15,32 +15,51 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+/**
+ * Servlet to handle all analysis calls.
+ */
 @RestController
 public class AnalysisServlet {
+
+    //TODO: Update to only take capture ID when persistent capture data is added.
+    /**
+     * Method to handle post requests to /analysis.
+     * @param response HttpServletResponse to stream metric data to.
+     * @param capture Capture containing the id and s3 where metric data is stored.
+     * @throws IOException Throws an IOException if unable to copy stream to response.
+     */
     @RequestMapping(value = "/analysis", method = RequestMethod.POST)
     public void getMetrics(HttpServletResponse response, @RequestBody Capture capture) throws IOException {
 
         InputStream stream;
 
         // Get metric stream
-        if (capture.getEndTime() != null && capture.getStartTime() != null && capture.getRds() != null && new Date().compareTo(capture.getEndTime()) < 0) {
+        if (capture.getStatus().equals("Running")) { // Obtain from CloudWatch if capture is currently running
             CloudWatchManager cloudManager = new CloudWatchManager();
-            GetMetricStatisticsResult stats = cloudManager.getMetricStatistics(capture.getRds(), capture.getStartTime(), capture.getEndTime(), "CPUUtilization");
-            stream = new ByteArrayInputStream(stats.toString().getBytes(StandardCharsets.UTF_8));
-        } else {
+            String metrics = cloudManager.getAllMetricStatisticsAsJson(capture.getRds(), capture.getStartTime(), new Date());
+            stream = new ByteArrayInputStream(metrics.getBytes(StandardCharsets.UTF_8));
+        } else { // Obtain from S3 if capture has already finished
             S3Manager s3Manager = new S3Manager();
             stream = s3Manager.getFile(capture.getS3(), capture.getId() + "-Performance.log");
         }
+
+        //TODO: Replace else statement with commented block when persistent capture data is added.
+        /*else if (capture.getStatus().equals("Finished")) { // Obtain from S3 if capture has already finished
+            S3Manager s3Manager = new S3Manager();
+            stream = s3Manager.getFile(capture.getS3(), capture.getId() + "-Performance.log");
+        } else {
+            return;
+        }*/
 
         setResponseOutputStream(response, stream, capture.getId());
     }
 
     /**
-     *
-     * @param response HttpServletResponse to copy stream to
-     * @param stream Stream to copy to response
-     * @param id Stream file id
-     * @throws IOException Thrown if error is unable to be written to response
+     * Method to copy InputStream to HttpServletResponse.
+     * @param response HttpServletResponse to copy stream to.
+     * @param stream Stream to copy to response.
+     * @param id Stream file id.
+     * @throws IOException Thrown if error is unable to be written to response.
      */
     public void setResponseOutputStream(HttpServletResponse response, InputStream stream, String id) throws IOException {
         // Return error if performance log not found
