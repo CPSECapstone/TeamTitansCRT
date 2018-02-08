@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.Date;
+import java.util.stream.Collectors;
 
 public class CloudWatchManager {
 
@@ -51,6 +52,29 @@ public class CloudWatchManager {
                     .withRegion(Regions.US_WEST_1)
                     .build();
         }
+    }
+
+    /**
+     *
+     * @return An array of all metrics available on CloudWatch
+     */
+    public String[] getMetricNames() {
+        return cwClient.listMetrics().getMetrics().stream()
+                .map(x -> x.getMetricName())
+                .distinct()
+                .sorted()
+                .toArray(String[]::new);
+    }
+
+    /**
+     *
+     * @param dbID The database to get data from
+     * @param start The start time
+     * @param end The end time
+     * @return A string containing json for all metric results
+     */
+    public String getAllMetricStatisticsAsJson(String dbID, Date start, Date end) {
+        return getMetricStatisticsAsJson(dbID, start, end, getMetricNames());
     }
 
     /**
