@@ -54,26 +54,41 @@ function updateStatus() {
 }
 
 function addToTable(icon, id, status, startTime, endTime, button) {
-    // manually append html string
-    $('#statusTable > tbody').append(
-        "<tr data-toggle=\"collapse\" data-target=\"#accordion\" class=\"clickable\">" +
-        "<td width=\"(100/12)%\">" + icon +
-        "</td><td width=\"(100/4)%\">" + id +
-        "</td><td width=\"(100/6)%\">" + status +
-        "</td><td width=\"(100/6)%\">" + formatTime(startTime, "MM/dd/yyyy HH:mm:ss") +
-        "</td><td width=\"(100/6)%\">" + formatTime(endTime, "MM/dd/yyyy HH:mm:ss") +
-        "</td><td width=\"(100/6)%\">" + button +
-        "</td></tr>" +
-        "<tr>" +
-            "<td colspan=\"3\">" +
-                "<div id=\"accordion\" class=\"collapse\">" +
-                    "<ul class=\"stats-list\">" +
-                        "<li>CPU: </li>" +
-                        "<li>RAM: </li>" +
-                    "</ul>" +
-                "</div>" +
-            "</td>" +
-        "</tr>");
+    var body = {
+        id: id,
+        startTime: startTime,
+        endTime: endTime,
+        metric: "CPUUtilization"
+    };
+    
+    $.ajax({
+        url: "/cloudwatch/average",
+        type: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: JSON.stringify(body),
+        success: function(data) {
+            
+            // manually append html string
+            $('#statusTable > tbody').append(
+                "<tr data-toggle=\"collapse\" data-target=\"#accordion\" class=\"clickable\">" +
+                "<td width=\"(100/12)%\">" + icon +
+                "</td><td width=\"(100/4)%\">" + id +
+                "</td><td width=\"(100/6)%\">" + status +
+                "</td><td width=\"(100/6)%\">" + formatTime(startTime, "MM/dd/yyyy HH:mm:ss") +
+                "</td><td width=\"(100/6)%\">" + formatTime(endTime, "MM/dd/yyyy HH:mm:ss") +
+                "</td><td width=\"(100/6)%\">" + button +
+                "</td></tr>" +
+                "<tr>" +
+                    "<td colspan=\"3\">" +
+                        "<div id=\"accordion\" class=\"collapse\">" +
+                            "<ul class=\"stats-list\">" +
+                                "<li>CPU Utilization: " + data + "</li>" +
+                            "</ul>" +
+                        "</div>" +
+                    "</td>" +
+                "</tr>");
+        }
+    });
 }
 
 function stopCapture(id) {

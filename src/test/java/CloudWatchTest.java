@@ -62,7 +62,7 @@ public class CloudWatchTest {
 
         assertEquals(testArr.toJSONString(), arr.toJSONString());
     }
-
+/*
     @Test
     public void calculateAverage() throws Exception {
         File f = new File(".privateKeys");
@@ -72,5 +72,5 @@ public class CloudWatchTest {
         CloudWatchManager cwManger = new CloudWatchManager();
         ResponseEntity<Double> average = cwManger.calculateAverage("testdb", start, end, "CPUUtilization");
         assertNotNull(average);
-    }
+    } */
 }
