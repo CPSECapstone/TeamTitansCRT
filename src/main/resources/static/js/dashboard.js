@@ -17,15 +17,30 @@ function updateStatus() {
                 var capture = data[i];
                 var id = capture["id"];
                 var status = capture["status"];
+                var startTime = capture["startTime"];
+                var endTime = capture["endTime"];
                 var button = "";
+                var icon = "";
                 console.log("ID: " + id +
                     "\nStatus: " + status);
+                
                 if (status == "Running") {
+                    icon = "<img src=\"../img/running.png\" alt=\"running\">";
                     button =
                         "<a href=\"#\" id=\"" + id +
                         "\" class=\"btn btn-default btn-stop\">Stop Capture</a>";
+                }                
+                else if (status == "Queued") {
+                    icon = "<img src=\"../img/queued.png\" alt=\"queued\">";
                 }
-                addToTable(id, status, button);
+                else if (status == "Finished") {
+                    icon = "<img src=\"../img/finished.png\" alt=\"finished\">";
+                }
+                else {
+                    icon = "<img src=\"../img/failed.png\" alt=\"failed\">";
+                }
+                
+                addToTable(icon, id, status, startTime, endTime, button);
                 // adds stop functionality to each button added
                 $(String('#' + id)).on("click", function() {
                     stopCapture(this.id);
@@ -38,13 +53,27 @@ function updateStatus() {
     });
 }
 
-function addToTable(id, status, button) {
+function addToTable(icon, id, status, startTime, endTime, button) {
     // manually append html string
     $('#statusTable > tbody').append(
-        "<tr><td>" + id +
-        "</td><td>" + status +
-        "</td><td>" + button +
-        "</td></tr>");
+        "<tr data-toggle=\"collapse\" data-target=\"#accordion\" class=\"clickable\">" +
+        "<td width=\"(100/12)%\">" + icon +
+        "</td><td width=\"(100/4)%\">" + id +
+        "</td><td width=\"(100/6)%\">" + status +
+        "</td><td width=\"(100/6)%\">" + formatTime(startTime, "MM/dd/yyyy HH:mm:ss") +
+        "</td><td width=\"(100/6)%\">" + formatTime(endTime, "MM/dd/yyyy HH:mm:ss") +
+        "</td><td width=\"(100/6)%\">" + button +
+        "</td></tr>" +
+        "<tr>" +
+            "<td colspan=\"3\">" +
+                "<div id=\"accordion\" class=\"collapse\">" +
+                    "<ul class=\"stats-list\">" +
+                        "<li>CPU: </li>" +
+                        "<li>RAM: </li>" +
+                    "</ul>" +
+                "</div>" +
+            "</td>" +
+        "</tr>");
 }
 
 function stopCapture(id) {
@@ -73,3 +102,30 @@ function stopCapture(id) {
         }
     });
 }
+
+function formatTime(time, format) {
+            var t = new Date(time);
+            var tf = function (i) { return (i < 10 ? '0' : '') + i };
+            return format.replace(/yyyy|MM|dd|HH|mm|ss/g, function (a) {
+                switch (a) {
+                    case 'yyyy':
+                        return tf(t.getFullYear());
+                        break;
+                    case 'MM':
+                        return tf(t.getMonth() + 1);
+                        break;
+                    case 'mm':
+                        return tf(t.getMinutes());
+                        break;
+                    case 'dd':
+                        return tf(t.getDate());
+                        break;
+                    case 'HH':
+                        return tf(t.getHours());
+                        break;
+                    case 'ss':
+                        return tf(t.getSeconds());
+                        break;
+                }
+            })
+        }
