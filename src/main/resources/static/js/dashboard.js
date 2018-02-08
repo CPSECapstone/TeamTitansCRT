@@ -60,8 +60,8 @@ function addToTable(icon, id, status, startTime, endTime, button) {
         "<td width=\"(100/12)%\">" + icon +
         "</td><td width=\"(100/4)%\">" + id +
         "</td><td width=\"(100/6)%\">" + status +
-        "</td><td width=\"(100/6)%\">" + startTime.toLocaleString() +
-        "</td><td width=\"(100/6)%\">" + endTime.toLocaleString() +
+        "</td><td width=\"(100/6)%\">" + formatTime(startTime, "MM/dd/yyyy HH:mm:ss") +
+        "</td><td width=\"(100/6)%\">" + formatTime(endTime, "MM/dd/yyyy HH:mm:ss") +
         "</td><td width=\"(100/6)%\">" + button +
         "</td></tr>" +
         "<tr>" +
@@ -102,3 +102,30 @@ function stopCapture(id) {
         }
     });
 }
+
+function formatTime(time, format) {
+            var t = new Date(time);
+            var tf = function (i) { return (i < 10 ? '0' : '') + i };
+            return format.replace(/yyyy|MM|dd|HH|mm|ss/g, function (a) {
+                switch (a) {
+                    case 'yyyy':
+                        return tf(t.getFullYear());
+                        break;
+                    case 'MM':
+                        return tf(t.getMonth() + 1);
+                        break;
+                    case 'mm':
+                        return tf(t.getMinutes());
+                        break;
+                    case 'dd':
+                        return tf(t.getDate());
+                        break;
+                    case 'HH':
+                        return tf(t.getHours());
+                        break;
+                    case 'ss':
+                        return tf(t.getSeconds());
+                        break;
+                }
+            })
+        }
