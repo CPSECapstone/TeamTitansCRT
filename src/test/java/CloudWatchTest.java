@@ -5,6 +5,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.springframework.http.ResponseEntity;
 import webHandler.CloudWatchManager;
 
 import java.io.File;
@@ -69,7 +70,7 @@ public class CloudWatchTest {
         Date start = new Date(System.currentTimeMillis() - 1000 * 60 * 60);
         Date end = new Date(System.currentTimeMillis());
         CloudWatchManager cwManger = new CloudWatchManager();
-        double average = cwManger.calculateAverage("testdb", start, end, "CPUUtilization");
+        ResponseEntity<Double> average = cwManger.calculateAverage("testdb", start, end, "CPUUtilization");
         assertNotNull(average);
     }
 }
