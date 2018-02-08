@@ -45,7 +45,9 @@ function startCapture(url, body) {
         },
         data: JSON.stringify(body),
         success: function() {
-            $("#lblStatus").html("Started Successful.");
+            $("#lblStatus").html("<p>Started Successful.</p>" +
+                                "<a href=\"dashboard\" id=\"btnDashboard\" class=\"btn btn-default\">Go to Dashboard</a>");
+                                 
             // window.location.href = "dashboard";
         },
         error: function(err) {

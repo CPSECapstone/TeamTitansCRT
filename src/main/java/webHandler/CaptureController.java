@@ -17,6 +17,9 @@ import java.util.*;
 @RestController
 public class CaptureController {
 
+    // Number of minutes to milliseconds to wait before updating captures.
+    private final int UPDATE_PERIOD = 1000 * 60 * 1;
+
     private HashMap<String, Capture> captures = new HashMap<>();
 
     @RequestMapping(value = "/capture/start", method = RequestMethod.POST)
@@ -37,6 +40,34 @@ public class CaptureController {
                     captureStop(capture);
                 }
             }, capture.getEndTime());
+        }
+
+        if (capture.hasFileSizeLimit()) {
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    int fileSize = getFileSize(capture);
+                    capture.setDbFileSize(fileSize);
+                    if (fileSize > capture.getFileSizeLimit()) {
+                        captureStop(capture);
+                        cancel();
+                    }
+                }
+            }, 0, UPDATE_PERIOD);
+        }
+
+        if (capture.hasTransactionLimit()) {
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    int numTransactions = getNumTransactions(capture);
+                    capture.setNumDBTransactions(numTransactions);
+                    if (numTransactions > capture.getTransactionLimit()) {
+                        captureStop(capture);
+                        cancel();
+                    }
+                }
+            }, 0, UPDATE_PERIOD);
         }
 
         captures.put(capture.getId(), capture);
@@ -99,6 +130,30 @@ public class CaptureController {
     @RequestMapping(value = "/capture/status", method = RequestMethod.GET)
     public ResponseEntity<Collection<Capture>> captureStatus() {
         return new ResponseEntity<>(captures.values(), HttpStatus.OK);
+    }
+
+    private int getFileSize(Capture capture) {
+        try {
+            RDSManager rdsManager = new RDSManager();
+            String logData = rdsManager.downloadLog(capture.getRds(), "general/mysql-general.log");
+            String parsedLogData = new LogParser().parseLogData(logData, capture.getFilterStatements(), capture.getFilterUsers());
+            return parsedLogData.getBytes(StandardCharsets.UTF_8.name()).length;
+        } catch(UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
+    private int getNumTransactions(Capture capture) {
+        try {
+            RDSManager rdsManager = new RDSManager();
+            String logData = rdsManager.downloadLog(capture.getRds(), "general/mysql-general.log");
+            String parsedLogData = new LogParser().parseLogData(logData, capture.getFilterStatements(), capture.getFilterUsers());
+            return parsedLogData.length()  - parsedLogData.replace("\n", "").length();
+        } catch(Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
     }
 
     public void updateCaptures() {

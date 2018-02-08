@@ -4,12 +4,21 @@ import java.util.Date;
 import java.util.List;
 
 public class Capture {
+    private final int NO_LIMIT = 0;
+
     private String id;
     private String rds;
     private String s3;
     private Date startTime;
     private Date endTime;
     private String status;
+
+    private int fileSizeLimit = NO_LIMIT;
+    private int transactionLimit = NO_LIMIT;
+
+    private int dbFileSize = 0;
+    private int numDBTransactions = 0;
+
     private List<String> filterStatements;
     private List<String> filterUsers;
 
@@ -26,6 +35,17 @@ public class Capture {
         this.status = "Running";
     }
 
+    public Capture(String id, String rds, String s3, int fileSizeLimit, int transactionLimit) {
+        this.id = id;
+        this.rds = rds;
+        this.s3 = s3;
+        this.startTime = new Date();
+        this.endTime = null;
+        this.fileSizeLimit = fileSizeLimit;
+        this.transactionLimit = transactionLimit;
+        this.status = "Running";
+    }
+
     public Capture(String id, String rds, String s3, Date startTime, Date endTime) {
         this.id = id;
         this.rds = rds;
@@ -35,10 +55,23 @@ public class Capture {
         this.status = "Running";
     }
 
+    public Capture(String id, String rds, String s3, Date startTime, Date endTime, int fileSizeLimit, int transactionLimit) {
+        this.id = id;
+        this.rds = rds;
+        this.s3 = s3;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.fileSizeLimit = fileSizeLimit;
+        this.transactionLimit = transactionLimit;
+        this.status = "Running";
+    }
+
     public void updateStatus() {
         Date currTime = new Date();
         if (startTime != null && currTime.compareTo(startTime) >= 0) {
-            if (endTime != null && currTime.compareTo(endTime) >= 0) {
+            if ((endTime != null && currTime.compareTo(endTime) >= 0)
+                    || (fileSizeLimit != NO_LIMIT && dbFileSize > fileSizeLimit)
+                    || (transactionLimit != NO_LIMIT && numDBTransactions > transactionLimit)) {
                 this.status = "Finished";
             } else {
                 this.status = "Running";
@@ -94,6 +127,26 @@ public class Capture {
     public void setStatus(String status) {
         this.status = status;
     }
+
+    public int getFileSizeLimit() { return this.fileSizeLimit; }
+
+    public void setFileSizeLimit(int size) {this.fileSizeLimit = size; }
+
+    public int getTransactionLimit() {return this.transactionLimit; }
+
+    public void setTransactionLimit(int size) {this.transactionLimit = size; }
+
+    public int getDbFileSize() { return this.dbFileSize; }
+
+    public void setDbFileSize(int size) {this.dbFileSize = size; }
+
+    public int getNumDBTransactions() {return this.numDBTransactions; }
+
+    public void setNumDBTransactions(int num) {this.numDBTransactions = num; }
+
+    public boolean hasTransactionLimit() {return this.getTransactionLimit() > NO_LIMIT; }
+
+    public boolean hasFileSizeLimit() {return this.getFileSizeLimit() > NO_LIMIT; }
 
     public List<String> getFilterStatements()
     {
