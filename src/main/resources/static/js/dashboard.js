@@ -70,7 +70,7 @@ function addToTable(icon, id, status, startTime, endTime, button) {
             
             // manually append html string
             $('#statusTable > tbody').append(
-                "<tr data-toggle=\"collapse\" data-target=\"#accordion\" class=\"clickable\">" +
+                "<tr data-toggle=\"collapse\" data-target=\"#accordion" + id + "\" class=\"clickable\">" +
                 "<td width=\"(100/12)%\">" + icon +
                 "</td><td width=\"(100/4)%\">" + id +
                 "</td><td width=\"(100/6)%\">" + status +
@@ -80,7 +80,7 @@ function addToTable(icon, id, status, startTime, endTime, button) {
                 "</td></tr>" +
                 "<tr>" +
                     "<td colspan=\"3\">" +
-                        "<div id=\"accordion\" class=\"collapse\">" +
+                        "<div id=\"accordion" + id + "\" class=\"collapse\">" +
                             "<ul class=\"stats-list\">" +
                                 "<li>CPU Utilization: " + data + "</li>" +
                             "</ul>" +
