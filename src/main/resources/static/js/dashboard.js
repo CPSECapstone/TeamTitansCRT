@@ -9,7 +9,7 @@ $(document).ready(function() {
 
 function updateStatus() {
     $.ajax({
-        url: domain + "/capture/status",
+        url: "/capture/status",
         type: "GET",
         success: function(data) {
             $('#statusTable > tbody').html("");
@@ -27,7 +27,7 @@ function updateStatus() {
                 if (status == "Running") {
                     icon = "<img src=\"../img/running.png\" alt=\"running\">";
                     button =
-                        "<a href=\"#\" id=\"" + id +
+                        "<a href=\"#\" id=\"stopButton" + id +
                         "\" class=\"btn btn-default btn-stop\">Stop Capture</a>";
                 }                
                 else if (status == "Queued") {
@@ -41,10 +41,6 @@ function updateStatus() {
                 }
                 
                 addToTable(icon, id, status, startTime, endTime, button);
-                // adds stop functionality to each button added
-                $(String('#' + id)).on("click", function() {
-                    stopCapture(this.id);
-                });
             }
         },
         error: function(err) {
@@ -101,8 +97,9 @@ function stopCapture(id) {
         endTime: null,
         status: ""
     };
+    
     $.ajax({
-        url: domain + url,
+        url: url,
         type: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -119,28 +116,34 @@ function stopCapture(id) {
 }
 
 function formatTime(time, format) {
-            var t = new Date(time);
-            var tf = function (i) { return (i < 10 ? '0' : '') + i };
-            return format.replace(/yyyy|MM|dd|HH|mm|ss/g, function (a) {
-                switch (a) {
-                    case 'yyyy':
-                        return tf(t.getFullYear());
-                        break;
-                    case 'MM':
-                        return tf(t.getMonth() + 1);
-                        break;
-                    case 'mm':
-                        return tf(t.getMinutes());
-                        break;
-                    case 'dd':
-                        return tf(t.getDate());
-                        break;
-                    case 'HH':
-                        return tf(t.getHours());
-                        break;
-                    case 'ss':
-                        return tf(t.getSeconds());
-                        break;
-                }
-            })
+    var t = new Date(time);
+    var tf = function (i) { return (i < 10 ? '0' : '') + i };
+    return format.replace(/yyyy|MM|dd|HH|mm|ss/g, function (a) {
+        switch (a) {
+            case 'yyyy':
+                return tf(t.getFullYear());
+                break;
+            case 'MM':
+                return tf(t.getMonth() + 1);
+                break;
+            case 'mm':
+                return tf(t.getMinutes());
+                break;
+            case 'dd':
+                return tf(t.getDate());
+                break;
+            case 'HH':
+                return tf(t.getHours());
+                break;
+            case 'ss':
+                return tf(t.getSeconds());
+                break;
         }
+    })
+}
+
+$(function() {
+    $('#statusTable').on('click', '[id^=stopButton]' , function() {
+        stopCapture(this.id.replace("stopButton", ""));
+    });
+});
