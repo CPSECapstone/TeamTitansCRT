@@ -2,6 +2,7 @@ var domain = "http://localhost:8080";
 
 $(document).ready(function() {
     setDateFields();
+    $('#example-getting-started').multiselect();
 
     $("#btnCaptureStart").on("click", function() {
         var startTime = null;
@@ -19,6 +20,8 @@ $(document).ready(function() {
             s3: $("#txtS3").val(),
             startTime: startTime,
             endTime: endTime,
+            fileSizeLimit: $("#txtMaxSize").val(),
+            transactionLimit: $("#txtMaxTrans").val(),
             status: ""
         };
         startCapture("/capture/start", body);

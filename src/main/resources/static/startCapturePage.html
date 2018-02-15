@@ -7,26 +7,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="">
-
+    
     <title>My CRT</title>
-
+    
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css">
-
+    
     <!-- Custom Fonts -->
     <link href="css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Raleway|Roboto" rel="stylesheet">
-
+    
     <!-- Theme CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.css">
     <link href="css/mdb.css" rel="stylesheet">
     <link href="css/allPages.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/bootstrap-multiselect.css" type="text/css">
     <!-- <link href="css/materialTheme.css" rel="stylesheet"> -->
 </head>
 
 <body>
-
-<!-- Navigation -->
+    
+    <!-- Navigation -->
     <nav class="navbar navbar-custom z-depth-1" role="navigation">
         <div id="nav-container">
             <div class="navbar-header">
@@ -36,101 +37,101 @@
             <ul class="nav navbar-nav navbar-right">
                 <li class="dropdown">
                     <!-- <a href="#" role="button" class="dropdown-toggle hoverable" data-toggle="dropdown">
-                        <span class="glyphicon glyphicon-th-large" style="color: white"></span>
-                    </a> -->
-                    <a href="" class="dropdown-toggle" data-toggle="dropdown">
-                        <span class="glyphicon glyphicon-bell notification-icon"></span>
-                    </a>
-                    <ul role="menu" class="dropdown-menu notifications-panel">
-                        <li class="notification-item">
-                            <div class="notification-header">
-                                <p>Lorem ipsum dolor sit amet</p>
-                            </div>
-                            <div class="notification-body">
-                                <span class="glyphicon glyphicon-bell notification-icon"></span>
-                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do</p>
-                            </div>
-                        </li>
-                        <li class="notification-item">
-                            <div class="notification-header">
-                                <p>Lorem ipsum dolor sit amet</p>
-                            </div>
-                            <div class="notification-body">
-                                <span class="glyphicon glyphicon-bell notification-icon"></span>
-                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do</p>
-                            </div>
-                        </li>
-                        <li class="notification-item">
-                            <div class="notification-header">
-                                <p>Lorem ipsum dolor sit amet</p>
-                            </div>
-                            <div class="notification-body">
-                                <span class="glyphicon glyphicon-bell notification-icon"></span>
-                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do</p>
-                            </div>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
-        </div>
-    </nav>
+                    <span class="glyphicon glyphicon-th-large" style="color: white"></span>
+                </a> -->
+                <a href="" class="dropdown-toggle" data-toggle="dropdown">
+                    <span class="glyphicon glyphicon-bell notification-icon"></span>
+                </a>
+                <ul role="menu" class="dropdown-menu notifications-panel">
+                    <li class="notification-item">
+                        <div class="notification-header">
+                            <p>Lorem ipsum dolor sit amet</p>
+                        </div>
+                        <div class="notification-body">
+                            <span class="glyphicon glyphicon-bell notification-icon"></span>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do</p>
+                        </div>
+                    </li>
+                    <li class="notification-item">
+                        <div class="notification-header">
+                            <p>Lorem ipsum dolor sit amet</p>
+                        </div>
+                        <div class="notification-body">
+                            <span class="glyphicon glyphicon-bell notification-icon"></span>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do</p>
+                        </div>
+                    </li>
+                    <li class="notification-item">
+                        <div class="notification-header">
+                            <p>Lorem ipsum dolor sit amet</p>
+                        </div>
+                        <div class="notification-body">
+                            <span class="glyphicon glyphicon-bell notification-icon"></span>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do</p>
+                        </div>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</nav>
 
-    <div id="wrapper">
-        <div class="overlay"></div>
-
-        <!-- Sidebar -->
-        <nav class="navbar navbar-inverse navbar-fixed-top" id="sidebar-wrapper" role="navigation">
-            <ul class="nav sidebar-nav">
-                <li class="sidebar-brand">
-                    <a href="#">
-                       MyCRT
-                    </a>
-                </li>
-                <li>
-                    <a href="dashboard" id="#btnDashboard">Dashboard</a>
-                </li>
-                <li class="dropdown">
-                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Capture <span class="caret"></span></a>
-                  <ul class="dropdown-menu" role="menu">
+<div id="wrapper">
+    <div class="overlay"></div>
+    
+    <!-- Sidebar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" id="sidebar-wrapper" role="navigation">
+        <ul class="nav sidebar-nav">
+            <li class="sidebar-brand">
+                <a href="#">
+                    MyCRT
+                </a>
+            </li>
+            <li>
+                <a href="dashboard" id="#btnDashboard">Dashboard</a>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Capture <span class="caret"></span></a>
+                <ul class="dropdown-menu" role="menu">
                     <li><a href="capture">Start Capture</a></li>
                     <li><a href="#">Manage Capture</a></li>
-                  </ul>
-                </li>
-                <li class="dropdown">
-                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Replay <span class="caret"></span></a>
-                  <ul class="dropdown-menu" role="menu">
+                </ul>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Replay <span class="caret"></span></a>
+                <ul class="dropdown-menu" role="menu">
                     <li><a href="#">Start Replay</a></li>
                     <li><a href="#">Manage Replay</a></li>
-                  </ul>
-                </li>
-                <li class="dropdown">
-                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Analyze Results <span class="caret"></span></a>
-                  <ul class="dropdown-menu" role="menu">
+                </ul>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Analyze Results <span class="caret"></span></a>
+                <ul class="dropdown-menu" role="menu">
                     <li><a href="analyze">Compare Results</a></li>
                     <li><a href="#">History</a></li>
-                  </ul>
-                </li>
-                <li>
-                    <a href="settings">Settings</a>
-                </li>
-                <li>
-                    <a href="#">Help</a>
-                </li>
-                <li>
-                    <a href="#">Logout</a>
-                </li>
-            </ul>
-        </nav>
-        <!-- /#sidebar-wrapper -->
-
-        <!-- Page Content -->
-        <div id="page-content-wrapper">
-            <button type="button" class="hamburger is-closed" data-toggle="offcanvas" id="mdb-override">
-                <span class="hamb-top"></span>
-    			<span class="hamb-middle"></span>
-				<span class="hamb-bottom"></span>
-            </button>
-            <div id="content" class="col-xs-10">
+                </ul>
+            </li>
+            <li>
+                <a href="settings">Settings</a>
+            </li>
+            <li>
+                <a href="#">Help</a>
+            </li>
+            <li>
+                <a href="#">Logout</a>
+            </li>
+        </ul>
+    </nav>
+    <!-- /#sidebar-wrapper -->
+    
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+        <button type="button" class="hamburger is-closed" data-toggle="offcanvas" id="mdb-override">
+            <span class="hamb-top"></span>
+            <span class="hamb-middle"></span>
+            <span class="hamb-bottom"></span>
+        </button>
+        <div id="content" class="col-xs-10">
             <h3 class="text-center title">Start Capture</h3>
             <div class="col-xs-12">
                 <div class="input">
@@ -145,19 +146,28 @@
                 <div class="checkbox">
                     <label class="input-label-checkbox">
                         <!-- TODO: bootstrap bug, need work arround
-                            data-toggle=toggle works fine, but collapse doesnt-->
+                        data-toggle=toggle works fine, but collapse doesnt-->
                         <input id="chkTime" type="checkbox" data-toggle="collapse" href="#chkCollapse"> Advanced
                     </label>
                 </div>
                 <div id="chkCollapse" class="input collapse">
                     <label class="input-label">Start Time:<input id="txtStartTime" class="form-control" type="datetime-local" value=""></label>
                     <label class="input-label">End Time:<input id="txtEndTime" class="form-control" type="datetime-local" value=""></label>
+                    <label class="input-label">Max Capture Size (mB):<input id="txtMaxSize" class="form-control" type="text" value="1024"></label>
+                    <label class="input-label">Max Number of Transactions:<input id="txtMaxTrans" class="form-control" type="text" value="100"></label>
+                    <label class="input-label">Database Commands to Ignore:</label>
+                    <div class="example">
+                        <select id="example-getting-started" class="btn btn-small" multiple="multiple">
+                            <option value="SELECT">SELECT</option>
+                            <option value="UPDATE">UPDATE</option>
+                            <option value="INSERT INTO">INSERT INTO</option>
+                            <option value="CREATE TABLE">CREATE TABLE</option>
+                            <option value="DELETE FROM">DELETE FROM</option>
+                        </select>
+                    </div>
                 </div>
             </div>
             <a href="#" id="btnCaptureStart" class="btn btn-default">Start Capture</a>
-           
-            
-
             <div class="container-fluid">
                 <h3 id="lblStatus"></h3>
                 <a href="#" id="btnStatus" class="btn btn-default">Update Status</a>
@@ -192,6 +202,7 @@
     <script src="js/sideBar.js"></script>
     <script src="js/startCapture.js"></script>
     <script src="js/dashboard.js"></script>
+    <script type="text/javascript" src="js/bootstrap-multiselect.js"></script>
 
 </body>
 
