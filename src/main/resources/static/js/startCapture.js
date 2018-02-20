@@ -14,17 +14,22 @@ $(document).ready(function() {
         if ($("#txtEndTime").val()) {
             endTime = new Date(String($("#txtEndTime").val()));
         }
-        var body = {
-            id: $("#txtID").val(),
-            rds: $("#txtRDS").val(),
-            s3: $("#txtS3").val(),
-            startTime: startTime,
-            endTime: endTime,
-            fileSizeLimit: $("#txtMaxSize").val(),
-            transactionLimit: $("#txtMaxTrans").val(),
-            status: ""
-        };
-        startCapture("/capture/start", body);
+
+        // Only start capture if rds and s3 selected
+        if ($('#rdsSelector').val() != '' && $('#s3Selector').val() != '') {
+            var body = {
+                id: $("#txtID").val(),
+                rds: $("#rdsSelector").val(),
+                s3: $("#s3Selector").val(),
+                startTime: startTime,
+                endTime: endTime,
+                fileSizeLimit: $("#txtMaxSize").val(),
+                transactionLimit: $("#txtMaxTrans").val(),
+                status: ""
+            };
+
+            startCapture("/capture/start", body);
+        }
     });
 
 });
@@ -59,3 +64,39 @@ function startCapture(url, body) {
         }
     });
 }
+
+// Populate rds dropdown
+$(function() {
+    $.ajax({
+        url: "/resource/rds",
+        type: "GET",
+        success: function(data) {
+            var selector = '<option value="">Select RDS Endpoint</option>';
+            for (var i = 0; i < data.length; i++) {
+                selector += "<option value='" + data[i] +"'>" + data[i] + "</option>"; // Add selector option
+            }
+            $('#rdsSelector').html(selector);
+        },
+        error: function(err) {
+            console.log(err);
+        }
+    });
+});
+
+// Populate s3 dropdown
+$(function() {
+    $.ajax({
+        url: "/resource/s3",
+        type: "GET",
+        success: function(data) {
+            var selector = '<option value="">Select S3 Endpoint</option>';
+            for (var i = 0; i < data.length; i++) {
+                selector += "<option value='" + data[i] +"'>" + data[i] + "</option>"; // Add selector option
+            }
+            $('#s3Selector').html(selector);
+        },
+        error: function(err) {
+            console.log(err);
+        }
+    });
+});

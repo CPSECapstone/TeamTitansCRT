@@ -3,6 +3,8 @@ package webHandler;
 import java.io.File;
 import java.io.FileReader;
 import java.io.InputStream;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
@@ -94,5 +96,11 @@ public class S3Manager {
             System.out.println("Error Message: " + ace.getMessage());
         }
         return dataStream;
+    }
+
+    public List<String> getS3Buckets() {
+        return s3Client.listBuckets().stream()
+                .map(x->x.getName())
+                .collect(Collectors.toList());
     }
 }
