@@ -98,7 +98,8 @@ public class CaptureController {
 
             LogParser parser = new LogParser();
 
-            String parsedLogData = parser.parseLogData(logData, capture.getFilterStatements(), capture.getFilterUsers());
+            String parsedLogData = parser.parseLogData(logData, capture.getFilterStatements(),
+                    capture.getFilterUsers(), capture.getStartTime(), capture.getEndTime());
 
             InputStream stream = null;
             try
@@ -183,7 +184,8 @@ public class CaptureController {
         try {
             RDSManager rdsManager = new RDSManager();
             String logData = rdsManager.downloadLog(capture.getRds(), "general/mysql-general.log");
-            String parsedLogData = new LogParser().parseLogData(logData, capture.getFilterStatements(), capture.getFilterUsers());
+            String parsedLogData = new LogParser().parseLogData(logData, capture.getFilterStatements(),
+                    capture.getFilterUsers(), capture.getStartTime(), capture.getEndTime());
             return parsedLogData.getBytes(StandardCharsets.UTF_8.name()).length;
         } catch(UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -195,7 +197,8 @@ public class CaptureController {
         try {
             RDSManager rdsManager = new RDSManager();
             String logData = rdsManager.downloadLog(capture.getRds(), "general/mysql-general.log");
-            String parsedLogData = new LogParser().parseLogData(logData, capture.getFilterStatements(), capture.getFilterUsers());
+            String parsedLogData = new LogParser().parseLogData(logData, capture.getFilterStatements(),
+                    capture.getFilterUsers(), capture.getStartTime(), capture.getEndTime());
             return parsedLogData.length()  - parsedLogData.replace("\n", "").length();
         } catch(Exception e) {
             e.printStackTrace();
