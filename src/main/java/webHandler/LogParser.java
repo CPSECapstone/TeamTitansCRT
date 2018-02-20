@@ -1,7 +1,10 @@
 package webHandler;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 public class LogParser {
@@ -25,7 +28,9 @@ public class LogParser {
 
         public String toString()
         {
-            return this.date + " " + this.time + " " + this.id + " " + this.command + " " + this.query;
+            return "{\n" + "\"date\": \"" + this.date + "\",\n\"time\": \"" + this.time +
+                    "\",\n\"id\": " + this.id + ",\n\"command\": \"" + this.command +
+                    "\",\n\"query\": \"" + this.query + "\"\n}";
         }
 
 
@@ -58,7 +63,6 @@ public class LogParser {
     {
         // add the default rdsadmin
         usersToRemove.add("rdsadmin");
-
         // Match any users connections with user-selected users
         if (statement.command.equals("Connect") && usersToRemove.contains(statement.query.split("@")[0]))
         {
@@ -71,6 +75,8 @@ public class LogParser {
 
     private boolean filterUserSelectedStatements(Statement statement, List<String> statementsToRemove)
     {
+        statementsToRemove.add("Statistics");
+        statementsToRemove.add("Quit");
         for (String statementToRemove : statementsToRemove)
         {
             // Regex match any user-selected statements with current queries
@@ -79,45 +85,37 @@ public class LogParser {
                 return true;
             }
         }
-
         return false;
     }
 
     private boolean filterRDSDefaultStatements(Statement statement)
     {
-        /* don't think this is an exhaustive list... might not even need
-        Filter will work without this if the rdsadmin connection is within any of the previous logs the LogParser
-        object handled
-        If this is enabled, all users who originate these queries will be removed
-        (could be good only if they match exactly to all default queries)
-        */
+        // don't think this is an exhaustive list... might not even need
 
         if (statement.query.equals("SELECT 1") ||
                 statement.query.equals("Statistics") ||
                 statement.query.equals("COMMIT") ||
-                statement.query.contains("(?i).*rds_.*") ||
-                statement.query.contains("(?i).*purge binary logs to.*") ||
-                statement.query.contains("(?i).*@@session.*") ||
-                statement.query.contains("(?i)show global variables like.*") ||
-                statement.query.contains("(?i)flush logs.*") ||
-                statement.query.contains("(?i)set autocommit.*") ||
-                statement.query.contains("(?i)set sql.*") ||
-                statement.query.contains("(?i)set character_set_results.*") ||
-                statement.query.contains("(?i)set names.*") ||
-                statement.query.contains("(?i)Show engines") ||
-                statement.query.contains("(?i)show session.*") ||
-                statement.query.contains("(?i)show function status") ||
-                statement.query.contains("(?i)show full tables.*"))
+                statement.query.matches("(?i).*rds_.*") ||
+                statement.query.matches("(?i).*purge binary logs to.*") ||
+                statement.query.matches("(?i).*@@session.*") ||
+                statement.query.matches("(?i)show global variables like.*") ||
+                statement.query.matches("(?i)flush logs.*") ||
+                statement.query.matches("(?i)set autocommit.*") ||
+                statement.query.matches("(?i)set sql.*") ||
+                statement.query.matches("(?i)set character_set_results.*") ||
+                statement.query.matches("(?i)set names.*") ||
+                statement.query.matches("(?i)Show engines") ||
+                statement.query.matches("(?i)show session.*") ||
+                statement.query.matches("(?i)show function status") ||
+                statement.query.matches("(?i)show full tables.*"))
         {
-            idToRemove.add(statement.id);
             return true;
         }
         return false;
     }
 
-    private Statement adhereToTimeLayout(Statement statement)
+    private String adhereToTimeLayout(String time)
     {
-        String time = statement.time;
         String[] timeArray = time.split(":");
         for (int i = 0; i < timeArray.length; i++)
         {
@@ -126,11 +124,10 @@ public class LogParser {
                 timeArray[i] = "0" + timeArray[i];
             }
         }
-        statement.time = String.join(":", timeArray);
-        return statement;
+        return String.join(":", timeArray);
     }
 
-    public Statement createStatement(String stmt)
+    private Statement createStatement(String stmt)
     {
         List<String> currentStatement = new ArrayList<>(Arrays.asList(stmt.split("\\s")));
         currentStatement.removeAll(Arrays.asList("", null));
@@ -151,16 +148,17 @@ public class LogParser {
             currentStatement.add(0, previousTime);
             currentStatement.add(0, previousDate);
         }
+
         Statement statement = new Statement(currentStatement.get(0).trim(),
-                currentStatement.get(1).trim(),
+                adhereToTimeLayout(currentStatement.get(1).trim()),
                 Integer.parseInt(currentStatement.get(2)), currentStatement.get(3).trim(),
                 String.join(" ", currentStatement.subList(4, currentStatement.size())).trim());
 
-        adhereToTimeLayout(statement);
         return statement;
     }
 
-    public String parseLogData(String logData, List<String> statementsToRemove, List<String> usersToRemove)
+    public String parseLogData(String logData, List<String> statementsToRemove, List<String> usersToRemove,
+                               Date startTime, Date endTime)
     {
         List<String> parsedLogStatements = new ArrayList<>();
 
@@ -176,7 +174,15 @@ public class LogParser {
 
             // create a statement representation of the line
             Statement statement = createStatement(stmt);
+            if (statement.query.equals("Quit") || statement.query.equals("Statistics"))
+            {
+                continue;
+            }
 
+            if (!(isWithinTimeInterval(statement, startTime, endTime)))
+            {
+                continue;
+            }
 
             // Filters the default rds statements, user-selected users and user-selected statements
             if (filterRDSDefaultStatements(statement) ||
@@ -202,6 +208,33 @@ public class LogParser {
 
         }
 
-        return String.join("\n", parsedLogStatements);
+
+        return "[" + String.join(",\n", parsedLogStatements) + "]";
+    }
+
+    private boolean isWithinTimeInterval(Statement statement, Date startTime, Date endTime)
+    {
+
+        String pattern = "yymmdd hh:mm:ss";
+        try
+        {
+            SimpleDateFormat sdf = new SimpleDateFormat(pattern);
+            Date statementDate = sdf.parse(statement.date + " " + statement.time);
+
+            if (statementDate.compareTo(startTime) > 0)
+            {
+                if (endTime != null)
+                {
+                    return (statementDate.compareTo(endTime) < 0);
+                }
+            }
+        }
+        catch (ParseException pe)
+        {
+            pe.printStackTrace();
+            return true;
+        }
+
+        return false;
     }
 }
