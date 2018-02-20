@@ -146,7 +146,8 @@ public class CaptureController {
 
             LogParser parser = new LogParser();
 
-            String parsedLogData = parser.parseLogData(logData, capture.getFilterStatements(), capture.getFilterUsers());
+            String parsedLogData = parser.parseLogData(logData, capture.getFilterStatements(),
+                    capture.getFilterUsers(), capture.getStartTime(), capture.getEndTime());
 
             InputStream stream = null;
             try

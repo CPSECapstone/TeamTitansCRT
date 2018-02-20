@@ -2,7 +2,6 @@ var domain = "http://localhost:8080";
 
 $(function() {
     $('#example-getting-started').multiselect();
-    // addToTable("", "MyCapture", "Running", "2017-10-10T05:10", "2017-10-10T05:10", "")
     updateStatus();
 });
 
@@ -70,7 +69,6 @@ function updateCapture(id) {
         fileSizeLimit: $("#" + id + " .txtMaxSize").val(),
         transactionLimit: $("#" + id + " .txtMaxTrans").val()
     };
-    console.log(body);
     
     $.ajax({
         url: domain + "/capture/update",
@@ -81,6 +79,7 @@ function updateCapture(id) {
         data: JSON.stringify(body),
         success: function() {
             console.log(id + " success")
+            updateStatus();
         },
         error: function(err) {
             $("#lblStatus").html("Startup failure.");
