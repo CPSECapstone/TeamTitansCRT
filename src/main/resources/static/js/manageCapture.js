@@ -57,8 +57,7 @@ function addToTable(capture) {
         "<\/div>"+
         "<\/div>"
     );
-    $(".save").on("click", function() {
-        console.log(id);
+    $("#" + id + " .save").on("click", function() {
         updateCapture(id);
     });
 }
@@ -71,6 +70,7 @@ function updateCapture(id) {
         fileSizeLimit: $("#" + id + " .txtMaxSize").val(),
         transactionLimit: $("#" + id + " .txtMaxTrans").val()
     };
+    console.log(body);
     
     $.ajax({
         url: domain + "/capture/update",
