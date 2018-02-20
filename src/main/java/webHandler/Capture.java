@@ -1,5 +1,6 @@
 package webHandler;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -150,6 +151,10 @@ public class Capture {
 
     public List<String> getFilterStatements()
     {
+        if (this.filterStatements == null)
+        {
+            return new ArrayList<String>();
+        }
         return this.filterStatements;
     }
 
@@ -160,6 +165,10 @@ public class Capture {
 
     public List<String> getFilterUsers()
     {
+        if (this.filterUsers == null)
+        {
+            return new ArrayList<String>();
+        }
         return this.filterUsers;
     }
 
