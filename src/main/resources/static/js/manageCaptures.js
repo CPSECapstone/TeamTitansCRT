@@ -42,7 +42,6 @@ function updateStatus() {
                 
                 addToTable(icon, id, status, startTime, endTime, button);
             }
-            
         },
         error: function(err) {
             console.log(err);
@@ -142,12 +141,6 @@ function formatTime(time, format) {
         }
     })
 }
-
-$(document).ready(function() 
-    { 
-        $("#statusTable").tablesorter(); 
-    } 
-); 
     
 
 $(function() {

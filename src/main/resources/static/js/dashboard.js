@@ -44,26 +44,6 @@ function updateStatus() {
     });
 }
 
-function getMetric(id, startTime, endTime, metric) {
-    var body = {
-        id: id,
-        startTime: startTime,
-        endTime: endTime,
-        metric: metric
-    };
-    
-    $.ajax({
-        url: "/cloudwatch/average",
-        type: "POST",
-        headers: { "Content-Type": "application/json" },
-        data: JSON.stringify(body),
-        success: function(data) {
-            return data;            
-        }
-    });
-}
-
-
 function addToTable(icon, id, status, startTime, endTime, button) {
     var body = {
         id: id,
@@ -94,8 +74,6 @@ function addToTable(icon, id, status, startTime, endTime, button) {
                         "<div id=\"accordion" + id + "\" class=\"collapse\">" +
                             "<ul class=\"stats-list\">" +
                                 "<li>CPU Utilization: " + data + "</li>" +
-                                "<li>CPU Utilization: " + getMetric(id, startTime, endTime, "CPUUtilization") + "</li>" +
-                                "<li>Write Throughput: " + getMetric(id, startTime, endTime, "WriteThroughput") + "</li>" +
                             "</ul>" +
                         "</div>" +
                     "</td>" +
@@ -161,12 +139,6 @@ function formatTime(time, format) {
         }
     })
 }
-
-$(document).ready(function() 
-    { 
-        $("#statusTable").tablesorter(); 
-    } 
-); 
     
 
 $(function() {
