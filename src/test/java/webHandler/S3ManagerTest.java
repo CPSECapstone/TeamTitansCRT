@@ -44,7 +44,7 @@ public class S3ManagerTest {
     @Test
     public void downloadFileLocally() throws IOException {
         s3Manager.downloadFileLocally("teamtitans-test-mycrt", "test-Workload.log", "test-file.log");
-
+        assertTrue(true);
     }
 
     @After
