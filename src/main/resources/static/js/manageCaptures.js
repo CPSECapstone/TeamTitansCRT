@@ -29,12 +29,18 @@ function updateStatus() {
                     button =
                         "<a href=\"#\" id=\"stopButton" + id +
                         "\" class=\"btn btn-default btn-stop\">Stop Capture</a>";
-                    addToTable(icon, id, status, startTime, endTime, button);
                 }                
                 else if (status == "Queued") {
                     icon = "<img src=\"../img/queued.png\" alt=\"queued\">";
-                    addToTable(icon, id, status, startTime, endTime, button);
                 }
+                else if (status == "Finished") {
+                    icon = "<img src=\"../img/finished.png\" alt=\"finished\">";
+                }
+                else {
+                    icon = "<img src=\"../img/failed.png\" alt=\"failed\">";
+                }
+                
+                addToTable(icon, id, status, startTime, endTime, button);
             }
             
         },
@@ -43,26 +49,6 @@ function updateStatus() {
         }
     });
 }
-
-function getMetric(id, startTime, endTime, metric) {
-    var body = {
-        id: id,
-        startTime: startTime,
-        endTime: endTime,
-        metric: metric
-    };
-    
-    $.ajax({
-        url: "/cloudwatch/average",
-        type: "POST",
-        headers: { "Content-Type": "application/json" },
-        data: JSON.stringify(body),
-        success: function(data) {
-            return data;            
-        }
-    });
-}
-
 
 function addToTable(icon, id, status, startTime, endTime, button) {
     var body = {
@@ -94,15 +80,10 @@ function addToTable(icon, id, status, startTime, endTime, button) {
                         "<div id=\"accordion" + id + "\" class=\"collapse\">" +
                             "<ul class=\"stats-list\">" +
                                 "<li>CPU Utilization: " + data + "</li>" +
-                                "<li>CPU Utilization: " + getMetric(id, startTime, endTime, "CPUUtilization") + "</li>" +
-                                "<li>Write Throughput: " + getMetric(id, startTime, endTime, "WriteThroughput") + "</li>" +
                             "</ul>" +
                         "</div>" +
                     "</td>" +
                 "</tr>");
-        },
-        error: function(err) {
-            console.log(err);
         }
     });
 }
