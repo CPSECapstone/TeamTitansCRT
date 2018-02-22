@@ -6,11 +6,18 @@ import java.sql.*;
 public class DBUtil {
 
     Connection conn;
+    private String databaseFile;
     /**
      * Connect to a sample database
      *
      * @param databaseFile the database file name
      */
+
+    public DBUtil(String databaseFile)
+    {
+        this.conn = connectSqlite(databaseFile);
+    }
+
     public static Connection connectSqlite(String databaseFile)
     {
         Connection conn = null;
@@ -64,28 +71,6 @@ public class DBUtil {
         return conn;
     }
 
-    public static void createNewTable(String databaseFile) throws SQLException
-    {
-
-        String sql = "CREATE TABLE IF NOT EXISTS captures (\n"
-                +  " id INTEGER PRIMARY KEY, \n"
-                + " rds TEXT, \n"
-                + " s3 TEXT, \n"
-                + " startTime TEXT, \n"
-                + " endTime TEXT, \n"
-                + " status TEXT, \n"
-                + " fileSizeLimit INTEGER, \n"
-                + " transactionLimit INTEGER, \n"
-                + " dbFileSize INTEGER, \n"
-                + " numDbTransactions INTEGER \n"
-                +");";
-
-        Connection conn = DriverManager.getConnection(databaseFile);
-        Statement stmt = conn.createStatement();
-
-        stmt.execute(sql);
-    }
-
     public void closeConnection() throws SQLException {
         if (conn != null)
         {
@@ -93,22 +78,65 @@ public class DBUtil {
         }
     }
 
+    public static void createNewTable(String databaseFile) throws SQLException
+    {
+
+        String sql = "CREATE TABLE IF NOT EXISTS captures(\n"
+                +  " id INTEGER PRIMARY KEY,\n"
+                + " rds TEXT,\n"
+                + " s3 TEXT,\n"
+                + " startTime TEXT,\n"
+                + " endTime TEXT,\n"
+                + " status TEXT,\n"
+                + " fileSizeLimit INTEGER,\n"
+                + " transactionLimit INTEGER,\n"
+                + " dbFileSize INTEGER,\n"
+                + " numDbTransactions INTEGER\n"
+                +");";
+
+        Connection conn = DriverManager.getConnection(databaseFile);
+        Statement stmt = conn.createStatement();
+
+        stmt.execute(sql);
+        conn.close();
+        stmt.close();
+    }
+
+
     public void saveCapture (Capture capture) throws SQLException
     {
-        String sql = "INSERT INTO captures(id) VALUES (?,?)";
+        //inserts an id, if an id is there then it's replaced
+        String sql = "INSERT OR REPLACE INTO captures(id) VALUES (?)";
+
         PreparedStatement pstmt = conn.prepareStatement(sql);
         pstmt.setLong(1, Long.parseLong(capture.getId()));
         pstmt.executeUpdate();
+
+        pstmt.close();
     }
 
-    public ResultSet loadCapture (String id) throws SQLException
+    public Capture loadCapture (String id) throws SQLException
     {
-        String sql = "SELECT * FROM captures WHERE id = " + Long.parseLong(id);
-        Statement stmt = conn.createStatement();
-        ResultSet results = stmt.executeQuery(sql);
+        Capture capture = new Capture();
+        ResultSet rs;
 
+        String sql = "SELECT * FROM captures WHERE id = ?";
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        pstmt.setLong(1, Long.parseLong(id));
+        pstmt.execute();
 
-        return results;
+        rs = pstmt.getResultSet();
+
+        if (!rs.next())
+        {
+            rs.close();
+            pstmt.close();
+            return null;
+        }
+
+        capture.setId(Long.toString(rs.getLong(1)));
+
+        return capture;
     }
 
     /*public static void main (String[] args)
