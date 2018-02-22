@@ -117,11 +117,12 @@ public class AnalysisServlet {
         Double averageSum = 0.0;
 
         if(!dataPoints.isEmpty()){
-            for(Datapoint point: dataPoints) {
-                averageSum += point.getAverage();
-            }
+            return averageSum;
         }
 
-        return averageSum;
+        for(Datapoint point: dataPoints) {
+            averageSum += point.getAverage();
+        }
+        return averageSum/dataPoints.size();
     }
 }
