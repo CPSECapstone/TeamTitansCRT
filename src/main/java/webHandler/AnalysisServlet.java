@@ -100,10 +100,6 @@ public class AnalysisServlet {
             averages.add(calculateAverage(request.getID(), request.getStartTime(), request.getEndTime(), metric));
         }
 
-        for(Double d: averages) {
-            System.out.println(d);
-        }
-
         return new ResponseEntity<List<Double>>(averages, HttpStatus.OK);
     }
 
