@@ -18,7 +18,7 @@ import java.util.*;
 public class CaptureController {
 
     // Number of minutes to milliseconds to wait before updating captures.
-    private final int UPDATE_PERIOD = 1000 * 60 * 1;
+    private final int UPDATE_PERIOD_MINUTE = 1000 * 60 * 1;
 
     private HashMap<String, Capture> captures = new HashMap<>();
 
@@ -42,6 +42,8 @@ public class CaptureController {
             }, capture.getEndTime());
         }
 
+        capture.startCaptureLogs();
+
         if (capture.hasFileSizeLimit()) {
             new Timer().schedule(new TimerTask() {
                 @Override
@@ -53,7 +55,7 @@ public class CaptureController {
                         cancel();
                     }
                 }
-            }, 0, UPDATE_PERIOD);
+            }, 0, UPDATE_PERIOD_MINUTE);
         }
 
         if (capture.hasTransactionLimit()) {
@@ -67,7 +69,7 @@ public class CaptureController {
                         cancel();
                     }
                 }
-            }, 0, UPDATE_PERIOD);
+            }, 0, UPDATE_PERIOD_MINUTE);
         }
 
         captures.put(capture.getId(), capture);
@@ -93,25 +95,7 @@ public class CaptureController {
 
         if (targetCapture.getStatus().equals("Finished")) {
             // Grab RDS workload
-            RDSManager rdsManager = new RDSManager();
-            String logData = rdsManager.downloadLog(targetCapture.getRds(),  "general/mysql-general.log");
-
-            LogParser parser = new LogParser();
-
-            String parsedLogData = parser.parseLogData(logData, capture.getFilterStatements(),
-                    capture.getFilterUsers(), capture.getStartTime(), capture.getEndTime());
-
-            InputStream stream = null;
-            try
-            {
-                stream = new ByteArrayInputStream(parsedLogData.getBytes(StandardCharsets.UTF_8.name()));
-            } catch (UnsupportedEncodingException enc) {
-                enc.printStackTrace();
-            }
-
-            if (stream == null) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
+            capture.endCaptureLogs();
 
             CloudWatchManager cloudManager = new CloudWatchManager();
             String stats = cloudManager.getAllMetricStatisticsAsJson(targetCapture.getRds(), targetCapture.getStartTime(), targetCapture.getEndTime());
@@ -119,7 +103,6 @@ public class CaptureController {
 
             // Store RDS workload in S3
             S3Manager s3Manager = new S3Manager();
-            s3Manager.uploadFile(targetCapture.getS3(), targetCapture.getId() + "-Workload.log", stream, new ObjectMetadata());
             s3Manager.uploadFile(targetCapture.getS3(), targetCapture.getId() + "-Performance.log", statStream, new ObjectMetadata());
 
             //TODO: Add check for file upload

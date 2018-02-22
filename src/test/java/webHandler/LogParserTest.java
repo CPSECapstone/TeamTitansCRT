@@ -105,7 +105,8 @@ public class LogParserTest {
 
         String noData = logParser.parseLogData(logData, statementsToRemove, usersToRemove, startTime, endTime);
 
-        assertEquals("[]", noData);
+        System.out.println(noData);
+        assertEquals("", noData);
     }
 
     @Test
@@ -114,7 +115,7 @@ public class LogParserTest {
         List<String> statementsToRemove = new ArrayList<>();
         List<String> usersToRemove = new ArrayList<>();
 
-        String expected = "[{\n" +
+        String expected = "{\n" +
                 "\"date\": \"180217\",\n" +
                 "\"time\": \"21:08:52\",\n" +
                 "\"id\": 6968,\n" +
@@ -134,10 +135,9 @@ public class LogParserTest {
                 "\"id\": 6969,\n" +
                 "\"command\": \"Query\",\n" +
                 "\"query\": \"CREATE TABLE Users (value INT PRIMARY KEY)\"\n" +
-                "}]";
+                "}";
 
         String userData = logParser.parseLogData(logData, statementsToRemove, usersToRemove, startTime, endTime);
-
         assertEquals(expected, userData);
     }
 
