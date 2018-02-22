@@ -139,23 +139,19 @@
 
             <div id="content" class="col-xs-10">
                 <h3 class="text-center">Compare Results</h3>
-
-                <label class="input-label"> Number of Captures:
-                    <select class="form-control" id="captureSelector">
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                    </select>
-                </label>
-
-                <div id="captureInputs">
-                    <div class="input">
-                        <label class="input-label">Capture1 ID:<input id="txtID-1" class="form-control" type="text" value="MyCapture1"></label>
-                    </div>
-                    <div class="input">
-                        <label class="input-label">S3 Endpoint:<input id="txtS3-1" class="form-control" type="text" value="teamtitans-test-mycrt"></label>
-                    </div>
+                <div id="performanceTable" style="height:300px;overflow:auto;">
+                    <table class="table table-striped table-hover">
+                        <col width="40">
+                        <tr>
+                            <th></th>
+                            <th>ID</th>
+                            <th>RDS</th>
+                            <th>S3</th>
+                            <th>Start</th>
+                            <th>End</th>
+                            <th>Status</th>
+                        </tr>
+                    </table>
                 </div>
 
                 <a href="#" id="btnGetMetrics" class="btn btn-default">Get Metrics</a>

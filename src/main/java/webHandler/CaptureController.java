@@ -20,6 +20,7 @@ public class CaptureController {
     // Number of minutes to milliseconds to wait before updating captures.
     private final int UPDATE_PERIOD = 1000 * 60 * 1;
 
+    // TODO: Remove when Capture DAO addeds
     private HashMap<String, Capture> captures = new HashMap<>();
 
     @RequestMapping(value = "/capture/start", method = RequestMethod.POST)
@@ -70,6 +71,7 @@ public class CaptureController {
             }, 0, UPDATE_PERIOD);
         }
 
+        // TODO: Replace with Capture DAO code
         captures.put(capture.getId(), capture);
 
         return new ResponseEntity<>(HttpStatus.OK);

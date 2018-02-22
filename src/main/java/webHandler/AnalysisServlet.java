@@ -32,6 +32,8 @@ public class AnalysisServlet {
     public void getMetrics(HttpServletResponse response, @RequestBody Capture capture) throws IOException {
 
         InputStream stream;
+        // TODO: Update parameter name from capture to captureId, add Capture DAO, sudo-code below
+        // Capture capture = DatabaseManager.getCaptureWithID(captureId.getId());
 
         // Get metric stream
         if (capture.getStatus().equals("Running")) { // Obtain from CloudWatch if capture is currently running
@@ -43,7 +45,7 @@ public class AnalysisServlet {
             stream = s3Manager.getFile(capture.getS3(), capture.getId() + "-Performance.log");
         }
 
-        //TODO: Replace else statement with commented block when persistent capture data is added.
+        //TODO: Replace else statement with commented block when Capture DAO added (Test everything else before replacing).
         /*else if (capture.getStatus().equals("Finished")) { // Obtain from S3 if capture has already finished
             S3Manager s3Manager = new S3Manager();
             stream = s3Manager.getFile(capture.getS3(), capture.getId() + "-Performance.log");
