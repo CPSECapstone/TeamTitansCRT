@@ -36,7 +36,6 @@ function updateStatus() {
                     addToTable(icon, id, status, startTime, endTime, button);
                 }
             }
-            
         },
         error: function(err) {
             console.log(err);
@@ -139,7 +138,6 @@ function formatTime(time, format) {
         }
     })
 }
-    
 
 $(function() {
     $('#statusTable').on('click', '[id^=stopButton]' , function() {
