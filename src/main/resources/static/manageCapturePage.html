@@ -133,52 +133,28 @@
         
     <!-- Page Content -->
         <div id="content" class="col-xs-10">
-            <h3 class="text-center title">Start Capture</h3>
-            <div class="col-xs-12">
-                <div class="input">
-                    <label class="input-label">RDS Endpoint:
-                        <select class="form-control" id="rdsSelector">
-                            <option value="">Select RDS Endpoint</option>
-                        </select>
-                    </label>
-                </div>
-                <div class="input">
-                    <label class="input-label">S3 Endpoint:
-                        <select class="form-control" id="s3Selector">
-                            <option value="">Select S3 Endpoint</option>
-                        </select>
-                    </label>
-                </div>
-                <div class="input">
-                    <label class="input-label">Capture ID:<input id="txtID" class="form-control" type="text" value="MyCapture"></label>
-                </div>
-                <div class="checkbox">
-                    <label class="input-label-checkbox">
-                        <!-- TODO: bootstrap bug, need work arround
-                        data-toggle=toggle works fine, but collapse doesnt-->
-                        <input id="chkTime" type="checkbox" data-toggle="collapse" href="#chkCollapse"> Advanced
-                    </label>
-                </div>
-                <div id="chkCollapse" class="input collapse">
-                    <label class="input-label">Start Time:<input id="txtStartTime" class="form-control" type="datetime-local" value=""></label>
-                    <label class="input-label">End Time:<input id="txtEndTime" class="form-control" type="datetime-local" value=""></label>
-                    <label class="input-label">Max Capture Size (mB):<input id="txtMaxSize" class="form-control" type="text" value="1024"></label>
-                    <label class="input-label">Max Number of Transactions:<input id="txtMaxTrans" class="form-control" type="text" value="100"></label>
-                    <label class="input-label">Database Commands to Ignore:</label>
-                    <div class="example">
-                        <select id="example-getting-started" class="btn btn-small" multiple="multiple">
-                            <option value="SELECT">SELECT</option>
-                            <option value="UPDATE">UPDATE</option>
-                            <option value="INSERT INTO">INSERT INTO</option>
-                            <option value="CREATE TABLE">CREATE TABLE</option>
-                            <option value="DELETE FROM">DELETE FROM</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <a href="#" id="btnCaptureStart" class="btn btn-default">Start Capture</a>
+            <h3 class="text-center title">Manage Captures</h3>
+           
             <div class="container-fluid">
                 <h3 id="lblStatus"></h3>
+                
+                <a href="#" id="btnStatus" class="btn btn-default">Update Status</a>
+                <a href="dashboard" id="btnDashboard" class="btn btn-default">Go to Dashboard</a>
+                
+                <table id="statusTable" class="table" width="100%">
+                    <thead>
+                        <tr class="">
+                            <th> </th> 
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>Start Time</th>
+                            <th>End Time</th>
+                            <th> </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>            
             </div>
         </div>
     </div>
@@ -194,8 +170,7 @@
 
     <!-- Theme JavaScript -->
     <script src="js/sideBar.js"></script>
-    <script src="js/startCapture.js"></script>
-    <script src="js/dashboard.js"></script>
+    <script src="js/manageCaptures.js"></script>
     <script src="js/allPages.js"></script>
     <script type="text/javascript" src="js/bootstrap-multiselect.js"></script>
 

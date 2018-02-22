@@ -29,14 +29,19 @@ function updateStatus() {
                     button =
                         "<a href=\"#\" id=\"stopButton" + id +
                         "\" class=\"btn btn-default btn-stop\">Stop Capture</a>";
-                    addToTable(icon, id, status, startTime, endTime, button);
                 }                
                 else if (status == "Queued") {
                     icon = "<img src=\"../img/queued.png\" alt=\"queued\">";
-                    addToTable(icon, id, status, startTime, endTime, button);
                 }
+                else if (status == "Finished") {
+                    icon = "<img src=\"../img/finished.png\" alt=\"finished\">";
+                }
+                else {
+                    icon = "<img src=\"../img/failed.png\" alt=\"failed\">";
+                }
+                
+                addToTable(icon, id, status, startTime, endTime, button);
             }
-            
         },
         error: function(err) {
             console.log(err);
@@ -78,9 +83,6 @@ function addToTable(icon, id, status, startTime, endTime, button) {
                         "</div>" +
                     "</td>" +
                 "</tr>");
-        },
-        error: function(err) {
-            console.log(err);
         }
     });
 }
