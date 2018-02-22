@@ -1,6 +1,9 @@
 package webHandler;
 
 import java.io.*;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
@@ -17,14 +20,10 @@ import com.amazonaws.util.IOUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-
 public class S3Manager {
-
     private AmazonS3 s3Client;
 
-    public S3Manager()
-    {
-
+    public S3Manager() {
         JSONParser parser = new JSONParser();
 
         try {
@@ -49,23 +48,18 @@ public class S3Manager {
                     .withRegion(Regions.US_WEST_1)
                     .build();
         }
-
     }
 
-    public void uploadFile(String bucketName, String fileName, InputStream file, ObjectMetadata metadata)
-    {
-       try
-       {
+    public void uploadFile(String bucketName, String fileName, InputStream file, ObjectMetadata metadata) {
+       try {
            System.out.println("Starting the upload of a file to S3.");
            s3Client.putObject(new PutObjectRequest(bucketName, fileName, file, metadata));
            System.out.println("Uploaded file to S3");
-       } catch (AmazonServiceException ase)
-       {
+       } catch (AmazonServiceException ase) {
            System.out.println("Caught an AmazonServiceException");
            System.out.println("Error Message: " + ase.getMessage());
            System.out.println("Error Code: " + ase.getErrorCode());
-       } catch (AmazonClientException ace)
-       {
+       } catch (AmazonClientException ace) {
            System.out.println("Caught an AmazonClientException");
            System.out.println("Error Message: " + ace.getMessage());
        }
@@ -73,14 +67,12 @@ public class S3Manager {
 
     public InputStream getFile(String bucketName, String fileName) {
         InputStream dataStream = null;
-        try
-        {
+        try {
             System.out.println("Downloading an object");
             S3Object s3Object = s3Client.getObject(new GetObjectRequest(
                     bucketName, fileName));
             dataStream = s3Object.getObjectContent();
-        } catch (AmazonServiceException ase)
-        {
+        } catch (AmazonServiceException ase) {
             System.out.println("Caught an AmazonServiceException");
             System.out.println("Error Message:    " + ase.getMessage());
             System.out.println("HTTP Status Code: " + ase.getStatusCode());
@@ -94,6 +86,12 @@ public class S3Manager {
         return dataStream;
     }
 
+    public List<String> getS3Buckets() {
+        return s3Client.listBuckets().stream()
+                .map(x->x.getName())
+                .collect(Collectors.toList());
+    }
+  
     /**
      * @param bucketName S3 bucket name. ex: teamtitans-test-mycrt
      * @param fileName file to search for
