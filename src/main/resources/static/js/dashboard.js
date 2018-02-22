@@ -49,7 +49,7 @@ function addToTable(icon, id, status, startTime, endTime, button) {
         id: id,
         startTime: startTime,
         endTime: endTime,
-        metric: "CPUUtilization"
+        metrics: ["CPUUtilization", "FreeStorageSpace", "WriteThroughput"]
     };
     
     $.ajax({
@@ -73,7 +73,9 @@ function addToTable(icon, id, status, startTime, endTime, button) {
                     "<td colspan=\"3\">" +
                         "<div id=\"accordion" + id + "\" class=\"collapse\">" +
                             "<ul class=\"stats-list\">" +
-                                "<li>CPU Utilization: " + data + "</li>" +
+                                "<li>CPU Utilization (percent): " + data[0] + "</li>" +
+                                "<li>Free Storage Space Available (bytes): " + data[1] + "</li>" +
+                                "<li>Write Throughput (bytes/sec): " + data[2] + "</li>" +
                             "</ul>" +
                         "</div>" +
                     "</td>" +
