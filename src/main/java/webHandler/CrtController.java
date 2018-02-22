@@ -16,6 +16,9 @@ public class CrtController {
 
     @GetMapping("capture")
     public String capture() { return "startCapturePage.html"; }
+    
+    @GetMapping("manageCaptures")
+    public String manageCaptures() { return "manageCapturePage.html"; }
 
     @GetMapping("analyze")
     public String analyze() { return "analyzePage.html"; }

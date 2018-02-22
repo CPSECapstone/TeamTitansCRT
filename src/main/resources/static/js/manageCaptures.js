@@ -29,14 +29,19 @@ function updateStatus() {
                     button =
                         "<a href=\"#\" id=\"stopButton" + id +
                         "\" class=\"btn btn-default btn-stop\">Stop Capture</a>";
-                    addToTable(icon, id, status, startTime, endTime, button);
                 }                
                 else if (status == "Queued") {
                     icon = "<img src=\"../img/queued.png\" alt=\"queued\">";
-                    addToTable(icon, id, status, startTime, endTime, button);
                 }
+                else if (status == "Finished") {
+                    icon = "<img src=\"../img/finished.png\" alt=\"finished\">";
+                }
+                else {
+                    icon = "<img src=\"../img/failed.png\" alt=\"failed\">";
+                }
+                
+                addToTable(icon, id, status, startTime, endTime, button);
             }
-            
         },
         error: function(err) {
             console.log(err);
@@ -49,7 +54,7 @@ function addToTable(icon, id, status, startTime, endTime, button) {
         id: id,
         startTime: startTime,
         endTime: endTime,
-        metrics: ["CPUUtilization", "FreeStorageSpace", "WriteThroughput"]
+        metric: "CPUUtilization"
     };
     
     $.ajax({
@@ -73,16 +78,11 @@ function addToTable(icon, id, status, startTime, endTime, button) {
                     "<td colspan=\"3\">" +
                         "<div id=\"accordion" + id + "\" class=\"collapse\">" +
                             "<ul class=\"stats-list\">" +
-                                "<li>CPU Utilization (percent): " + data[0] + "</li>" +
-                                "<li>Free Storage Space Available (bytes): " + data[1] + "</li>" +
-                                "<li>Write Throughput (bytes/sec): " + data[2] + "</li>" +
+                                "<li>CPU Utilization: " + data + "</li>" +
                             "</ul>" +
                         "</div>" +
                     "</td>" +
                 "</tr>");
-        },
-        error: function(err) {
-            console.log(err);
         }
     });
 }

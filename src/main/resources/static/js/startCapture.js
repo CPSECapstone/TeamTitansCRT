@@ -54,9 +54,8 @@ function startCapture(url, body) {
         data: JSON.stringify(body),
         success: function() {
             $("#lblStatus").html("<p>Started Successful.</p>" +
-                                "<a href=\"dashboard\" id=\"btnDashboard\" class=\"btn btn-default\">Go to Dashboard</a>");
-                                 
-            // window.location.href = "dashboard";
+                                 "<a href=\"manageCaptures\" id=\"btnManageCaptures\" class=\"btn btn-default\">Manage Captures</a>" +
+                                 "<a href=\"dashboard\" id=\"btnDashboard\" class=\"btn btn-default\">Go to Dashboard</a>");
         },
         error: function(err) {
             $("#lblStatus").html("Startup failure.");

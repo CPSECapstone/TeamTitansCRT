@@ -97,14 +97,14 @@
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown">Capture <span class="caret"></span></a>
                   <ul class="dropdown-menu" role="menu">
                     <li><a href="capture">Start Capture</a></li>
-                    <li><a href="#">Manage Capture</a></li>
+                    <li><a href="manageCaptures">Manage Captures</a></li>
                   </ul>
                 </li>
                 <li class="dropdown">
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown">Replay <span class="caret"></span></a>
                   <ul class="dropdown-menu" role="menu">
                     <li><a href="#">Start Replay</a></li>
-                    <li><a href="#">Manage Replay</a></li>
+                    <li><a href="#">Manage Replays</a></li>
                   </ul>
                 </li>
                 <li class="dropdown">
@@ -127,18 +127,21 @@
         </nav>
         <!-- /#sidebar-wrapper -->
 
-        <!-- Page Content -->
+        
         <div id="page-content-wrapper">
             <button type="button" class="hamburger is-closed" data-toggle="offcanvas" id="mdb-override">
                 <span class="hamb-top"></span>
     			<span class="hamb-middle"></span>
 				<span class="hamb-bottom"></span>
             </button>
+            
+        <!-- Page Content -->
             <div id="content" class="col-xs-10">
                 <h3 class="text-center title">Dashboard</h3>
-                <h4 class="text-center"><b>Status of Recent Captured and Replayed Workloads</b></h4>
+                <h4 class="text-center"><b>Status of Queued and Running Captured and Replayed Workloads</b></h4>
 
                 <a href="#" id="btnStatus" class="btn btn-default">Update Status</a>
+                <a href="manageCaptures" id="btnManageCaptures" class="btn btn-default">Manage Captures</a>
 
                 <div class="container-fluid">
                     <h3 id="lblStatus"></h3>
@@ -183,7 +186,7 @@
     <!-- Theme JavaScript -->
     <script src="js/sideBar.js"></script>
     <script src="js/dashboard.js"></script>
-
+    <script src="js/allPages.js"></script>
 </body>
 
 </html>

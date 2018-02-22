@@ -62,15 +62,4 @@ public class CloudWatchTest {
 
         assertEquals(testArr.toJSONString(), arr.toJSONString());
     }
-
-    @Test
-    public void calculateAverage() throws Exception {
-        File f = new File(".privateKeys");
-        org.junit.Assume.assumeTrue(f.exists() && f.isFile());
-        Date start = new Date(System.currentTimeMillis() - 1000 * 60 * 60);
-        Date end = new Date(System.currentTimeMillis());
-        CloudWatchManager cwManger = new CloudWatchManager();
-        ResponseEntity<Double> average = cwManger.calculateAverage("testdb", start, end, "CPUUtilization");
-        assertNotNull(average);
-    }
 }
