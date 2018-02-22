@@ -100,6 +100,10 @@ public class AnalysisServlet {
             averages.add(calculateAverage(request.getID(), request.getStartTime(), request.getEndTime(), metric));
         }
 
+        for(Double d: averages) {
+            System.out.println(d);
+        }
+
         return new ResponseEntity<List<Double>>(averages, HttpStatus.OK);
     }
 
@@ -116,7 +120,7 @@ public class AnalysisServlet {
         List<Datapoint> dataPoints = result.getDatapoints();
         Double averageSum = 0.0;
 
-        if(!dataPoints.isEmpty()){
+        if(dataPoints.isEmpty()){
             return averageSum;
         }
 
