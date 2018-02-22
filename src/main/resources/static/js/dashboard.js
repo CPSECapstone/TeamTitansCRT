@@ -7,6 +7,7 @@ $(document).ready(function() {
     updateStatus();
 });
 
+/* Updates the table to represent what is actually happening for capture. Only running and queued captures are visible in the table. */
 function updateStatus() {
     $.ajax({
         url: "/capture/status",
@@ -39,10 +40,12 @@ function updateStatus() {
         },
         error: function(err) {
             console.log(err);
+            console.log("Error updating the status.")
         }
     });
 }
 
+/* Adds new captures to the table. Takes the capture's id and gets its status, start time, and end time. Also, adds an icon to show the status of the capture visually. If the capture is running, there will be a stop capture button as well. */
 function addToTable(icon, id, status, startTime, endTime, button) {
     var body = {
         id: id,
@@ -82,10 +85,12 @@ function addToTable(icon, id, status, startTime, endTime, button) {
         },
         error: function(err) {
             console.log(err);
+            console.log("Error adding the the table on the dashboard.");
         }
     });
 }
 
+/* If you push the stop capture button, it ends immediately. */
 function stopCapture(id) {
     var url = "/capture/stop";
     var body = {
@@ -110,31 +115,33 @@ function stopCapture(id) {
         },
         error: function(err) {
             console.log(err);
+            console.log("Error stopping capture on dashboard");
         }
     });
 }
 
+/* Formarts the time from milliseconds to month day year hour minutes seconds. */
 function formatTime(time, format) {
     var t = new Date(time);
     var tf = function (i) { return (i < 10 ? '0' : '') + i };
     return format.replace(/yyyy|MM|dd|HH|mm|ss/g, function (a) {
         switch (a) {
-            case 'yyyy':
+            case 'yyyy': //year
                 return tf(t.getFullYear());
                 break;
-            case 'MM':
+            case 'MM': //month
                 return tf(t.getMonth() + 1);
                 break;
-            case 'mm':
+            case 'mm': //minutes
                 return tf(t.getMinutes());
                 break;
-            case 'dd':
+            case 'dd': //day
                 return tf(t.getDate());
                 break;
-            case 'HH':
+            case 'HH': //hour
                 return tf(t.getHours());
                 break;
-            case 'ss':
+            case 'ss': //seconds
                 return tf(t.getSeconds());
                 break;
         }
