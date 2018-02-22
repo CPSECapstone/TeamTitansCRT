@@ -8,6 +8,9 @@ $(document).ready(function() {
     $("#btnCapture").on("click", function() {
         window.location.href = "capture";
     });
+    $("#btnManageCaptures").on("click", function() {
+        window.location.href = "manageCaptures";
+    });
     $("#btnDashboard").on("click", function() {
         window.location.href = "dashboard";
     });
