@@ -1,9 +1,6 @@
 package webHandler;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.InputStream;
-
+import java.io.*;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
@@ -16,6 +13,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.util.IOUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -94,5 +92,27 @@ public class S3Manager {
             System.out.println("Error Message: " + ace.getMessage());
         }
         return dataStream;
+    }
+
+    /**
+     * @param bucketName S3 bucket name. ex: teamtitans-test-mycrt
+     * @param fileName file to search for
+     * @param filePath where the file will be saved. ex: src/main/resources/filename.tmp
+     * @return void it will create a new file and write the inputstream's content to it
+     */
+    public void downloadFileLocally (String bucketName, String fileName, String filePath) throws IOException {
+        //this is the datastream of the file being downloaded
+        InputStream inStream = getFile(bucketName, fileName);
+
+        //creates the new local file and creates an outputstream for it
+        File newFile = new File(filePath);
+        OutputStream outStream = new FileOutputStream(newFile);
+
+        //this will copy the content of the inputstream to the new fiel
+        IOUtils.copy(inStream,outStream);
+
+        //close after use
+        inStream.close();
+        outStream.close();
     }
 }
