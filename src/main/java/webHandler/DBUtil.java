@@ -1,18 +1,23 @@
 package webHandler;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import javax.xml.transform.Result;
+import java.sql.*;
 
 public class DBUtil {
 
+    Connection conn;
+    /**
+     * Connect to a sample database
+     *
+     * @param databaseFile the database file name
+     */
     public static Connection connectSqlite(String databaseFile)
     {
         Connection conn = null;
         try {
 
             conn = DriverManager.getConnection("jdbc:sqlite:" + databaseFile);
+            //conn = DriverManager.getConnection("jdbc:sqlite:/Users/devin/chinook.db");
             Statement stmt = conn.createStatement();
 
             // Enable WAL-mode transactions for concurrent writing.
@@ -26,6 +31,8 @@ public class DBUtil {
 
             // Enable foreign key enforcement to protect against inserting invalid data.
             stmt.execute("PRAGMA foreign_keys = ON;");
+
+            System.out.println("Connection to SQLite has been established.");
 
             stmt.close();
         }
@@ -51,4 +58,61 @@ public class DBUtil {
         }
         return conn;
     }
+
+    public Connection getConnection()
+    {
+        return conn;
+    }
+
+    public static void createNewTable(String databaseFile) throws SQLException
+    {
+
+        String sql = "CREATE TABLE IF NOT EXISTS captures (\n"
+                +  " id INTEGER PRIMARY KEY, \n"
+                + " rds TEXT, \n"
+                + " s3 TEXT, \n"
+                + " startTime TEXT, \n"
+                + " endTime TEXT, \n"
+                + " status TEXT, \n"
+                + " fileSizeLimit INTEGER, \n"
+                + " transactionLimit INTEGER, \n"
+                + " dbFileSize INTEGER, \n"
+                + " numDbTransactions INTEGER \n"
+                +");";
+
+        Connection conn = DriverManager.getConnection(databaseFile);
+        Statement stmt = conn.createStatement();
+
+        stmt.execute(sql);
+    }
+
+    public void closeConnection() throws SQLException {
+        if (conn != null)
+        {
+            conn.close();
+        }
+    }
+
+    public void saveCapture (Capture capture) throws SQLException
+    {
+        String sql = "INSERT INTO captures(id) VALUES (?,?)";
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        pstmt.setLong(1, Long.parseLong(capture.getId()));
+        pstmt.executeUpdate();
+    }
+
+    public ResultSet loadCapture (String id) throws SQLException
+    {
+        String sql = "SELECT * FROM captures WHERE id = " + Long.parseLong(id);
+        Statement stmt = conn.createStatement();
+        ResultSet results = stmt.executeQuery(sql);
+
+
+        return results;
+    }
+
+    /*public static void main (String[] args)
+    {
+        connectSqlite("/Users/devin/test.db");
+    }*/
 }
