@@ -127,6 +127,54 @@ public class CaptureController {
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
+    
+    @RequestMapping(value = "/capture/update", method = RequestMethod.POST)
+    public ResponseEntity<String> captureUpdate(@RequestBody Capture capture) {
+
+        Capture targetCapture = captures.get(capture.getId());
+        targetCapture.setStartTime(capture.getStartTime());
+        targetCapture.setEndTime(capture.getEndTime());
+        targetCapture.setTransactionLimit(capture.getTransactionLimit());
+        targetCapture.setFileSizeLimit(capture.getFileSizeLimit());
+        
+        targetCapture.updateStatus();
+
+        if (targetCapture.getStatus().equals("Finished")) {
+            // Grab RDS workload
+            RDSManager rdsManager = new RDSManager();
+            String logData = rdsManager.downloadLog(targetCapture.getRds(),  "general/mysql-general.log");
+
+            LogParser parser = new LogParser();
+
+            String parsedLogData = parser.parseLogData(logData, capture.getFilterStatements(),
+                    capture.getFilterUsers(), capture.getStartTime(), capture.getEndTime());
+
+            InputStream stream = null;
+            try
+            {
+                stream = new ByteArrayInputStream(parsedLogData.getBytes(StandardCharsets.UTF_8.name()));
+            } catch (UnsupportedEncodingException enc) {
+                enc.printStackTrace();
+            }
+
+            if (stream == null) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+
+            CloudWatchManager cloudManager = new CloudWatchManager();
+            String stats = cloudManager.getAllMetricStatisticsAsJson(targetCapture.getRds(), targetCapture.getStartTime(), targetCapture.getEndTime());
+            InputStream statStream = new ByteArrayInputStream(stats.getBytes(StandardCharsets.UTF_8));
+
+            // Store RDS workload in S3
+            S3Manager s3Manager = new S3Manager();
+            s3Manager.uploadFile(targetCapture.getS3(), targetCapture.getId() + "-Workload.log", stream, new ObjectMetadata());
+            s3Manager.uploadFile(targetCapture.getS3(), targetCapture.getId() + "-Performance.log", statStream, new ObjectMetadata());
+
+            //TODO: Add check for file upload
+        }
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
     @RequestMapping(value = "/capture/status", method = RequestMethod.GET)
     public ResponseEntity<Collection<Capture>> captureStatus() {
