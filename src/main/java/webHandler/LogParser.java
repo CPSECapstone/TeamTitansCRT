@@ -6,35 +6,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.io.InputStream;
 
 public class LogParser {
-
-    private class Statement
-    {
-        public String date;
-        public String time;
-        public int id;
-        public String command;
-        public String query;
-
-        public Statement(String date, String time, int id, String command, String query)
-        {
-            this.date = date;
-            this.time = time;
-            this.id = id;
-            this.command = command;
-            this.query = query;
-        }
-
-        public String toString()
-        {
-            return "{\n" + "\"date\": \"" + this.date + "\",\n\"time\": \"" + this.time +
-                    "\",\n\"id\": " + this.id + ",\n\"command\": \"" + this.command +
-                    "\",\n\"query\": \"" + this.query + "\"\n}";
-        }
-
-
-    }
 
     private String previousTime;
     private String previousDate;
@@ -64,9 +38,9 @@ public class LogParser {
         // add the default rdsadmin
         usersToRemove.add("rdsadmin");
         // Match any users connections with user-selected users
-        if (statement.command.equals("Connect") && usersToRemove.contains(statement.query.split("@")[0]))
+        if (statement.getCommand().equals("Connect") && usersToRemove.contains(statement.getQuery().split("@")[0]))
         {
-            idToRemove.add(statement.id);
+            idToRemove.add(statement.getId());
             return true;
         }
 
@@ -80,7 +54,7 @@ public class LogParser {
         for (String statementToRemove : statementsToRemove)
         {
             // Regex match any user-selected statements with current queries
-            if (statement.query.matches("(?i)" + statementToRemove + ".*"))
+            if (statement.getQuery().matches("(?i)" + statementToRemove + ".*"))
             {
                 return true;
             }
@@ -92,22 +66,24 @@ public class LogParser {
     {
         // don't think this is an exhaustive list... might not even need
 
-        if (statement.query.equals("SELECT 1") ||
-                statement.query.equals("Statistics") ||
-                statement.query.equals("COMMIT") ||
-                statement.query.matches("(?i).*rds_.*") ||
-                statement.query.matches("(?i).*purge binary logs to.*") ||
-                statement.query.matches("(?i).*@@session.*") ||
-                statement.query.matches("(?i)show global variables like.*") ||
-                statement.query.matches("(?i)flush logs.*") ||
-                statement.query.matches("(?i)set autocommit.*") ||
-                statement.query.matches("(?i)set sql.*") ||
-                statement.query.matches("(?i)set character_set_results.*") ||
-                statement.query.matches("(?i)set names.*") ||
-                statement.query.matches("(?i)Show engines") ||
-                statement.query.matches("(?i)show session.*") ||
-                statement.query.matches("(?i)show function status") ||
-                statement.query.matches("(?i)show full tables.*"))
+        String query = statement.getQuery();
+
+        if (query.equals("SELECT 1") ||
+                query.equals("Statistics") ||
+                query.equals("COMMIT") ||
+                query.matches("(?i).*rds_.*") ||
+                query.matches("(?i).*purge binary logs to.*") ||
+                query.matches("(?i).*@@session.*") ||
+                query.matches("(?i)show global variables like.*") ||
+                query.matches("(?i)flush logs.*") ||
+                query.matches("(?i)set autocommit.*") ||
+                query.matches("(?i)set sql.*") ||
+                query.matches("(?i)set character_set_results.*") ||
+                query.matches("(?i)set names.*") ||
+                query.matches("(?i)Show engines") ||
+                query.matches("(?i)show session.*") ||
+                query.matches("(?i)show function status") ||
+                query.matches("(?i)show full tables.*"))
         {
             return true;
         }
@@ -176,7 +152,7 @@ public class LogParser {
 
             // create a statement representation of the line
             Statement statement = createStatement(stmt);
-            if (statement.query.equals("Quit") || statement.query.equals("Statistics"))
+            if (statement.getQuery().equals("Quit") || statement.getQuery().equals("Statistics"))
             {
                 continue;
             }
@@ -189,7 +165,7 @@ public class LogParser {
             // Filters the default rds statements, user-selected users and user-selected statements
             if (filterRDSDefaultStatements(statement) ||
                     filterUserSelectedUsers(statement, usersToRemove) ||
-                    idToRemove.contains(statement.id) ||
+                    idToRemove.contains(statement.getId()) ||
                     filterUserSelectedStatements(statement, statementsToRemove))
             {
                 continue;
@@ -218,7 +194,7 @@ public class LogParser {
     private boolean isWithinTimeInterval(Statement statement, Date startTime, Date endTime)
     {
 
-        if (statement.date.equals("------") && statement.time.equals("--:--:--")) {
+        if (statement.getDate().equals("------") && statement.getTime().equals("--:--:--")) {
             return true;
         }
 
@@ -226,7 +202,7 @@ public class LogParser {
         try
         {
             SimpleDateFormat sdf = new SimpleDateFormat(pattern);
-            Date statementDate = sdf.parse(statement.date + " " + statement.time);
+            Date statementDate = sdf.parse(statement.getDate() + " " + statement.getTime());
 
             if (statementDate.compareTo(startTime) > 0)
             {
@@ -243,5 +219,9 @@ public class LogParser {
         }
 
         return false;
+    }
+
+    public static ArrayList<Statement> getStatements(InputStream stream) {
+        return new ArrayList<Statement>();
     }
 }
