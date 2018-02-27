@@ -91,28 +91,40 @@ public class AnalysisServlet {
     }
     
     /**
-     * @param dbID      The database to get data from
-     * @param start     The (capture's) start time
-     * @param end       The end time. For current time use (new Date(System.currentTimeMillis()))
-     * @param metric   One or more metric names to request ex. "CPUUtilization"
-     * @return          The average through the timespan as a double
+     * @param request MetricRequest contains String id, Date start, Date end, String... metrics
+     * @return A list of averages
      */
     @RequestMapping(value = "/cloudwatch/average", method = RequestMethod.POST)
-    public ResponseEntity<Double> calculateAverage(@RequestBody MetricRequest request){
-        CloudWatchManager cloudManager = new CloudWatchManager();
-        GetMetricStatisticsResult result = cloudManager.getMetricStatistics(request.getID(), request.getStartTime(), request.getEndTime(), request.getMetric());
-        List<Datapoint> dataPoints = result.getDatapoints();
-        double averageSum = 0.0;
+    public ResponseEntity<List<Double>> calculateAverages(@RequestBody MetricRequest request){
+        List<Double> averages = new ArrayList<Double>();
 
-        //It's usually empty when the start and end times are too close together
+        for(String metric : request.getMetrics()) {
+            averages.add(calculateAverage(request.getID(), request.getStartTime(), request.getEndTime(), metric));
+        }
+
+        return new ResponseEntity<List<Double>>(averages, HttpStatus.OK);
+    }
+
+    /**
+     * @param id      The database to get data from
+     * @param start     The (capture's) start time
+     * @param end       The end time. For current time use (new Date(System.currentTimeMillis()))
+     * @param metric   Metric name to request ex. "CPUUtilization"
+     * @return          The average through the timespan as a Double
+     */
+    public Double calculateAverage(String id, Date start, Date end, String metric) {
+        CloudWatchManager cloudManager = new CloudWatchManager();
+        GetMetricStatisticsResult result = cloudManager.getMetricStatistics(id, start, end, metric);
+        List<Datapoint> dataPoints = result.getDatapoints();
+        Double averageSum = 0.0;
+
         if(dataPoints.isEmpty()){
-            return new ResponseEntity<Double>(averageSum, HttpStatus.OK);
+            return averageSum;
         }
 
         for(Datapoint point: dataPoints) {
             averageSum += point.getAverage();
         }
-
-        return new ResponseEntity<Double>(averageSum / dataPoints.size(), HttpStatus.OK);
+        return averageSum/dataPoints.size();
     }
 }

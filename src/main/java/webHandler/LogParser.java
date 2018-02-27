@@ -160,6 +160,8 @@ public class LogParser {
     public String parseLogData(String logData, List<String> statementsToRemove, List<String> usersToRemove,
                                Date startTime, Date endTime)
     {
+
+
         List<String> parsedLogStatements = new ArrayList<>();
 
         List<String> logStatements = new ArrayList<>(Arrays.asList(logData.split("\n")));
@@ -194,6 +196,7 @@ public class LogParser {
             }
 
 
+
             /*
             // Filters the user-selected users and statements
             if (filterUserSelectedUsers(statement, usersToRemove) ||
@@ -209,11 +212,15 @@ public class LogParser {
         }
 
 
-        return "[" + String.join(",\n", parsedLogStatements) + "]";
+        return String.join(",\n", parsedLogStatements);
     }
 
     private boolean isWithinTimeInterval(Statement statement, Date startTime, Date endTime)
     {
+
+        if (statement.date.equals("------") && statement.time.equals("--:--:--")) {
+            return true;
+        }
 
         String pattern = "yymmdd hh:mm:ss";
         try
@@ -227,12 +234,12 @@ public class LogParser {
                 {
                     return (statementDate.compareTo(endTime) < 0);
                 }
+                return true;
             }
         }
         catch (ParseException pe)
         {
             pe.printStackTrace();
-            return true;
         }
 
         return false;

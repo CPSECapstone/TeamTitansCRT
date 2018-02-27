@@ -8,18 +8,17 @@ public class MetricRequest {
     private String id;
     private Date startTime;
     private Date endTime;
-    private String metric;
-
+    private String[] metrics;
    
     public MetricRequest() {
 
     }
 
-    public MetricRequest(String id, Date startTime, Date endTime, String metric) {
+    public MetricRequest(String id, Date startTime, Date endTime, String... metrics) {
         this.id = id;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.metric = metric;
+        this.metrics = metrics;
     }
     
     public String getID() {
@@ -46,11 +45,11 @@ public class MetricRequest {
         this.endTime = endTime;
     }
     
-    public String getMetric() {
-        return metric;
+    public String[] getMetrics() {
+        return metrics;
     }
     
-    public void setMetric(String metric) {
-        this.metric = metric;
+    public void setMetrics(String... metrics) {
+        this.metrics = metrics;
     }
 }
