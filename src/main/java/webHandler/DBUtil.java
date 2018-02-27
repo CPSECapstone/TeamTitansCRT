@@ -8,7 +8,7 @@ public class DBUtil {
     Connection conn;
     private String databaseFile;
     /**
-     * Connect to a sample database
+     * Connect to a database
      *
      * @param databaseFile the database file name
      */
@@ -24,11 +24,9 @@ public class DBUtil {
         try {
 
             conn = DriverManager.getConnection("jdbc:sqlite:" + databaseFile);
-            //conn = DriverManager.getConnection("jdbc:sqlite:/Users/devin/chinook.db");
             Statement stmt = conn.createStatement();
 
             // Enable WAL-mode transactions for concurrent writing.
-            // See: https://www.sqlite.org/wal.html
             stmt.execute("PRAGMA synchronous = NORMAL;");
             stmt.execute("PRAGMA journal_mode = WAL;");
 
