@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
@@ -15,6 +16,11 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
+import com.amazonaws.services.cloudwatch.AmazonCloudWatchClientBuilder;
+import com.amazonaws.services.cloudwatch.model.*;
+
+import java.util.*;
 /**
  * Servlet to handle all analysis calls.
  */
@@ -80,5 +86,43 @@ public class AnalysisServlet {
         // Set the content type and attachment header.
         response.addHeader("Content-disposition", "attachment;filename=" + id + "-Performance.log");
         response.setContentType("txt/plain");
+    }
+    
+    /**
+     * @param request MetricRequest contains String id, Date start, Date end, String... metrics
+     * @return A list of averages
+     */
+    @RequestMapping(value = "/cloudwatch/average", method = RequestMethod.POST)
+    public ResponseEntity<List<Double>> calculateAverages(@RequestBody MetricRequest request){
+        List<Double> averages = new ArrayList<Double>();
+
+        for(String metric : request.getMetrics()) {
+            averages.add(calculateAverage(request.getID(), request.getStartTime(), request.getEndTime(), metric));
+        }
+
+        return new ResponseEntity<List<Double>>(averages, HttpStatus.OK);
+    }
+
+    /**
+     * @param id      The database to get data from
+     * @param start     The (capture's) start time
+     * @param end       The end time. For current time use (new Date(System.currentTimeMillis()))
+     * @param metric   Metric name to request ex. "CPUUtilization"
+     * @return          The average through the timespan as a Double
+     */
+    public Double calculateAverage(String id, Date start, Date end, String metric) {
+        CloudWatchManager cloudManager = new CloudWatchManager();
+        GetMetricStatisticsResult result = cloudManager.getMetricStatistics(id, start, end, metric);
+        List<Datapoint> dataPoints = result.getDatapoints();
+        Double averageSum = 0.0;
+
+        if(dataPoints.isEmpty()){
+            return averageSum;
+        }
+
+        for(Datapoint point: dataPoints) {
+            averageSum += point.getAverage();
+        }
+        return averageSum/dataPoints.size();
     }
 }

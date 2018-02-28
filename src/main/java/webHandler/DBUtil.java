@@ -25,6 +25,7 @@ public class DBUtil {
         try {
 
             conn = DriverManager.getConnection("jdbc:sqlite:" + databaseFile);
+            //conn = DriverManager.getConnection("jdbc:sqlite:/Users/devin/chinook.db");
             Statement stmt = conn.createStatement();
 
             // Enable WAL-mode transactions for concurrent writing.
@@ -189,3 +190,5 @@ public class DBUtil {
     {
         connectSqlite("/Users/devin/test.db");
     }*/
+}
+

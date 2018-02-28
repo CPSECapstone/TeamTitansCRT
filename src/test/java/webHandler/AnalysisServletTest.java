@@ -3,10 +3,15 @@ package webHandler;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.util.Date;
+import java.util.List;
+
+import static junit.framework.TestCase.assertNotNull;
 import static org.mockito.Mockito.*;
 
 public class AnalysisServletTest {
@@ -52,5 +57,20 @@ public class AnalysisServletTest {
         verify(mockResponse, never()).addHeader("Content-disposition", "attachment;filename=test-Performance.log");
         verify(mockResponse, never()).setContentType("txt/plain");
         verify(mockResponse, never()).flushBuffer();
+    }
+
+
+    @Test
+    public void calculateAverages() throws Exception {
+        File f = new File(".privateKeys");
+        org.junit.Assume.assumeTrue(f.exists() && f.isFile());
+        Date start = new Date(System.currentTimeMillis() - 1000 * 60 * 60);
+        Date end = new Date(System.currentTimeMillis());
+        AnalysisServlet servlet = new AnalysisServlet();
+
+        MetricRequest request = new MetricRequest("testdb", start, end, "CPUUtilization", "WriteThroughput");
+        ResponseEntity<List<Double>> averages = servlet.calculateAverages(request);
+
+        assertNotNull(averages);
     }
 }

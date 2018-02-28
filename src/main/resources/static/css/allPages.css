@@ -117,40 +117,39 @@
 
 }
 .sidebar-nav li:first-child a {
-    color: var(--secondary);
-    background-color: #1a1a1a;
-}
+    background-color: #1c1c1c;
+} 
 .sidebar-nav li:nth-child(2):before {
-    color: var(--secondary);
-    background-color: #ec1b5a;   
+    color: #FFFFFF;
+    background-color: var(--secondary);
 }
 .sidebar-nav li:nth-child(3):before {
-    color: var(--secondary);
-    background-color: #79aefe;   
+    color: #FFFFFF;
+    background-color: var(--secondary);   
 }
 .sidebar-nav li:nth-child(4):before {
-    color: var(--secondary);
-    background-color: #314190;   
+    color: #FFFFFF;
+    background-color: var(--secondary);    
 }
 .sidebar-nav li:nth-child(5):before {
-    color: var(--secondary);
-    background-color: #279636;   
+    color: #FFFFFF;
+    background-color: var(--secondary);   
 }
 .sidebar-nav li:nth-child(6):before {
-    color: var(--secondary);
-    background-color: #7d5d81;   
+    color: #FFFFFF;
+    background-color: var(--secondary);   
 }
 .sidebar-nav li:nth-child(7):before {
-    color: var(--secondary);
-    background-color: #ead24c;   
+    color: #FFFFFF;
+    background-color: var(--secondary);    
 }
 .sidebar-nav li:nth-child(8):before {
-    color: var(--secondary);
-    background-color: #2d2366;   
+    color: #FFFFFF;
+    background-color: var(--secondary);    
 }
 .sidebar-nav li:nth-child(9):before {
-    color: var(--secondary);
-    background-color: #35acdf;   
+    color: #FFFFFF;
+    background-color: var(--secondary);    
 }
 .sidebar-nav li:hover:before,
 .sidebar-nav li.open:hover:before {
@@ -164,7 +163,7 @@
 
 .sidebar-nav li a {
     display: block;
-    color: var(--secondary);
+    color: #FFFFFF;
     text-decoration: none;
     padding: 10px 10px 20px 30px;  
     font-size: 1.5rem;
@@ -178,7 +177,7 @@
 .sidebar-nav li.open a:focus{
     color: #fff;
     text-decoration: none;
-    background-color: transparent;
+    background-color: var(--secondary);
 }
 
 .sidebar-nav > .sidebar-brand {
@@ -332,7 +331,6 @@
     bottom: 0;
     background-color: rgba(250,250,250,.8);
     z-index: 1;
->>>>>>> Stashed changes
 }
 
 /* =============== Sidebar ================================*/
@@ -414,6 +412,11 @@ body {
     border-bottom: 1px solid #000;
     border-right-style: none;
     box-shadow: 1px 0 0 #000;
+}
+
+.card {
+    padding: 10px;
+    margin-bottom: 5px;
 }
 
 /* ======================= Navbar ================= */

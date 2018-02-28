@@ -16,7 +16,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import java.io.*;
-
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 public class RDSManager extends AmazonWebServiceResult{
@@ -72,4 +73,9 @@ public class RDSManager extends AmazonWebServiceResult{
         return null;
     }
 
+    public List<String> getRDSInstances() {
+        return rdsClient.describeDBInstances().getDBInstances().stream()
+                .map(x->x.getDBInstanceIdentifier())
+                .collect(Collectors.toList());
+    }
 }
