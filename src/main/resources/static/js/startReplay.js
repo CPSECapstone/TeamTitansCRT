@@ -4,47 +4,26 @@ $(document).ready(function() {
     setDateFields();
     $('#example-getting-started').multiselect();
 
-    $("#btnCaptureStart").on("click", function() {
-        var startTime = null;
-        if ($("#txtStartTime").val()) {
-            startTime = new Date(String($("#txtStartTime").val()));
-        }
-
-        var endTime = null;
-        if ($("#txtEndTime").val()) {
-            endTime = new Date(String($("#txtEndTime").val()));
-        }
-
+    $("#btnReplayStart").on("click", function() {
         // Only start capture if rds and s3 selected
-        if ($('#rdsSelector').val() != '' && $('#s3Selector').val() != '') {
+        if ($('#rdsSelector').val() != '' && $('#captureSelector').val() != '') {
             var body = {
                 id: $("#txtID").val(),
                 rds: $("#rdsSelector").val(),
-                s3: $("#s3Selector").val(),
-                startTime: startTime,
-                endTime: endTime,
-                fileSizeLimit: $("#txtMaxSize").val(),
-                transactionLimit: $("#txtMaxTrans").val(),
                 status: ""
             };
+            body = {
+                body,
+                "Fast Mode"
+            }
 
-            startCapture("/capture/start", body);
+            startReplay("/replay/start", body);
         }
     });
 
 });
 
-function setDateFields() {
-    var now = new Date();
-    // TODO i think this is bc Pacific Time Zone
-    now.setHours(now.getHours() - 8);
-    $("#txtStartTime").val(String(now.toISOString().replace("Z", "")));
-    // TODO: fix bug about 24 + 2
-    now.setHours(now.getHours() + 2);
-    $("#txtEndTime").val(String(now.toISOString().replace("Z", "")));
-}
-
-function startCapture(url, body) {
+function startReplay(url, body) {
     $.ajax({
         url: domain + url,
         type: "POST",
@@ -54,7 +33,7 @@ function startCapture(url, body) {
         data: JSON.stringify(body),
         success: function() {
             $("#lblStatus").html("<p>Started Successful.</p>" +
-                                 "<a href=\"manageCaptures\" id=\"btnManageCaptures\" class=\"btn btn-default\">Manage Captures</a>" +
+                                 "<a href=\"manageReplays\" id=\"btnManageReplays\" class=\"btn btn-default\">Manage Replays</a>" +
                                  "<a href=\"dashboard\" id=\"btnDashboard\" class=\"btn btn-default\">Go to Dashboard</a>");
         },
         error: function(err) {
@@ -82,17 +61,18 @@ $(function() {
     });
 });
 
-// Populate s3 dropdown
+// Populate capture select dropdown
 $(function() {
     $.ajax({
-        url: "/resource/s3",
+        // TODO: idk what's supposed be here
+        url: "",
         type: "GET",
         success: function(data) {
-            var selector = '<option value="">Select S3 Endpoint</option>';
+            var selector = '<option value="">Select a Capture</option>';
             for (var i = 0; i < data.length; i++) {
                 selector += "<option value='" + data[i] +"'>" + data[i] + "</option>"; // Add selector option
             }
-            $('#s3Selector').html(selector);
+            $('#captureSelector').html(selector);
         },
         error: function(err) {
             console.log(err);
