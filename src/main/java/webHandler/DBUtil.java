@@ -2,6 +2,7 @@ package webHandler;
 
 import javax.xml.transform.Result;
 import java.sql.*;
+import java.util.ArrayList;
 
 public class DBUtil {
 
@@ -110,8 +111,8 @@ public class DBUtil {
         pstmt.setLong(1, Long.parseLong(capture.getId()));
         pstmt.setString(2, capture.getRds());
         pstmt.setString(3, capture.getS3());
-        //pstmt.setString(4, capture.getStartTime()); //TODO: SQLite date
-        //pstmt.setString(5, capture.getEndTime()); //TODO: SQLite date
+        pstmt.setTimestamp(4, new Timestamp(capture.getStartTime().getTime()));
+        pstmt.setTimestamp(5, new Timestamp(capture.getEndTime().getTime()));
         pstmt.setString(6, capture.getStatus());
         pstmt.setInt(7, capture.getFileSizeLimit());
         pstmt.setInt(8, capture.getDbFileSize());
@@ -120,7 +121,7 @@ public class DBUtil {
 
         pstmt.close();
 
-        if (capture.getId() == null)
+        if (capture.getId() == null) //TODO: last row id implementation
         {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT last_insert_rowid");
@@ -129,6 +130,35 @@ public class DBUtil {
             capture.setId(Long.toString(id));
             pstmt.close();
         }
+    }
+
+    public ArrayList<Capture> loadAllCaptures() throws SQLException
+    {
+        ResultSet rs;
+        ArrayList<Capture> captures = new ArrayList<>();
+
+        String sql = "SELECT * FROM captures";
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        pstmt.execute();
+        rs = pstmt.getResultSet();
+
+        while (rs.next())
+        {
+            Capture capture = new Capture();
+            capture.setId(rs.getString(1));
+            capture.setRds(rs.getString(2));
+            capture.setS3(rs.getString(3));
+            capture.setStartTime(rs.getDate(4));
+            capture.setEndTime(rs.getDate(5));
+            capture.setStatus(rs.getString(6));
+            capture.setFileSizeLimit(rs.getInt(7));
+            capture.setDbFileSize(rs.getInt(8));
+            capture.setNumDBTransactions(rs.getInt(9));
+
+            captures.add(capture);
+        }
+
+        return captures;
     }
 
     public Capture loadCapture (String id) throws SQLException
@@ -159,4 +189,3 @@ public class DBUtil {
     {
         connectSqlite("/Users/devin/test.db");
     }*/
-}
