@@ -104,8 +104,10 @@ public class DBUtil {
 
     public void saveCapture (Capture capture) throws SQLException
     {
-        //inserts an id, if an id is there then it's replaced
-        String sql = "INSERT OR REPLACE INTO captures(id) VALUES (?)";
+        //inserts values, if value is there then it's replaced
+        String sql = "INSERT OR REPLACE INTO captures(id, rds, s3, startTime, endTime, status, " +
+                "fileSizeLimit, transactionLimit, dbFileSize, numDbTransactions) " +
+                "VALUES (?,?,?,?,?,?,?,?,?)";
 
         PreparedStatement pstmt = conn.prepareStatement(sql);
         pstmt.setLong(1, Long.parseLong(capture.getId()));
@@ -145,7 +147,7 @@ public class DBUtil {
         while (rs.next())
         {
             Capture capture = new Capture();
-            capture.setId(rs.getString(1));
+            capture.setId(Long.toString(rs.getLong(1)));
             capture.setRds(rs.getString(2));
             capture.setS3(rs.getString(3));
             capture.setStartTime(rs.getDate(4));
@@ -181,6 +183,14 @@ public class DBUtil {
         }
 
         capture.setId(Long.toString(rs.getLong(1)));
+        capture.setRds(rs.getString(2));
+        capture.setS3(rs.getString(3));
+        capture.setStartTime(rs.getDate(4));
+        capture.setEndTime(rs.getDate(5));
+        capture.setStatus(rs.getString(6));
+        capture.setFileSizeLimit(rs.getInt(7));
+        capture.setDbFileSize(rs.getInt(8));
+        capture.setNumDBTransactions(rs.getInt(9));
 
         return capture;
     }
