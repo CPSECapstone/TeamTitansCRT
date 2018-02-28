@@ -10,21 +10,21 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
+public class CaptureFilterTest {
 
-public class LogParserTest {
-
-    private LogParser logParser;
+    private LogFilter logFilter;
     private String logData;
     private Date startTime;
     private Date endTime;
+    private int transactionLimit;
 
 
     @Before
     public void before()
     {
-        logParser = new LogParser();
         logData = "/rdsdbbin/mysql/bin/mysqld, Version: 5.6.37-log (MySQL Community Server (GPL)). started with:\n" +
                 "Tcp port: 3306 Unix socket: /tmp/mysql.sock\n" +
                 "Time Id Command Argument\n" +
@@ -93,24 +93,28 @@ public class LogParserTest {
 
         startTime = new Date(5);
         endTime = new Date();
+        transactionLimit = 0;
     }
 
     @Test
-    public void noDataLogParse()
+    public void noDataLogFilter()
     {
         List<String> statementsToRemove = new ArrayList<>();
         List<String> usersToRemove = new ArrayList<>();
 
         usersToRemove.add("admin");
+        logFilter = new CaptureFilter(startTime, endTime, transactionLimit, statementsToRemove, usersToRemove);
+        List<Statement> filteredStatementList = logFilter.filterLogData(logData);
 
-        String noData = logParser.parseLogData(logData, statementsToRemove, usersToRemove, startTime, endTime);
+        List<String> noDataList = filteredStatementList.stream().
+                map(stmt -> stmt.toString()).collect(Collectors.toList());
 
-        System.out.println(noData);
+        String noData = String.join(",\n", noDataList);
         assertEquals("", noData);
     }
 
     @Test
-    public void userDataLogParse()
+    public void userDataLogFilter()
     {
         List<String> statementsToRemove = new ArrayList<>();
         List<String> usersToRemove = new ArrayList<>();
@@ -137,7 +141,14 @@ public class LogParserTest {
                 "\"query\": \"CREATE TABLE Users (value INT PRIMARY KEY)\"\n" +
                 "}";
 
-        String userData = logParser.parseLogData(logData, statementsToRemove, usersToRemove, startTime, endTime);
+        logFilter = new CaptureFilter(startTime, endTime, transactionLimit, statementsToRemove, usersToRemove);
+
+        List<Statement> filteredStatementList = logFilter.filterLogData(logData);
+
+        List<String> userDataList = filteredStatementList.stream().
+                map(stmt -> stmt.toString()).collect(Collectors.toList());
+
+        String userData = String.join(",\n", userDataList);
         assertEquals(expected, userData);
     }
 
@@ -145,7 +156,7 @@ public class LogParserTest {
     @After
     public void after()
     {
-        logParser = null;
-        assertNull(logParser);
+        logFilter = null;
+        assertNull(logFilter);
     }
 }

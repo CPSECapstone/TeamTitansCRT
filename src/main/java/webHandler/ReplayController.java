@@ -3,14 +3,12 @@ package webHandler;
 import java.io.InputStream;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import sun.java2d.pipe.AAShapePipe;
 
 public class ReplayController {
 
@@ -25,7 +23,7 @@ public class ReplayController {
         String filename = capture.getId() + WorkloadTag;
         statementsStream = s3Manager.getFile(capture.getS3(), filename);
 
-        statements = LogParser.getStatements(statementsStream);
+        statements = LogFilter.getStatements(statementsStream);
 
         switch (replayType) {
             case "Time Sensitive":

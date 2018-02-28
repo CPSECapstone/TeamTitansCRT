@@ -5,6 +5,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class LogController {
 
@@ -15,7 +16,7 @@ public class LogController {
 
     private RDSManager rdsManager;
     private S3Manager s3Manager;
-    private LogParser logParser;
+    private LogFilter logFilter;
 
     private boolean isRunning = false;
     private boolean isFirstWrite = true;
@@ -27,7 +28,8 @@ public class LogController {
 
         rdsManager = new RDSManager();
         s3Manager = new S3Manager();
-        logParser = new LogParser();
+        logFilter = new CaptureFilter(capture.getStartTime(), capture.getEndTime(), capture.getTransactionLimit(),
+                capture.getFilterStatements(), capture.getFilterUsers());
 
         fileName = capture.getId() + "-Workload.log";
     }
@@ -71,17 +73,20 @@ public class LogController {
             return;
         }
 
-        String parsedLogData = logParser.parseLogData(logData, capture.getFilterStatements(),
-                capture.getFilterUsers(), capture.getStartTime(), capture.getEndTime());
+        List<Statement> filteredStatementList = logFilter.filterLogData(logData);
+
+        List<String> filteredLogDataList = filteredStatementList.stream().
+                map(stmt -> stmt.toString()).collect(Collectors.toList());
+        String filteredLogData = String.join(",\n", filteredLogDataList);
         InputStream stream = null;
         try {
-            stream = new ByteArrayInputStream(parsedLogData.getBytes(StandardCharsets.UTF_8.name()));
+            stream = new ByteArrayInputStream(filteredLogData.getBytes(StandardCharsets.UTF_8.name()));
         } catch (UnsupportedEncodingException enc) {
             enc.printStackTrace();
         }
 
         if (stream != null) {
-            writeToFile(parsedLogData);
+            writeToFile(filteredLogData);
         }
     }
 
