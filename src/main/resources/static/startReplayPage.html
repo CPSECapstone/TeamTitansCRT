@@ -149,9 +149,6 @@
                         </select>
                     </label>
                 </div>
-                <div class="input">
-                    <label class="input-label">Capture ID:<input id="txtID" class="form-control" type="text" value="MyCapture"></label>
-                </div>
                 <div class="checkbox">
                     <label class="input-label-checkbox">
                         <!-- TODO: bootstrap bug, need work arround
@@ -161,8 +158,12 @@
                 </div>
                 <div id="chkCollapse" class="input collapse">
                     
-                    <label class="input-label">Max Capture Size (mB):<input id="txtMaxSize" class="form-control" type="text" value="1024"></label>
-                    <label class="input-label">Max Number of Transactions:<input id="txtMaxTrans" class="form-control" type="text" value="100"></label>
+                    <label class="input-label">Replay Type:
+                        <select class="form-control" id="replayTypeSelector">
+                            <option value="">Time Sensitive</option>
+                            <option value="">Fast Mode</option>
+                        </select>
+                    </label>
                     <label class="input-label">Database Commands to Ignore:</label>
                     <div class="example">
                         <select id="example-getting-started" class="btn btn-small" multiple="multiple">

@@ -12,6 +12,8 @@ $(document).ready(function() {
                 rds: $("#rdsSelector").val(),
                 status: ""
             };
+
+            // options: Time Sensitive or Fast Mode
             body = {
                 body,
                 "Fast Mode"
@@ -62,6 +64,8 @@ $(function() {
 });
 
 // Populate capture select dropdown
+// need endpoint that supplies names of all running captures
+// maybe parse the repsonse from updateStatus??
 $(function() {
     $.ajax({
         // TODO: idk what's supposed be here

@@ -21,10 +21,10 @@ public class CrtController {
     public String manageCaptures() { return "manageCapturePage.html"; }
 
     @GetMapping("replay")
-    public String capture() { return "startReplayPage.html"; }
+    public String replay() { return "startReplayPage.html"; }
     
     @GetMapping("manageReplays")
-    public String manageCaptures() { return "manageReplaysPage.html"; }
+    public String manageReplays() { return "manageReplaysPage.html"; }
 
     @GetMapping("analyze")
     public String analyze() { return "analyzePage.html"; }
