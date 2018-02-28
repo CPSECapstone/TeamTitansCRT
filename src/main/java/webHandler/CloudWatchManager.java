@@ -14,6 +14,13 @@ import com.amazonaws.services.cloudwatch.model.*;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.JSONObject;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.http.ResponseEntity;
+
 import java.util.Date;
 import java.util.stream.Collectors;
 
@@ -185,26 +192,5 @@ public class CloudWatchManager {
         return obj;
     }
 
-    /* @param dbID      The database to get data from
-     * @param start     The (capture's) start time
-     * @param end       The end time. For current time use (new Date(System.currentTimeMillis()))
-     * @param metrics   One or more metric names to request ex. "CPUUtilization"
-     * @return          The average through the timespan as a double
-     */
-    public double calculateAverage(String dbID, Date start, Date end, String metric){
-        GetMetricStatisticsResult result = getMetricStatistics(dbID, start, end, metric);
-        List<Datapoint> dataPoints = result.getDatapoints();
-        double averageSum = 0;
-
-        //It's usually empty when the start and end times are too close together
-        if(dataPoints.isEmpty()){
-            return 0;
-        }
-
-        for(Datapoint point: dataPoints) {
-            averageSum += point.getAverage();
-        }
-
-        return averageSum / dataPoints.size();
-    }
+    
 }

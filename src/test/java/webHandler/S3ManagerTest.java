@@ -5,6 +5,7 @@ import org.junit.After;
 import org.junit.Test;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
 import static org.junit.Assert.*;
@@ -38,6 +39,12 @@ public class S3ManagerTest {
         InputStream inputStream = s3Manager.getFile("teamtitans-test-mycrt", "test-Workload.log");
         inputStream.close();
         assertNotNull(inputStream);
+    }
+
+    @Test
+    public void downloadFileLocally() throws IOException {
+        s3Manager.downloadFileLocally("teamtitans-test-mycrt", "test-Workload.log", "test-file.log");
+        assertTrue(true);
     }
 
     @After
