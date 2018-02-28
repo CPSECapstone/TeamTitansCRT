@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 public class CaptureController {
@@ -127,15 +128,19 @@ public class CaptureController {
             RDSManager rdsManager = new RDSManager();
             String logData = rdsManager.downloadLog(targetCapture.getRds(),  "general/mysql-general.log");
 
-            LogParser parser = new LogParser();
+            LogFilter logFilter = new CaptureFilter(capture.getStartTime(), capture.getEndTime(), capture.getTransactionLimit(),
+                    capture.getFilterStatements(), capture.getFilterUsers());
 
-            String parsedLogData = parser.parseLogData(logData, capture.getFilterStatements(),
-                    capture.getFilterUsers(), capture.getStartTime(), capture.getEndTime());
+            List<Statement> filteredStatementList = logFilter.filterLogData(logData);
+
+            List<String> filteredLogDataList = filteredStatementList.stream().
+                    map(stmt -> stmt.toString()).collect(Collectors.toList());
+            String filteredLogData = String.join(",\n", filteredLogDataList);
 
             InputStream stream = null;
             try
             {
-                stream = new ByteArrayInputStream(parsedLogData.getBytes(StandardCharsets.UTF_8.name()));
+                stream = new ByteArrayInputStream(filteredLogData.getBytes(StandardCharsets.UTF_8.name()));
             } catch (UnsupportedEncodingException enc) {
                 enc.printStackTrace();
             }
@@ -168,9 +173,14 @@ public class CaptureController {
         try {
             RDSManager rdsManager = new RDSManager();
             String logData = rdsManager.downloadLog(capture.getRds(), "general/mysql-general.log");
-            String parsedLogData = new LogParser().parseLogData(logData, capture.getFilterStatements(),
-                    capture.getFilterUsers(), capture.getStartTime(), capture.getEndTime());
-            return parsedLogData.getBytes(StandardCharsets.UTF_8.name()).length;
+            LogFilter logFilter = new CaptureFilter(capture.getStartTime(), capture.getEndTime(), capture.getTransactionLimit(),
+                    capture.getFilterStatements(), capture.getFilterUsers());
+            List<Statement> filteredStatementList = logFilter.filterLogData(logData);
+
+            List<String> filteredLogDataList = filteredStatementList.stream().
+                    map(stmt -> stmt.toString()).collect(Collectors.toList());
+            String filteredLogData = String.join(",\n", filteredLogDataList);
+            return filteredLogData.getBytes(StandardCharsets.UTF_8.name()).length;
         } catch(UnsupportedEncodingException e) {
             e.printStackTrace();
             return -1;
@@ -181,9 +191,14 @@ public class CaptureController {
         try {
             RDSManager rdsManager = new RDSManager();
             String logData = rdsManager.downloadLog(capture.getRds(), "general/mysql-general.log");
-            String parsedLogData = new LogParser().parseLogData(logData, capture.getFilterStatements(),
-                    capture.getFilterUsers(), capture.getStartTime(), capture.getEndTime());
-            return parsedLogData.length()  - parsedLogData.replace("\n", "").length();
+            LogFilter logFilter = new CaptureFilter(capture.getStartTime(), capture.getEndTime(), capture.getTransactionLimit(),
+                    capture.getFilterStatements(), capture.getFilterUsers());
+            List<Statement> filteredStatementList = logFilter.filterLogData(logData);
+
+            List<String> filteredLogDataList = filteredStatementList.stream().
+                    map(stmt -> stmt.toString()).collect(Collectors.toList());
+            String filteredLogData = String.join(",\n", filteredLogDataList);
+            return filteredLogData.length()  - filteredLogData.replace("\n", "").length();
         } catch(Exception e) {
             e.printStackTrace();
             return -1;
