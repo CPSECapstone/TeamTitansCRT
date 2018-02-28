@@ -11,11 +11,12 @@ import static org.junit.Assert.*;
 
 }*/
 
-public class DatabaseTest {
+public class MySQLManagerTest {
     @Test
-    public void getConnection() throws Exception
+    public void query() throws Exception
     {
-        Database db = new Database("testdb.cgtpml3lsh3i.us-west-1.rds.amazonaws.com:3306", "testdb", "admin", "TeamTitans!");
-        assertNotNull(db.getConnection());
+        DatabaseManager db = new MySQLManager("testdb.cgtpml3lsh3i.us-west-1.rds.amazonaws.com:3306",
+                "testdb", "admin", "TeamTitans!");
+        assertTrue(db.query("SELECT 1"));
     }
 }
