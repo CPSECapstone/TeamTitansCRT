@@ -26,7 +26,6 @@ public class DBUtil {
         {
 
             conn = DriverManager.getConnection("jdbc:sqlite:" + databaseFile);
-            //conn = DriverManager.getConnection("jdbc:sqlite:/Users/devin/chinook.db");
             Statement stmt = conn.createStatement();
 
             // Enable WAL-mode transactions for concurrent writing.
@@ -44,7 +43,8 @@ public class DBUtil {
 
             stmt.close();
 
-            createNewTable(databaseFile);
+            createNewCaptureTable(databaseFile);
+            createNewReplayTable(databaseFile);
         }
 
         catch(SQLException e)
@@ -92,13 +92,14 @@ public class DBUtil {
         }
     }
 
-    public static void createNewTable(String databaseFile) throws SQLException
+    public static void createNewCaptureTable(String databaseFile)
     {
 
         try
         {
             String sql = "CREATE TABLE IF NOT EXISTS captures(\n"
-                    + " id INTEGER PRIMARY KEY,\n"
+                    + " id INTEGER PRIMARY KEY AUTOINCREMENT,\n"
+                    + " name TEXT,\n"
                     + " rds TEXT,\n"
                     + " s3 TEXT,\n"
                     + " startTime TEXT,\n"
@@ -124,18 +125,49 @@ public class DBUtil {
         }
     }
 
+    public static void createNewReplayTable(String databaseFile)
+    {
 
-    public boolean saveCapture (Capture capture) throws SQLException
+        try
+        {
+            String sql = "CREATE TABLE IF NOT EXISTS replays(\n"
+                    + " id INTEGER PRIMARY KEY AUTOINCREMENT,\n"
+                    + " capture_id INTEGER,\n"
+                    + " name TEXT,\n"
+                    + " rds TEXT,\n"
+                    + " s3 TEXT,\n"
+                    + " startTime TEXT,\n"
+                    + " endTime TEXT,\n"
+                    + " status TEXT,\n"
+                    + " FOREIGN KEY(capture_id) REFERENCES captures(id)\n"
+                    + ");";
+
+            Connection conn = DriverManager.getConnection(databaseFile);
+            Statement stmt = conn.createStatement();
+
+            stmt.execute(sql);
+            conn.close();
+            stmt.close();
+        }
+
+        catch (SQLException e)
+        {
+            System.err.println(e.getMessage());
+        }
+    }
+
+
+    public boolean saveCapture (Capture capture)
     {
         //inserts values, if value is there then it's replaced
-        String sql = "INSERT OR REPLACE INTO captures(id, rds, s3, startTime, endTime, status, " +
+        String sql = "INSERT OR REPLACE INTO captures(name, rds, s3, startTime, endTime, status, " +
                 "fileSizeLimit, transactionLimit, dbFileSize, numDbTransactions) " +
                 "VALUES (?,?,?,?,?,?,?,?,?)";
 
         try
         {
             PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setLong(1, Long.parseLong(capture.getId()));
+            pstmt.setString(1, capture.getName());
             pstmt.setString(2, capture.getRds());
             pstmt.setString(3, capture.getS3());
             pstmt.setTimestamp(4, new Timestamp(capture.getStartTime().getTime()));
@@ -149,13 +181,13 @@ public class DBUtil {
             pstmt.close();
 
 
-            if (capture.getId() == null) //TODO: last row id implementation
+            if (capture.getName() == null) //TODO: last row id implementation
             {
                 Statement stmt = conn.createStatement();
                 ResultSet rs = stmt.executeQuery("SELECT last_insert_rowid");
                 rs.next();
-                long id = rs.getLong(1);
-                capture.setId(Long.toString(id));
+                String name = rs.getString(1);
+                capture.setName(name);
                 pstmt.close();
             }
 
@@ -168,7 +200,47 @@ public class DBUtil {
         }
     }
 
-    public ArrayList<Capture> loadAllCaptures() throws SQLException
+    public Capture loadCapture (String name)
+    {
+        try
+        {
+            Capture capture = new Capture();
+            ResultSet rs;
+
+            String sql = "SELECT * FROM captures WHERE name = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, name);
+            pstmt.execute();
+
+            rs = pstmt.getResultSet();
+
+            if (!rs.next()) {
+                rs.close();
+                pstmt.close();
+                return null;
+            }
+
+            capture.setName(rs.getString(1));
+            capture.setRds(rs.getString(2));
+            capture.setS3(rs.getString(3));
+            capture.setStartTime(rs.getDate(4));
+            capture.setEndTime(rs.getDate(5));
+            capture.setStatus(rs.getString(6));
+            capture.setFileSizeLimit(rs.getInt(7));
+            capture.setDbFileSize(rs.getInt(8));
+            capture.setNumDBTransactions(rs.getInt(9));
+
+            return capture;
+        }
+
+        catch (SQLException e)
+        {
+            System.err.println(e.getMessage());
+            return null;
+        }
+    }
+
+    public ArrayList<Capture> loadAllCaptures()
     {
         try
         {
@@ -182,7 +254,7 @@ public class DBUtil {
 
             while (rs.next()) {
                 Capture capture = new Capture();
-                capture.setId(Long.toString(rs.getLong(1)));
+                capture.setName(rs.getString(1));
                 capture.setRds(rs.getString(2));
                 capture.setS3(rs.getString(3));
                 capture.setStartTime(rs.getDate(4));
@@ -205,16 +277,55 @@ public class DBUtil {
         }
     }
 
-    public Capture loadCapture (String id) throws SQLException
+    public boolean saveReplay(Replay replay)
+    {
+        //inserts values, if value is there then it's replaced
+        String sql = "INSERT OR REPLACE INTO replays(name, rds, s3, startTime, endTime, status) " +
+                "VALUES (?,?,?,?,?,?)";
+
+        try
+        {
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, replay.getName());
+            pstmt.setString(2, replay.getRds());
+            pstmt.setString(3, replay.getS3());
+            pstmt.setTimestamp(4, new Timestamp(replay.getStartTime().getTime()));
+            pstmt.setTimestamp(5, new Timestamp(replay.getEndTime().getTime()));
+            pstmt.setString(6, replay.getStatus());
+            pstmt.executeUpdate();
+
+            pstmt.close();
+
+
+            if (replay.getName() == null) //TODO: last row id implementation
+            {
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery("SELECT last_insert_rowid");
+                rs.next();
+                String name = rs.getString(1);
+                replay.setName(name);
+                pstmt.close();
+            }
+
+            return true;
+        }
+
+        catch (SQLException e){
+            System.err.println(e.getMessage());
+            return false;
+        }
+    }
+
+    public Replay loadReplay(String id)
     {
         try
         {
-            Capture capture = new Capture();
+            Replay replay = new Replay();
             ResultSet rs;
 
-            String sql = "SELECT * FROM captures WHERE id = ?";
+            String sql = "SELECT * FROM replays WHERE id = ?";
             PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setLong(1, Long.parseLong(id));
+            pstmt.setString(1, name);
             pstmt.execute();
 
             rs = pstmt.getResultSet();
@@ -225,17 +336,48 @@ public class DBUtil {
                 return null;
             }
 
-            capture.setId(Long.toString(rs.getLong(1)));
-            capture.setRds(rs.getString(2));
-            capture.setS3(rs.getString(3));
-            capture.setStartTime(rs.getDate(4));
-            capture.setEndTime(rs.getDate(5));
-            capture.setStatus(rs.getString(6));
-            capture.setFileSizeLimit(rs.getInt(7));
-            capture.setDbFileSize(rs.getInt(8));
-            capture.setNumDBTransactions(rs.getInt(9));
+            replay.setName(rs.getString(1));
+            replay.setRds(rs.getString(2));
+            replay.setS3(rs.getString(3));
+            replay.setStartTime(rs.getDate(4));
+            replay.setEndTime(rs.getDate(5));
+            replay.setStatus(rs.getString(6));
 
-            return capture;
+            return replay;
+        }
+
+        catch (SQLException e)
+        {
+            System.err.println(e.getMessage());
+            return null;
+        }
+    }
+
+    public ArrayList<Replay> loadAllReplays()
+    {
+        try
+        {
+            ResultSet rs;
+            ArrayList<Replay> replays = new ArrayList<>();
+
+            String sql = "SELECT * FROM replays";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.execute();
+            rs = pstmt.getResultSet();
+
+            while (rs.next()) {
+                Replay replay = new Replay();
+                replay.setName(rs.getString(1));
+                replay.setRds(rs.getString(2));
+                replay.setS3(rs.getString(3));
+                replay.setStartTime(rs.getDate(4));
+                replay.setEndTime(rs.getDate(5));
+                replay.setStatus(rs.getString(6));
+
+                replays.add(replay);
+            }
+
+            return replays;
         }
 
         catch (SQLException e)
