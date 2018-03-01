@@ -98,10 +98,7 @@ public class CaptureFilter extends LogFilter {
     protected String adhereToTimeLayout(String time)
     {
         String timeFormat = "%02d:%02d:%02d";
-        String[] timeArray = time.split(":");
-        String formattedTime = String.format(timeFormat, Integer.parseInt(timeArray[0]), Integer.parseInt(timeArray[1]),
-                Integer.parseInt(timeArray[2]));
-        return formattedTime;
+        return String.format(timeFormat, Arrays.stream(time.split(":")).map(Integer::parseInt).toArray());
     }
 
     private Statement createStatement(String stmt)

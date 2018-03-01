@@ -61,7 +61,10 @@ public class ReplayController {
 
             try {
                 Thread.sleep(toWait);
-                manager.query(statement.getQuery());
+                if (!statement.getCommand().equals("Connect"))
+                {
+                    manager.query(statement.getQuery());
+                }
             }
             catch (InterruptedException ex) {
                 ex.printStackTrace();
@@ -80,7 +83,11 @@ public class ReplayController {
                 replay.getDBPassword());
 
         for (Statement statement : statements) {
-            manager.query(statement.getQuery());
+            if (!statement.getCommand().equals("Connect"))
+            {
+                manager.query(statement.getQuery());
+            }
+
         }
 
         manager.closeConnection();
