@@ -1,4 +1,6 @@
 import org.junit.Test;
+import webHandler.DatabaseManager;
+import webHandler.MySQLManager;
 
 import static org.junit.Assert.*;
 
