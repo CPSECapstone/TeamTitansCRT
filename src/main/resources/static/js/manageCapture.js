@@ -1,5 +1,3 @@
-var domain = "http://localhost:8080";
-
 $(function() {
     $('#example-getting-started').multiselect();
     updateStatus();
@@ -71,7 +69,7 @@ function updateCapture(id) {
     };
     
     $.ajax({
-        url: domain + "/capture/update",
+        url: "/capture/update",
         type: "POST",
         headers: {
             "Content-Type": "application/json",

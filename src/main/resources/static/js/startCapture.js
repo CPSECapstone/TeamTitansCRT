@@ -1,5 +1,3 @@
-var domain = "http://localhost:8080";
-
 $(document).ready(function() {
     setDateFields();
     $('#example-getting-started').multiselect();
@@ -48,7 +46,7 @@ function setDateFields() {
 
 function startCapture(url, body) {
     $.ajax({
-        url: domain + url,
+        url: url,
         type: "POST",
         headers: {
             "Content-Type": "application/json",
