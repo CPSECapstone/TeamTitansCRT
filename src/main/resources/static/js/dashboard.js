@@ -30,10 +30,12 @@ function updateStatus() {
                     button =
                         "<a href=\"#\" id=\"stopButton" + id +
                         "\" class=\"btn btn-default btn-stop\">Stop Capture</a>";
+                    sortTable($('#statusTable'),'asc');
                     addToTable(icon, id, status, startTime, endTime, button);
                 }                
                 else if (status == "Queued") {
                     icon = "<img src=\"../img/queued.png\" alt=\"queued\">";
+                    sortTable($('#statusTable'),'asc');
                     addToTable(icon, id, status, startTime, endTime, button);
                 }
             }
@@ -153,3 +155,17 @@ $(function() {
         stopCapture(this.id.replace("stopButton", ""));
     });
 });
+
+
+function sortTable(table, order) {
+    var asc   = order === 'asc',
+        tbody = table.find('tbody');
+
+    tbody.find('tr').sort(function(a, b) {
+        if (asc) {
+            return $('td:nth-child(3)', a).text().localeCompare($('td:nth-child(3)', b).text());
+        } else {
+            return $('td:nth-child(3)', b).text().localeCompare($('td:nth-child(3)', a).text());
+        }
+    }).appendTo(tbody);
+}

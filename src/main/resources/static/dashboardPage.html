@@ -24,6 +24,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.css">
     <link href="css/mdb.css" rel="stylesheet">
     <link href="css/allPages.css" rel="stylesheet">
+    
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.css">
+    
 </head>
 
 <body>
@@ -141,8 +144,7 @@
                 <h4 class="text-center"><b>Status of Queued and Running Captured and Replayed Workloads</b></h4>
 
                 <a href="#" id="btnStatus" class="btn btn-default">Update Status</a>
-                <a href="manageCaptures" id="btnManageCaptures" class="btn btn-default">Manage Captures</a>          
-                <p><button onclick="sortTable()">Sort</button></p>
+                <a href="manageCaptures" id="btnManageCaptures" class="btn btn-default">Manage Captures</a>
 
                 <div class="container-fluid">
                     <h3 id="lblStatus"></h3>
@@ -159,45 +161,7 @@
                         </thead>
                         <tbody>
                         </tbody>
-                    </table>
-                    
-                    <script>
-                    function sortTable() {
-                      var table, rows, switching, i, x, y, shouldSwitch;
-                      table = document.getElementById("myTable");
-                      switching = true;
-                      /*Make a loop that will continue until
-                      no switching has been done:*/
-                      while (switching) {
-                        //start by saying: no switching is done:
-                        switching = false;
-                        rows = table.getElementsByTagName("TR");
-                        /*Loop through all table rows (except the
-                        first, which contains table headers):*/
-                        for (i = 1; i < (rows.length - 1); i++) {
-                          //start by saying there should be no switching:
-                          shouldSwitch = false;
-                          /*Get the two elements you want to compare,
-                          one from current row and one from the next:*/
-                          x = rows[i].getElementsByTagName("TD")[0];
-                          y = rows[i + 1].getElementsByTagName("TD")[0];
-                          //check if the two rows should switch place:
-                          if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-                            //if so, mark as a switch and break the loop:
-                            shouldSwitch= true;
-                            break;
-                          }
-                        }
-                        if (shouldSwitch) {
-                          /*If a switch has been marked, make the switch
-                          and mark that a switch has been done:*/
-                          rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-                          switching = true;
-                        }
-                      }
-                    }
-                    </script>
-                    
+                    </table>            
                 </div>
             </div>
         </div>
@@ -217,7 +181,10 @@
     crossorigin="anonymous"></script>
 
     <!-- Plugin JavaScript -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>   
+  
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
+
 
     <!-- Google Maps API Key - Use your own API key to enable the map feature. More information on the Google Maps API can be found at https://developers.google.com/maps/ -->
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDo0B-2fjSnS4eo0T0KGtWKccCau77NkI"></script>
