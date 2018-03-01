@@ -210,4 +210,5 @@ public class CaptureController {
             entry.getValue().updateStatus();
         }
     }
+
 }
