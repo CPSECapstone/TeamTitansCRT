@@ -25,6 +25,8 @@ $(document).ready(function() {
                 endTime: endTime,
                 fileSizeLimit: $("#txtMaxSize").val(),
                 transactionLimit: $("#txtMaxTrans").val(),
+                filterStatements: $("#txtFilterStatements").val().split(',').map(x => x.trim()),
+                filterUsers: $("#txtFilterUsers").val().split(',').map(x => x.trim()),
                 status: ""
             };
 
