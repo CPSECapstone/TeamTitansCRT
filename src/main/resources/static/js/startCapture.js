@@ -17,7 +17,7 @@ $(document).ready(function() {
 
         // Only start capture if rds and s3 selected
         if ($('#rdsSelector').val() != '' && $('#s3Selector').val() != '') {
-            var body = {
+            var capture = {
                 id: $("#txtID").val(),
                 rds: $("#rdsSelector").val(),
                 s3: $("#s3Selector").val(),
@@ -30,7 +30,7 @@ $(document).ready(function() {
                 status: ""
             };
 
-            startCapture("/capture/start", body);
+            startCapture(capture);
         }
     });
 
@@ -46,14 +46,17 @@ function setDateFields() {
     $("#txtEndTime").val(String(now.toISOString().replace("Z", "")));
 }
 
-function startCapture(url, body) {
+/**           
+ * @param  {Capture} The Capture object to be started
+ */
+function startCapture(capture) {
     $.ajax({
-        url: domain + url,
+        url: "/capture/start",
         type: "POST",
         headers: {
             "Content-Type": "application/json",
         },
-        data: JSON.stringify(body),
+        data: JSON.stringify(capture),
         success: function() {
             $("#lblStatus").html("<p>Started Successful.</p>" +
                                  "<a href=\"manageCaptures\" id=\"btnManageCaptures\" class=\"btn btn-default\">Manage Captures</a>" +
