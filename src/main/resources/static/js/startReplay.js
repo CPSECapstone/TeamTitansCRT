@@ -1,38 +1,38 @@
-var domain = "http://localhost:8080";
-
-$(document).ready(function() {
-    setDateFields();
-    $('#example-getting-started').multiselect();
-
+$(function() {
     $("#btnReplayStart").on("click", function() {
-        // Only start capture if rds and s3 selected
+        // Only start capture if rds and capture selected
         if ($('#rdsSelector').val() != '' && $('#captureSelector').val() != '') {
-            var body = {
+            var replay = {
                 id: $("#txtID").val(),
                 rds: $("#rdsSelector").val(),
-                status: ""
+                s3: $("#s3Selector").val(),
+                filterStatements: $("#txtFilterStatements").val().split(',').map(x => x.trim()),
+                filterUsers: $("#txtFilterUsers").val().split(',').map(x => x.trim())
             };
 
             // options: Time Sensitive or Fast Mode
-            body = {
-                body,
-                "Fast Mode"
+            replay = {
+                replay,
+                replayType: $("#replayTypeSelector").val()
             }
 
-            startReplay("/replay/start", body);
+            startReplay(replay);
         }
     });
 
 });
 
-function startReplay(url, body) {
+/**
+ * @param  {Replay} The replay object to pass to back end
+ */
+function startReplay(replay) {
     $.ajax({
-        url: domain + url,
+        url: "/replay/start",
         type: "POST",
         headers: {
             "Content-Type": "application/json",
         },
-        data: JSON.stringify(body),
+        data: JSON.stringify(replay),
         success: function() {
             $("#lblStatus").html("<p>Started Successful.</p>" +
                                  "<a href=\"manageReplays\" id=\"btnManageReplays\" class=\"btn btn-default\">Manage Replays</a>" +
@@ -77,6 +77,24 @@ $(function() {
                 selector += "<option value='" + data[i] +"'>" + data[i] + "</option>"; // Add selector option
             }
             $('#captureSelector').html(selector);
+        },
+        error: function(err) {
+            console.log(err);
+        }
+    });
+});
+
+// Populate s3 dropdown
+$(function() {
+    $.ajax({
+        url: "/resource/s3",
+        type: "GET",
+        success: function(data) {
+            var selector = '<option value="">Select S3 Endpoint</option>';
+            for (var i = 0; i < data.length; i++) {
+                selector += "<option value='" + data[i] +"'>" + data[i] + "</option>"; // Add selector option
+            }
+            $('#s3Selector').html(selector);
         },
         error: function(err) {
             console.log(err);

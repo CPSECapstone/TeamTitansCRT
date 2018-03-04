@@ -143,6 +143,13 @@
                     </label>
                 </div>
                 <div class="input">
+                    <label class="input-label">S3 Endpoint:
+                        <select class="form-control" id="s3Selector">
+                            <option value="">Select S3 Endpoint</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="input">
                     <label class="input-label">RDS Endpoint:
                         <select class="form-control" id="rdsSelector">
                             <option value="">Select RDS Endpoint</option>
@@ -160,20 +167,16 @@
                         
                         <label class="input-label">Replay Type:
                             <select class="form-control" id="replayTypeSelector">
-                                <option value="">Time Sensitive</option>
                                 <option value="">Fast Mode</option>
+                                <option value="">Time Sensitive</option>
                             </select>
                         </label>
-                        <label class="input-label">Database Commands to Ignore:</label>
-                        <div class="example">
-                            <select id="example-getting-started" class="btn btn-small" multiple="multiple">
-                                <option value="SELECT">SELECT</option>
-                                <option value="UPDATE">UPDATE</option>
-                                <option value="INSERT INTO">INSERT INTO</option>
-                                <option value="CREATE TABLE">CREATE TABLE</option>
-                                <option value="DELETE FROM">DELETE FROM</option>
-                            </select>
-                        </div>
+                        <label class="input-label">Database Commands to Ignore (comma delimited):
+                            <input id="txtFilterStatements" class="form-control" type="text" value="">
+                        </label>
+                        <label class="input-label">Database Users to Ignore (comma delimited):
+                            <input id="txtFilterUsers" class="form-control" type="text" value="">
+                        </label>
                     </div>
                 </div>
                 <a href="#" id="btnReplayStart" class="btn btn-default">Start Replay</a>
