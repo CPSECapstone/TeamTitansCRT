@@ -1,60 +1,41 @@
-$(document).ready(function() {
-    setDateFields();
-    $('#example-getting-started').multiselect();
-
-    $("#btnCaptureStart").on("click", function() {
-        var startTime = null;
-        if ($("#txtStartTime").val()) {
-            startTime = new Date(String($("#txtStartTime").val()));
-        }
-
-        var endTime = null;
-        if ($("#txtEndTime").val()) {
-            endTime = new Date(String($("#txtEndTime").val()));
-        }
-
-        // Only start capture if rds and s3 selected
-        if ($('#rdsSelector').val() != '' && $('#s3Selector').val() != '') {
-            var body = {
+$(function() {
+    $("#btnReplayStart").on("click", function() {
+        // Only start capture if rds and capture selected
+        if ($('#rdsSelector').val() != '' && $('#captureSelector').val() != '') {
+            var replay = {
                 id: $("#txtID").val(),
                 rds: $("#rdsSelector").val(),
                 s3: $("#s3Selector").val(),
-                startTime: startTime,
-                endTime: endTime,
-                fileSizeLimit: $("#txtMaxSize").val(),
-                transactionLimit: $("#txtMaxTrans").val(),
                 filterStatements: $("#txtFilterStatements").val().split(',').map(x => x.trim()),
-                filterUsers: $("#txtFilterUsers").val().split(',').map(x => x.trim()),
-                status: ""
+                filterUsers: $("#txtFilterUsers").val().split(',').map(x => x.trim())
             };
 
-            startCapture("/capture/start", body);
+            // options: Time Sensitive or Fast Mode
+            replay = {
+                replay,
+                replayType: $("#replayTypeSelector").val()
+            }
+
+            startReplay(replay);
         }
     });
 
 });
 
-function setDateFields() {
-    var now = new Date();
-    // TODO i think this is bc Pacific Time Zone
-    now.setHours(now.getHours() - 8);
-    $("#txtStartTime").val(String(now.toISOString().replace("Z", "")));
-    // TODO: fix bug about 24 + 2
-    now.setHours(now.getHours() + 2);
-    $("#txtEndTime").val(String(now.toISOString().replace("Z", "")));
-}
-
-function startCapture(url, body) {
+/**
+ * @param  {Replay} The replay object to pass to back end
+ */
+function startReplay(replay) {
     $.ajax({
-        url: url,
+        url: "/replay/start",
         type: "POST",
         headers: {
             "Content-Type": "application/json",
         },
-        data: JSON.stringify(body),
+        data: JSON.stringify(replay),
         success: function() {
             $("#lblStatus").html("<p>Started Successful.</p>" +
-                                 "<a href=\"manageCaptures\" id=\"btnManageCaptures\" class=\"btn btn-default\">Manage Captures</a>" +
+                                 "<a href=\"manageReplays\" id=\"btnManageReplays\" class=\"btn btn-default\">Manage Replays</a>" +
                                  "<a href=\"dashboard\" id=\"btnDashboard\" class=\"btn btn-default\">Go to Dashboard</a>");
         },
         error: function(err) {
@@ -75,6 +56,27 @@ $(function() {
                 selector += "<option value='" + data[i] +"'>" + data[i] + "</option>"; // Add selector option
             }
             $('#rdsSelector').html(selector);
+        },
+        error: function(err) {
+            console.log(err);
+        }
+    });
+});
+
+// Populate capture select dropdown
+// need endpoint that supplies names of all running captures
+// maybe parse the repsonse from updateStatus??
+$(function() {
+    $.ajax({
+        // TODO: idk what's supposed be here
+        url: "",
+        type: "GET",
+        success: function(data) {
+            var selector = '<option value="">Select a Capture</option>';
+            for (var i = 0; i < data.length; i++) {
+                selector += "<option value='" + data[i] +"'>" + data[i] + "</option>"; // Add selector option
+            }
+            $('#captureSelector').html(selector);
         },
         error: function(err) {
             console.log(err);

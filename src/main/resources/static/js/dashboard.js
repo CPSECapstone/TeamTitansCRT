@@ -1,5 +1,3 @@
-var domain = "http://localhost:8080";
-
 $(document).ready(function() {
     $("#btnStatus").on("click", function() {
         updateStatus();

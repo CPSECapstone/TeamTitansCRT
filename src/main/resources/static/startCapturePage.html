@@ -100,8 +100,8 @@
             <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Replay <span class="caret"></span></a>
                 <ul class="dropdown-menu" role="menu">
-                    <li><a href="#">Start Replay</a></li>
-                    <li><a href="#">Manage Replays</a></li>
+                    <li><a href="replay">Start Replay</a></li>
+                    <li><a href="manageReplays">Manage Replays</a></li>
                 </ul>
             </li>
             <li class="dropdown">
@@ -160,12 +160,25 @@
                     </label>
                 </div>
                 <div id="chkCollapse" class="input collapse">
-                    <label class="input-label">Start Time:<input id="txtStartTime" class="form-control" type="datetime-local" value=""></label>
-                    <label class="input-label">End Time:<input id="txtEndTime" class="form-control" type="datetime-local" value=""></label>
-                    <label class="input-label">Max Capture Size (mB):<input id="txtMaxSize" class="form-control" type="text" value="1024"></label>
-                    <label class="input-label">Max Number of Transactions:<input id="txtMaxTrans" class="form-control" type="text" value="100"></label>
-                    <label class="input-label">Database Commands to Ignore:</label>
-                    <div class="example">
+                    <label class="input-label">Start Time:
+                        <input id="txtStartTime" class="form-control" type="datetime-local" value="">
+                    </label>
+                    <label class="input-label">End Time:
+                        <input id="txtEndTime" class="form-control" type="datetime-local" value="">
+                    </label>
+                    <label class="input-label">Max Capture Size (mB):
+                        <input id="txtMaxSize" class="form-control" type="text" value="1024">
+                    </label>
+                    <label class="input-label">Max Number of Transactions:
+                        <input id="txtMaxTrans" class="form-control" type="text" value="100">
+                    </label>
+                    <label class="input-label">Database Commands to Ignore (comma delimited):
+                        <input id="txtFilterStatements" class="form-control" type="text" value="">
+                    </label>
+                    <label class="input-label">Database Users to Ignore (comma delimited):
+                        <input id="txtFilterUsers" class="form-control" type="text" value="">
+                    </label>
+                    <!-- <div class="example">
                         <select id="example-getting-started" class="btn btn-small" multiple="multiple">
                             <option value="SELECT">SELECT</option>
                             <option value="UPDATE">UPDATE</option>
@@ -173,7 +186,7 @@
                             <option value="CREATE TABLE">CREATE TABLE</option>
                             <option value="DELETE FROM">DELETE FROM</option>
                         </select>
-                    </div>
+                    </div> -->
                 </div>
             </div>
             <a href="#" id="btnCaptureStart" class="btn btn-default">Start Capture</a>
