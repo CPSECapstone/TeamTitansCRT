@@ -1,30 +1,37 @@
+package webHandler;
+
 import java.sql.SQLException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
+import java.util.function.Function;
 
-public class Database {
-    String dbms;
-    String dbURL;
-    String database;
-    String username;
-    String password;
+public abstract class DatabaseManager {
+    private String dbms;
+    private String dbURL;
+    private String database;
+    private String username;
+    private String password;
+    private String className;
 
-    public Database(String dbURL, String database, String username, String password)
+    private Connection conn = null;
+
+    public DatabaseManager(String dbms, String className, String dbURL, String database, String username,
+                            String password)
     {
-        this.dbms = "mysql";
+        this.dbms = dbms;
         this.dbURL = dbURL;
         this.database = database;
         this.username = username;
         this.password = password;
+        this.className = className;
     }
 
-    public Connection getConnection()
+    private Connection createConnection()
     {
-        Connection conn = null;
         try
         {
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName(this.className);
 
             conn = DriverManager.getConnection("jdbc:" + this.dbms + "://" +
                     this.dbURL + "/" + this.database, this.username, this.password);
@@ -39,6 +46,26 @@ public class Database {
             se.printStackTrace();
         }
         return conn;
+    }
+
+    private Connection getConnection()
+    {
+        return conn == null ? createConnection() : conn;
+    }
+
+    public void closeConnection()
+    {
+        try
+        {
+            if (conn != null)
+            {
+                conn.close();
+            }
+        }
+        catch (SQLException se)
+        {
+            se.printStackTrace();
+        }
     }
 
     public boolean query(String sqlQuery)

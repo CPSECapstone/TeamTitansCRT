@@ -75,6 +75,21 @@ public class CaptureFilter extends LogFilter {
         if (query.equals("SELECT 1") ||
                 query.equals("Statistics") ||
                 query.equals("COMMIT") ||
+                query.equals("SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ") ||
+                query.equals("SELECT current_user()") ||
+                query.equals("SELECT CONNECTION_ID()") ||
+                query.equals("SELECT DATABASE()") ||
+                query.equals("SELECT NAME FROM mysql.func") ||
+                query.equals("SHOW GLOBAL VARIABLES") ||
+                query.equals("show charset") ||
+                query.equals("show collation") ||
+                query.matches("(?i)SELECT .* FROM mysql..*") ||
+                query.matches("(?i)SHOW PROCEDURE STATUS WHERE.*") ||
+                query.matches("(?i)SHOW FUNCTION STATUS WHERE.*") ||
+                query.matches("(?i).*FROM information_schema.*") ||
+                query.matches("(?i)SHOW TRIGGERS FROM.*") ||
+                query.matches("(?i)SELECT tablespace_name.*") ||
+                query.matches("(?i)SELECT logfile_group_name.*") ||
                 query.matches("(?i).*rds_.*") ||
                 query.matches("(?i).*purge binary logs to.*") ||
                 query.matches("(?i).*@@session.*") ||
@@ -98,10 +113,7 @@ public class CaptureFilter extends LogFilter {
     protected String adhereToTimeLayout(String time)
     {
         String timeFormat = "%02d:%02d:%02d";
-        String[] timeArray = time.split(":");
-        String formattedTime = String.format(timeFormat, Integer.parseInt(timeArray[0]), Integer.parseInt(timeArray[1]),
-                Integer.parseInt(timeArray[2]));
-        return formattedTime;
+        return String.format(timeFormat, Arrays.stream(time.split(":")).map(Integer::parseInt).toArray());
     }
 
     private Statement createStatement(String stmt)
