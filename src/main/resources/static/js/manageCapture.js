@@ -1,5 +1,4 @@
 $(function() {
-    $('#example-getting-started').multiselect();
     updateStatus();
 });
 
