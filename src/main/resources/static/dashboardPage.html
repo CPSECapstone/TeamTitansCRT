@@ -30,103 +30,13 @@
 
 
     <!-- Navigation -->
-
-    <nav class="navbar navbar-custom z-depth-1" role="navigation">
-        <div id="nav-container">
-            <div class="navbar-header">
-                <a class="navbar-brand page-scroll" href="#page-top">
-                </a>
-            </div>
-            <ul class="nav navbar-nav navbar-right">
-                <li class="dropdown">
-                    <!-- <a href="#" role="button" class="dropdown-toggle hoverable" data-toggle="dropdown">
-                        <span class="glyphicon glyphicon-th-large" style="color: white"></span>
-                    </a> -->
-                    <a href="" class="dropdown-toggle" data-toggle="dropdown">
-                        <span class="glyphicon glyphicon-bell notification-icon"></span>
-                    </a>
-                    <ul role="menu" class="dropdown-menu notifications-panel">
-                        <li class="notification-item">
-                            <div class="notification-header">
-                                <p>Lorem ipsum dolor sit amet</p>
-                            </div>
-                            <div class="notification-body">
-                                <span class="glyphicon glyphicon-bell notification-icon"></span>
-                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do</p>
-                            </div>
-                        </li>
-                        <li class="notification-item">
-                            <div class="notification-header">
-                                <p>Lorem ipsum dolor sit amet</p>
-                            </div>
-                            <div class="notification-body">
-                                <span class="glyphicon glyphicon-bell notification-icon"></span>
-                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do</p>
-                            </div>
-                        </li>
-                        <li class="notification-item">
-                            <div class="notification-header">
-                                <p>Lorem ipsum dolor sit amet</p>
-                            </div>
-                            <div class="notification-body">
-                                <span class="glyphicon glyphicon-bell notification-icon"></span>
-                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do</p>
-                            </div>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
-        </div>
-    </nav>
+    <div class="nav-placeholder"></div>
 
     <div id="wrapper">
         <div class="overlay"></div>
-
+        
         <!-- Sidebar -->
-        <nav class="navbar navbar-inverse navbar-fixed-top" id="sidebar-wrapper" role="navigation">
-            <ul class="nav sidebar-nav">
-                <li class="sidebar-brand">
-                    <a href="#">
-                        MyCRT
-                    </a>
-                </li>
-                <li>
-                    <a href="dashboard" id="#btnDashboard">Dashboard</a>
-                </li>
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Capture <span class="caret"></span></a>
-                    <ul class="dropdown-menu" role="menu">
-                        <li><a href="capture">Start Capture</a></li>
-                        <li><a href="manageCaptures">Manage Captures</a></li>
-                    </ul>
-                </li>
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Replay <span class="caret"></span></a>
-                    <ul class="dropdown-menu" role="menu">
-                        <li><a href="replay">Start Replay</a></li>
-                        <li><a href="manageReplays">Manage Replays</a></li>
-                    </ul>
-                </li>
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Analyze Results <span class="caret"></span></a>
-                    <ul class="dropdown-menu" role="menu">
-                        <li><a href="analyze">Compare Results</a></li>
-                        <li><a href="#">History</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="settings">Settings</a>
-                </li>
-                <li>
-                    <a href="#">Help</a>
-                </li>
-                <li>
-                    <a href="#">Logout</a>
-                </li>
-            </ul>
-        </nav>
-        <!-- /#sidebar-wrapper -->
-
+        <div class="sidebar-placeholder"></div>
         
         <div id="page-content-wrapper">
             <button type="button" class="hamburger is-closed" data-toggle="offcanvas" id="mdb-override">
@@ -171,6 +81,7 @@
     <script src="js/libs/jquery.min.js" type="text/javascript"></script>
     <script src="js/libs/bootstrap.min.js" type="text/javascript"></script>
 
+    <script src="js/loadNav.js"></script>
     <script src="js/sideBar.js"></script>
     <script src="js/dashboard.js"></script>
 </body>
