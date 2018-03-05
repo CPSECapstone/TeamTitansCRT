@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class Capture {
+public class Capture implements Session {
     private final int NO_LIMIT = 0;
 
     private String id;
