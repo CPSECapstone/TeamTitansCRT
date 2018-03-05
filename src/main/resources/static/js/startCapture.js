@@ -1,6 +1,5 @@
-$(document).ready(function() {
-    setDateFields();
-    $('#example-getting-started').multiselect();
+$(function() {
+    populateFields();
 
     $("#btnCaptureStart").on("click", function() {
         var startTime = null;
@@ -34,17 +33,8 @@ $(document).ready(function() {
 
 });
 
-function setDateFields() {
-    var now = new Date();
-    // TODO i think this is bc Pacific Time Zone
-    now.setHours(now.getHours() - 8);
-    $("#txtStartTime").val(String(now.toISOString().replace("Z", "")));
-    // TODO: fix bug about 24 + 2
-    now.setHours(now.getHours() + 2);
-    $("#txtEndTime").val(String(now.toISOString().replace("Z", "")));
-}
-
 /**           
+ * Starts a capture using the given Capture object
  * @param  {Capture} The Capture object to be started
  */
 function startCapture(capture) {
@@ -62,13 +52,38 @@ function startCapture(capture) {
         },
         error: function(err) {
             $("#lblStatus").html("Startup failure.");
+
+            console.log("Error starting capture");
             console.log(err);
         }
     });
 }
 
-// Populate rds dropdown
-$(function() {
+function populateFields() {
+    var timeDifference = -8;
+    setDateFields(timeDifference);
+    populateRDSDropdown();
+    populateS3Dropdown();    
+}
+
+/**
+ * Automatically sets date fields to current time and +2hr
+ * @param {int} timeDifference the time difference as an int (ex: -8)
+ */
+function setDateFields(timeDifference) {
+    var now = new Date();
+    // TODO i think this is bc Pacific Time Zone
+    now.setHours(now.getHours() + timeDifference);
+    $("#txtStartTime").val(String(now.toISOString().replace("Z", "")));
+    // TODO: fix bug about 24 + 2
+    now.setHours(now.getHours() + 2);
+    $("#txtEndTime").val(String(now.toISOString().replace("Z", "")));
+}
+
+/**
+ * Populate rds dropdown
+ */
+function populateRDSDropdown() {
     $.ajax({
         url: "/resource/rds",
         type: "GET",
@@ -80,13 +95,16 @@ $(function() {
             $('#rdsSelector').html(selector);
         },
         error: function(err) {
+            console.log("Error populating rds dropdown")
             console.log(err);
         }
     });
-});
+}
 
-// Populate s3 dropdown
-$(function() {
+/**
+ * Populate s3 dropdown
+ */
+function populateS3Dropdown() {
     $.ajax({
         url: "/resource/s3",
         type: "GET",
@@ -98,7 +116,8 @@ $(function() {
             $('#s3Selector').html(selector);
         },
         error: function(err) {
+            console.log("Error populating s3 dropdown")
             console.log(err);
         }
     });
-});
+}
