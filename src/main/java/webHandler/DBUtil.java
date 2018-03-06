@@ -98,8 +98,8 @@ public class DBUtil {
         try
         {
             String sql = "CREATE TABLE IF NOT EXISTS captures(\n"
-                    + " id INTEGER PRIMARY KEY AUTOINCREMENT,\n"
-                    + " name TEXT,\n"
+                    + " dbId INTEGER PRIMARY KEY AUTOINCREMENT,\n"
+                    + " id TEXT,\n"
                     + " rds TEXT,\n"
                     + " s3 TEXT,\n"
                     + " startTime TEXT,\n"
@@ -131,9 +131,9 @@ public class DBUtil {
         try
         {
             String sql = "CREATE TABLE IF NOT EXISTS replays(\n"
-                    + " id INTEGER PRIMARY KEY AUTOINCREMENT,\n"
-                    + " capture_id INTEGER,\n"
-                    + " name TEXT,\n"
+                    + " dbId INTEGER PRIMARY KEY AUTOINCREMENT,\n"
+                    + " capture_id TEXT,\n"
+                    + " id TEXT,\n"
                     + " rds TEXT,\n"
                     + " s3 TEXT,\n"
                     + " startTime TEXT,\n"
@@ -160,14 +160,14 @@ public class DBUtil {
     public boolean saveCapture (Capture capture)
     {
         //inserts values, if value is there then it's replaced
-        String sql = "INSERT OR REPLACE INTO captures(name, rds, s3, startTime, endTime, status, " +
+        String sql = "INSERT OR REPLACE INTO captures(id, rds, s3, startTime, endTime, status, " +
                 "fileSizeLimit, transactionLimit, dbFileSize, numDbTransactions) " +
                 "VALUES (?,?,?,?,?,?,?,?,?)";
 
         try
         {
             PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, capture.getName());
+            pstmt.setString(1, capture.getId());
             pstmt.setString(2, capture.getRds());
             pstmt.setString(3, capture.getS3());
             pstmt.setTimestamp(4, new Timestamp(capture.getStartTime().getTime()));
@@ -181,13 +181,13 @@ public class DBUtil {
             pstmt.close();
 
 
-            if (capture.getName() == null) //TODO: last row id implementation
+            if (capture.getId() == null) //TODO: last row id implementation
             {
                 Statement stmt = conn.createStatement();
                 ResultSet rs = stmt.executeQuery("SELECT last_insert_rowid");
                 rs.next();
-                String name = rs.getString(1);
-                capture.setName(name);
+                String id = rs.getString(1);
+                capture.setId(id);
                 pstmt.close();
             }
 
@@ -200,16 +200,16 @@ public class DBUtil {
         }
     }
 
-    public Capture loadCapture (String name)
+    public Capture loadCapture (String id)
     {
         try
         {
             Capture capture = new Capture();
             ResultSet rs;
 
-            String sql = "SELECT * FROM captures WHERE name = ?";
+            String sql = "SELECT * FROM captures WHERE id = ?";
             PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, name);
+            pstmt.setString(1, id);
             pstmt.execute();
 
             rs = pstmt.getResultSet();
@@ -220,7 +220,7 @@ public class DBUtil {
                 return null;
             }
 
-            capture.setName(rs.getString(1));
+            capture.setId(rs.getString(1));
             capture.setRds(rs.getString(2));
             capture.setS3(rs.getString(3));
             capture.setStartTime(rs.getDate(4));
@@ -254,7 +254,7 @@ public class DBUtil {
 
             while (rs.next()) {
                 Capture capture = new Capture();
-                capture.setName(rs.getString(1));
+                capture.setId(rs.getString(1));
                 capture.setRds(rs.getString(2));
                 capture.setS3(rs.getString(3));
                 capture.setStartTime(rs.getDate(4));
@@ -280,13 +280,13 @@ public class DBUtil {
     public boolean saveReplay(Replay replay)
     {
         //inserts values, if value is there then it's replaced
-        String sql = "INSERT OR REPLACE INTO replays(name, rds, s3, startTime, endTime, status) " +
+        String sql = "INSERT OR REPLACE INTO replays(id, rds, s3, startTime, endTime, status) " +
                 "VALUES (?,?,?,?,?,?)";
 
         try
         {
             PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, replay.getName());
+            pstmt.setString(1, replay.getId());
             pstmt.setString(2, replay.getRds());
             pstmt.setString(3, replay.getS3());
             pstmt.setTimestamp(4, new Timestamp(replay.getStartTime().getTime()));
@@ -297,13 +297,13 @@ public class DBUtil {
             pstmt.close();
 
 
-            if (replay.getName() == null) //TODO: last row id implementation
+            if (replay.getId() == null) //TODO: last row id implementation
             {
                 Statement stmt = conn.createStatement();
                 ResultSet rs = stmt.executeQuery("SELECT last_insert_rowid");
                 rs.next();
-                String name = rs.getString(1);
-                replay.setName(name);
+                String id = rs.getString(1);
+                replay.setId(id);
                 pstmt.close();
             }
 
@@ -325,7 +325,7 @@ public class DBUtil {
 
             String sql = "SELECT * FROM replays WHERE id = ?";
             PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, name);
+            pstmt.setString(1, id);
             pstmt.execute();
 
             rs = pstmt.getResultSet();
@@ -336,7 +336,7 @@ public class DBUtil {
                 return null;
             }
 
-            replay.setName(rs.getString(1));
+            replay.setId(rs.getString(1));
             replay.setRds(rs.getString(2));
             replay.setS3(rs.getString(3));
             replay.setStartTime(rs.getDate(4));
@@ -367,7 +367,7 @@ public class DBUtil {
 
             while (rs.next()) {
                 Replay replay = new Replay();
-                replay.setName(rs.getString(1));
+                replay.setId(rs.getString(1));
                 replay.setRds(rs.getString(2));
                 replay.setS3(rs.getString(3));
                 replay.setStartTime(rs.getDate(4));
