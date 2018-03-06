@@ -1,8 +1,11 @@
 $(function() {
-    updateStatus();
+    updateCaptureList();
 });
 
-function updateStatus() {
+/**
+ * Top level function for creating list of capture cards
+ */
+function updateCaptureList() {
     $.ajax({
         url: "/capture/status",
         type: "GET",
@@ -10,7 +13,7 @@ function updateStatus() {
             $('#accordion').html("");
             for (var i = 0; i < data.length; i++) {
                 var capture = data[i];
-                addToTable(capture)
+                addToCaptureList(capture);
             }
         },
         error: function(err) {
@@ -19,7 +22,25 @@ function updateStatus() {
     });
 }
 
-function addToTable(capture) {
+/**
+ * Takes a capture, adds it to the list of capture cards, and creates the save binding
+ * @param {Capture}
+ */
+function addToCaptureList(capture) {
+    $("#accordion").append(createCaptureCard(capture));
+
+    var id = capture["id"];
+    $("#" + id + " .save").on("click", function() {
+        updateCapture(id);
+    });
+}
+
+/**
+ * Function that uses a template to create a card
+ * @param  {Capture}
+ * @return {string}
+ */
+function createCaptureCard(capture) {
     var id = capture["id"];
     var status = capture["status"];
     var startTime = new Date(capture["startTime"]);
@@ -30,29 +51,11 @@ function addToTable(capture) {
     endTime = endTime.toISOString().replace("Z", "");
     var fileSizeLimit = capture["fileSizeLimit"];
     var transactionLimit = capture["transactionLimit"];
-    console.log("ID: " + id + "\nStatus: " + status);
-        
-    $("#accordion").append(createCaptureCard(id, startTime, endTime, fileSizeLimit, transactionLimit));
-    $("#" + id + " .save").on("click", function() {
-        updateCapture(id);
-    });
-}
-
-/**
- * Function that uses a template to create a card
- * @param  {string}
- * @param  {datetime}
- * @param  {datetime}
- * @param  {int}
- * @param  {int}
- * @return {string}
- */
-function createCaptureCard(id, startTime, endTime, fileSizeLimit, transactionLimit) {
     return `
         <div class="card">
             <div class="card-header" role="tab">
                 <h5 class="mb-0">
-                    <a href="#${id}" data-toggle="collapse" data-parent="#accordion">${id}</a>
+                    <a href="#${id}" data-toggle="collapse" data-parent="#accordion">${id} - <small>${status}</small></a>
                 </h5>
             </div>
             <div class="collapse" id="${id}" role="tabpanel">
@@ -75,6 +78,10 @@ function createCaptureCard(id, startTime, endTime, fileSizeLimit, transactionLim
         </div> `
 }
 
+/**
+ * Takes a capture id and send the update request to the backend
+ * @param  {string}
+ */
 function updateCapture(id) {
     var body = {
         id: id,
@@ -93,7 +100,7 @@ function updateCapture(id) {
         data: JSON.stringify(body),
         success: function() {
             console.log(id + " success")
-            updateStatus();
+            updateCaptureList();
         },
         error: function(err) {
             $("#lblStatus").html("Startup failure.");
