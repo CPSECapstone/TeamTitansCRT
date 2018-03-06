@@ -7,7 +7,7 @@ import java.util.List;
 public class Capture {
     private final int NO_LIMIT = 0;
 
-    private String name;
+    private String id;
     private String rds;
     private String s3;
     private Date startTime;
@@ -29,8 +29,8 @@ public class Capture {
 
     }
 
-    public Capture(String name, String rds, String s3) {
-        this.name = name;
+    public Capture(String id, String rds, String s3) {
+        this.id = id;
         this.rds = rds;
         this.s3 = s3;
         this.startTime = new Date();
@@ -38,8 +38,8 @@ public class Capture {
         this.status = "Running";
     }
 
-    public Capture(String name, String rds, String s3, int fileSizeLimit, int transactionLimit) {
-        this.name = name;
+    public Capture(String id, String rds, String s3, int fileSizeLimit, int transactionLimit) {
+        this.id = id;
         this.rds = rds;
         this.s3 = s3;
         this.startTime = new Date();
@@ -49,8 +49,8 @@ public class Capture {
         this.status = "Running";
     }
 
-    public Capture(String name, String rds, String s3, Date startTime, Date endTime) {
-        this.name = name;
+    public Capture(String id, String rds, String s3, Date startTime, Date endTime) {
+        this.id = id;
         this.rds = rds;
         this.s3 = s3;
         this.startTime = startTime;
@@ -58,8 +58,8 @@ public class Capture {
         this.status = "Running";
     }
 
-    public Capture(String name, String rds, String s3, Date startTime, Date endTime, int fileSizeLimit, int transactionLimit) {
-        this.name = name;
+    public Capture(String id, String rds, String s3, Date startTime, Date endTime, int fileSizeLimit, int transactionLimit) {
+        this.id = id;
         this.rds = rds;
         this.s3 = s3;
         this.startTime = startTime;
@@ -95,9 +95,9 @@ public class Capture {
         this.logController.end();
     }
 
-    public String getName() { return name; }
+    public String getId() { return id; }
 
-    public void setName(String name) { this.name = name; }
+    public void setId(String name) { this.id = name; }
 
     public String getRds() {
         return rds;
