@@ -30,32 +30,49 @@ function addToTable(capture) {
     endTime = endTime.toISOString().replace("Z", "");
     var fileSizeLimit = capture["fileSizeLimit"];
     var transactionLimit = capture["transactionLimit"];
-    console.log("ID: " + id +
-        "\nStatus: " + status);
+    console.log("ID: " + id + "\nStatus: " + status);
         
-    $("#accordion").append(
-        "<div class=\"card\">"+
-        "<div class=\"card-header\" role=\"tab\" id=\"\">"+
-        "    <h5 class=\"mb-0\">"+
-        "        <a data-toggle=\"collapse\" data-parent=\"#accordion\" href=\"#" + id + "\" aria-expanded=\"true\" aria-controls=\"collapseOne\">"+
-        "            " + id + ""+
-        "        <\/a>"+
-        "    <\/h5>"+
-        "<\/div>"+
-        "<div id=\"" + id + "\" class=\"collapse\" role=\"tabpanel\" aria-labelledby=\"headingOne\">"+
-        "    <div class=\"card-block\">"+
-        "        <label class=\"input-label\">Start Time:<input class=\"txtStartTime form-control\" type=\"datetime-local\" value=\"" + startTime + "\"><\/label>"+
-        "        <label class=\"input-label\">End Time:<input class=\"txtEndTime form-control\" type=\"datetime-local\" value=\"" + endTime + "\"><\/label>"+
-        "        <label class=\"input-label\">Max Capture Size (mB):<input class=\"txtMaxSize form-control\" type=\"text\" value=\"" + fileSizeLimit + "\"><\/label>"+
-        "        <label class=\"input-label\">Max Number of Transactions:<input class=\"txtMaxTrans form-control\" type=\"text\" value=\"" + transactionLimit + "\"><\/label>"+
-        "        <a href=\"#\" class=\"btn btn-sm btn-default save\">Save<\/a>"+
-        "    <\/div>"+
-        "<\/div>"+
-        "<\/div>"
-    );
+    $("#accordion").append(createCaptureCard(id, startTime, endTime, fileSizeLimit, transactionLimit));
     $("#" + id + " .save").on("click", function() {
         updateCapture(id);
     });
+}
+
+/**
+ * Function that uses a template to create a card
+ * @param  {string}
+ * @param  {datetime}
+ * @param  {datetime}
+ * @param  {int}
+ * @param  {int}
+ * @return {string}
+ */
+function createCaptureCard(id, startTime, endTime, fileSizeLimit, transactionLimit) {
+    return `
+        <div class="card">
+            <div class="card-header" role="tab">
+                <h5 class="mb-0">
+                    <a href="#${id}" data-toggle="collapse" data-parent="#accordion">${id}</a>
+                </h5>
+            </div>
+            <div class="collapse" id="${id}" role="tabpanel">
+                <div class="card-block">
+                    <label for="" class="input-label">Start Time:
+                        <input type="datetime-local" class="txtStartTime form-control" value="${startTime}"/>
+                    </label>
+                    <label for="" class="input-label">End Time:
+                        <input type="datetime-local" class="txtEndTime form-control" value="${endTime}"/>
+                    </label>
+                    <label for="" class="input-label">Max Capture Size (mB):
+                        <input type="text" class="txtMaxSize form-control" value="${fileSizeLimit}"/>
+                    </label>
+                    <label for="" class="input-label">Max Number of Transactions:
+                        <input type="text" class="txtMaxTrans form-control" value="${transactionLimit}"/>
+                    </label>
+                    <a href="javascript:void(0)" class="btn btn-sm btn-default save">Save</a>
+                </div>
+            </div>
+        </div> `
 }
 
 function updateCapture(id) {
