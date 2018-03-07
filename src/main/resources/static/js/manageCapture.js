@@ -10,7 +10,8 @@ function updateCaptureList() {
         url: "/capture/status",
         type: "GET",
         success: function(data) {
-            $('#accordion').html("");
+            // clears contents of the captureList
+            $('#captureList').empty();
             for (var i = 0; i < data.length; i++) {
                 var capture = data[i];
                 addToCaptureList(capture);
@@ -27,7 +28,7 @@ function updateCaptureList() {
  * @param {Capture}
  */
 function addToCaptureList(capture) {
-    $("#accordion").append(createCaptureCard(capture));
+    $("#captureList").append(createCaptureCard(capture));
 
     var id = capture["id"];
     $("#" + id + " .save").on("click", function() {
@@ -43,19 +44,22 @@ function addToCaptureList(capture) {
 function createCaptureCard(capture) {
     var id = capture["id"];
     var status = capture["status"];
+    
+    // to be fixed with user set timezone
     var startTime = new Date(capture["startTime"]);
     startTime.setHours(startTime.getHours() - 8);
     startTime = startTime.toISOString().replace("Z", "");
     var endTime = new Date(capture["endTime"]);
     endTime.setHours(endTime.getHours() - 8);
     endTime = endTime.toISOString().replace("Z", "");
+
     var fileSizeLimit = capture["fileSizeLimit"];
     var transactionLimit = capture["transactionLimit"];
     return `
         <div class="card">
             <div class="card-header" role="tab">
                 <h5 class="mb-0">
-                    <a href="#${id}" data-toggle="collapse" data-parent="#accordion">${id} - <small>${status}</small></a>
+                    <a href="#${id}" data-toggle="collapse" data-parent="#captureList">${id} - <small>${status}</small></a>
                 </h5>
             </div>
             <div class="collapse" id="${id}" role="tabpanel">
