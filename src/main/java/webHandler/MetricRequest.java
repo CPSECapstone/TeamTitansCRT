@@ -5,7 +5,7 @@ import java.util.List;
 
 public class MetricRequest {
 
-    private String id;
+    private String rds;
     private Date startTime;
     private Date endTime;
     private String[] metrics;
@@ -14,19 +14,19 @@ public class MetricRequest {
 
     }
 
-    public MetricRequest(String id, Date startTime, Date endTime, String... metrics) {
-        this.id = id;
+    public MetricRequest(String rds, Date startTime, Date endTime, String... metrics) {
+        this.rds = rds;
         this.startTime = startTime;
         this.endTime = endTime;
         this.metrics = metrics;
     }
     
-    public String getID() {
-        return id;
+    public String getRDS() {
+        return rds;
     }
     
-    public void setID (String id) {
-        this.id = id;
+    public void setRDS (String rds) {
+        this.rds = rds;
     }
 
     public Date getStartTime() {

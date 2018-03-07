@@ -16,6 +16,7 @@ function updateStatus() {
             for (var i = 0; i < data.length; i++) {
                 var capture = data[i];
                 var id = capture["id"];
+                var rds = capture["rds"];
                 var status = capture["status"];
                 var startTime = capture["startTime"];
                 var endTime = capture["endTime"];
@@ -40,7 +41,7 @@ function updateStatus() {
                     icon = "<img src=\"../img/failed.png\" alt=\"failed\">";
                 }
                 
-                addToTable(icon, id, status, startTime, endTime, button);
+                addToTable(icon, id, rds, status, startTime, endTime, button);
             }
         },
         error: function(err) {
@@ -49,9 +50,9 @@ function updateStatus() {
     });
 }
 
-function addToTable(icon, id, status, startTime, endTime, button) {
+function addToTable(icon, id, rds, status, startTime, endTime, button) {
     var body = {
-        id: id,
+        rds: rds,
         startTime: startTime,
         endTime: endTime,
         metric: "CPUUtilization"

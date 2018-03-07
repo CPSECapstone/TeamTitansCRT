@@ -12,7 +12,11 @@ import java.util.Date;
 import java.util.List;
 
 import static junit.framework.TestCase.assertNotNull;
+import static junit.framework.TestCase.assertTrue;
 import static org.mockito.Mockito.*;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class AnalysisServletTest {
 
@@ -64,13 +68,11 @@ public class AnalysisServletTest {
     public void calculateAverages() throws Exception {
         File f = new File(".privateKeys");
         org.junit.Assume.assumeTrue(f.exists() && f.isFile());
-        Date start = new Date(System.currentTimeMillis() - 1000 * 60 * 60);
-        Date end = new Date(System.currentTimeMillis());
+        Date start = new Date(System.currentTimeMillis()-1000*60);
+        Date end = new Date(System.currentTimeMillis()+1000*60*60*2);
         AnalysisServlet servlet = new AnalysisServlet();
-
         MetricRequest request = new MetricRequest("testdb", start, end, "CPUUtilization", "WriteThroughput");
         ResponseEntity<List<Double>> averages = servlet.calculateAverages(request);
-
-        assertNotNull(averages);
+        assertTrue(!averages.getBody().isEmpty());
     }
 }

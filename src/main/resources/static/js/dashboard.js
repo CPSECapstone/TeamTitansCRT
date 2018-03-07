@@ -17,6 +17,7 @@ function updateStatus() {
             for (var i = 0; i < data.length; i++) {
                 var capture = data[i];
                 var id = capture["id"];
+                var rds = capture["rds"];
                 var status = capture["status"];
                 var startTime = capture["startTime"];
                 var endTime = capture["endTime"];
@@ -30,11 +31,11 @@ function updateStatus() {
                     button =
                         "<a href=\"#\" id=\"stopButton" + id +
                         "\" class=\"btn btn-default btn-stop\">Stop Capture</a>";
-                    addToTable(icon, id, status, startTime, endTime, button);
+                    addToTable(icon, id, rds, status, startTime, endTime, button);
                 }                
                 else if (status == "Queued") {
                     icon = "<img src=\"../img/queued.png\" alt=\"queued\">";
-                    addToTable(icon, id, status, startTime, endTime, button);
+                    addToTable(icon, id, rds, status, startTime, endTime, button);
                 }
             }
         },
@@ -46,9 +47,9 @@ function updateStatus() {
 }
 
 /* Adds new captures to the table. Takes the capture's id and gets its status, start time, and end time. Also, adds an icon to show the status of the capture visually. If the capture is running, there will be a stop capture button as well. */
-function addToTable(icon, id, status, startTime, endTime, button) {
+function addToTable(icon, id, rds, status, startTime, endTime, button) {
     var body = {
-        id: id,
+        rds: rds,
         startTime: startTime,
         endTime: endTime,
         metrics: ["CPUUtilization", "FreeStorageSpace", "WriteThroughput"]
