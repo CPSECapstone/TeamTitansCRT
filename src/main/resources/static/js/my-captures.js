@@ -15,13 +15,25 @@ $(function() {
                 <p class=""><strong>Manage Captures</strong></p>
                 ${createCaptureTable()}
             </div>
-            <div class="col-lg-4">
+            <div class="col-lg-4 start-capture-form">
                 <p class=""><strong>Start a Capture</strong></p>
                 <div class="${rdsSelector}"></div>
                 <div class="${s3Selector}"></div>
-                <div class="form-group">
-                    <label class="input-label">Capture ID:</label>
-                    <input id="txtID" class="form-control" type="text" value="MyCapture">
+                ${createTextInput("Capture ID:", "txtID")}
+
+                <a data-toggle="collapse" href="#advanced">Advanced <span class="caret"></span></a>
+
+                <div id="advanced" class="collapse">
+                    <label class="input-label">Start Time:
+                        <input id="txtStartTime" class="form-control" type="datetime-local" value="">
+                    </label>
+                    <label class="input-label">End Time:
+                        <input id="txtEndTime" class="form-control" type="datetime-local" value="">
+                    </label>
+                    ${createTextInput("Max Capture Size (mB):", "txtMaxSize")}
+                    ${createTextInput("Max Number of Transactions:", "txtMaxTrans")}
+                    ${createTextInput("Database Commands to Ignore (comma delimited):", "txtFilterStatements")}
+                    ${createTextInput("Database Users to Ignore (comma delimited):", "txtFilterUsers")}
                 </div>
             </div>
         </div>
@@ -65,6 +77,14 @@ function populateS3Dropdown(selector) {
             console.log(err);
         }
     });
+}
+
+function createTextInput(label, id) {
+    return `
+    <div class="form-group">
+        <label class="input-label">${label}</label>
+        <input id="${id}" class="form-control" type="text" value="">
+    </div>`;
 }
 
 function createDropdown(label, id, options) {
