@@ -464,3 +464,7 @@ body {
 .list-group-item:last-child {
   border-radius: 0px;
 }
+
+.start-capture-form a.btn {
+  margin-left: 0px;
+}
