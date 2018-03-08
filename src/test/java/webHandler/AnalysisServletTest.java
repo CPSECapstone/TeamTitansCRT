@@ -68,11 +68,13 @@ public class AnalysisServletTest {
     public void calculateAverages() throws Exception {
         File f = new File(".privateKeys");
         org.junit.Assume.assumeTrue(f.exists() && f.isFile());
-        Date start = new Date(System.currentTimeMillis()-1000*60);
+        Date start = new Date(System.currentTimeMillis()-1000*60*60*2);
         Date end = new Date(System.currentTimeMillis()+1000*60*60*2);
         AnalysisServlet servlet = new AnalysisServlet();
         MetricRequest request = new MetricRequest("testdb", start, end, "CPUUtilization", "WriteThroughput");
         ResponseEntity<List<Double>> averages = servlet.calculateAverages(request);
         assertTrue(!averages.getBody().isEmpty());
     }
+
+
 }

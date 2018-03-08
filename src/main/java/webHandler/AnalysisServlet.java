@@ -106,7 +106,7 @@ public class AnalysisServlet {
 
     /**
      * Calculate the average of a metric for a time span.
-     * @param  rds     Database to get data from.
+     * @param  rds    Database to get data from.
      * @param  start  Capture's Start time.
      * @param  end    Capture's end time. For current time use (new Date(System.currentTimeMillis())).
      * @param  metric Metric name to request ex. "CPUUtilization".
