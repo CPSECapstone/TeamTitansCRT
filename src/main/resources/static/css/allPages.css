@@ -71,11 +71,6 @@
     width: 220px;
 }
 
-#page-content-wrapper {
-    width: 100%;
-    padding-top: 70px;
-}
-
 #wrapper.toggled #page-content-wrapper {
     position: absolute;
     margin-right: -220px;
@@ -459,4 +454,13 @@ body {
   font-weight: 500;
   text-decoration: underline;
   text-decoration-color: var(--secondary);
+}
+
+.border-on-right {
+  border-right: 1px solid #aaa;
+}
+
+.list-group-item:first-child,
+.list-group-item:last-child {
+  border-radius: 0px;
 }
