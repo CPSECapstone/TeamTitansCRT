@@ -81,6 +81,11 @@
     margin-right: -220px;
 }
 
+.menu-brand {
+  padding-left: 60px;
+  padding-top: 20px;
+}
+
 /*-------------------------------*/
 /*     Sidebar nav styles        */
 /*-------------------------------*/
@@ -110,64 +115,58 @@
     height: 100%;
     width: 3px;
     background-color: #1c1c1c;
-    -webkit-transition: width .2s ease-in;
+/*    -webkit-transition: width .2s ease-in;
       -moz-transition:  width .2s ease-in;
        -ms-transition:  width .2s ease-in;
             transition: width .2s ease-in;
-
+*/
 }
 .sidebar-nav li:first-child a {
     background-color: #1c1c1c;
 } 
 .sidebar-nav li:nth-child(2):before {
     color: #FFFFFF;
-    background-color: var(--secondary);
+    /*background-color: var(--secondary);*/
 }
 .sidebar-nav li:nth-child(3):before {
     color: #FFFFFF;
-    background-color: var(--secondary);   
+    /*background-color: var(--secondary);*/   
 }
 .sidebar-nav li:nth-child(4):before {
     color: #FFFFFF;
-    background-color: var(--secondary);    
+    /*background-color: var(--secondary);*/    
 }
 .sidebar-nav li:nth-child(5):before {
     color: #FFFFFF;
-    background-color: var(--secondary);   
+    /*background-color: var(--secondary);*/   
 }
 .sidebar-nav li:nth-child(6):before {
     color: #FFFFFF;
-    background-color: var(--secondary);   
+    /*background-color: var(--secondary);*/   
 }
 .sidebar-nav li:nth-child(7):before {
     color: #FFFFFF;
-    background-color: var(--secondary);    
+    /*background-color: var(--secondary);*/    
 }
 .sidebar-nav li:nth-child(8):before {
     color: #FFFFFF;
-    background-color: var(--secondary);    
+    /*background-color: var(--secondary);*/    
 }
 .sidebar-nav li:nth-child(9):before {
     color: #FFFFFF;
-    background-color: var(--secondary);    
+    /*background-color: var(--secondary);*/    
 }
 .sidebar-nav li:hover:before,
 .sidebar-nav li.open:hover:before {
     width: 100%;
+    /*
     -webkit-transition: width .2s ease-in;
       -moz-transition:  width .2s ease-in;
        -ms-transition:  width .2s ease-in;
             transition: width .2s ease-in;
-
+    */
 }
 
-.sidebar-nav li a {
-    display: block;
-    color: #FFFFFF;
-    text-decoration: none;
-    padding: 10px 10px 20px 30px;  
-    font-size: 1.5rem;
-}
 
 .sidebar-nav li a:hover,
 .sidebar-nav li a:active,
@@ -373,7 +372,7 @@
 /* ======================= Main ================= */
 body {
     background-color: white;
-    font-family: 'Raleway', sans-serif;
+    font-family: 'Roboto', sans-serif;
     color: black;
 }
 
@@ -426,10 +425,30 @@ body {
 }
 
 .navbar {
+    font-weight: 300;
     background-color: var(--p-dark);
+}
+
+#sidebar-wrapper > ul > li > a:hover,
+#sidebar-wrapper > ul > li.dropdown.open > ul > li > a:hover {
+    font-weight: 500;
+    letter-spacing: .07em;
+    -webkit-transition: all .2s ease;
+    -moz-transition: all .2s ease;
+    -o-transition: all .2s ease;
+    transition: all .2s ease;
+
 }
 
 /* =============== Sidebar ================================*/
 #sidebar {
-        background-color: var(--primary);
+    background-color: var(--primary);
+}
+
+.sidebar-nav li a {
+    display: block;
+    color: #FFFFFF;
+    text-decoration: none;
+    /*padding: 10px 10px 20px;  */
+    font-size: 1.5rem;
 }
