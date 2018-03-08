@@ -9,7 +9,8 @@ function injectNavTop() {
     <nav class="navbar navbar-custom z-depth-1" role="navigation">
         <div id="nav-container">
             <div class="navbar-header">
-                <a class="navbar-brand menu-brand page-scroll" href="#page-top">Menu</a>
+                <a class="navbar-brand menu-brand page-scroll" href="javascript:void(0)">Menu</a>
+                <a class="navbar-brand crt-brand page-scroll" href="dashboard">MyCRT</a>
             </div>
         </div>
     </nav>`);
