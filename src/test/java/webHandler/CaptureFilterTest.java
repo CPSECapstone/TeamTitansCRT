@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 public class CaptureFilterTest {
 
+    private Capture capture;
     private LogFilter logFilter;
     private String logData;
     private Date startTime;
@@ -94,6 +95,7 @@ public class CaptureFilterTest {
         startTime = new Date(5);
         endTime = new Date();
         transactionLimit = 0;
+        capture = new Capture("id", "", "", startTime, endTime, 0, transactionLimit);
     }
 
     @Test
@@ -103,7 +105,11 @@ public class CaptureFilterTest {
         List<String> usersToRemove = new ArrayList<>();
 
         usersToRemove.add("admin");
-        logFilter = new CaptureFilter(startTime, endTime, transactionLimit, statementsToRemove, usersToRemove);
+
+        capture.setFilterStatements(statementsToRemove);
+        capture.setFilterUsers(usersToRemove);
+
+        logFilter = new CaptureFilter(capture);
         List<Statement> filteredStatementList = logFilter.filterLogData(logData);
 
         List<String> noDataList = filteredStatementList.stream().
@@ -141,7 +147,7 @@ public class CaptureFilterTest {
                 "\"query\": \"CREATE TABLE Users (value INT PRIMARY KEY)\"\n" +
                 "}";
 
-        logFilter = new CaptureFilter(startTime, endTime, transactionLimit, statementsToRemove, usersToRemove);
+        logFilter = new CaptureFilter(capture);
 
         List<Statement> filteredStatementList = logFilter.filterLogData(logData);
 

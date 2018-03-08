@@ -174,8 +174,8 @@ public class DBUtil {
             pstmt.setTimestamp(5, new Timestamp(capture.getEndTime().getTime()));
             pstmt.setString(6, capture.getStatus());
             pstmt.setInt(7, capture.getFileSizeLimit());
-            pstmt.setInt(8, capture.getDbFileSize());
-            pstmt.setInt(9, capture.getNumDBTransactions());
+            pstmt.setLong(8, capture.getDbFileSize());
+            pstmt.setInt(9, capture.getTransactionCount());
             pstmt.executeUpdate();
 
             pstmt.close();
@@ -228,7 +228,7 @@ public class DBUtil {
             capture.setStatus(rs.getString(6));
             capture.setFileSizeLimit(rs.getInt(7));
             capture.setDbFileSize(rs.getInt(8));
-            capture.setNumDBTransactions(rs.getInt(9));
+            capture.setTransactionCount(rs.getInt(9));
 
             return capture;
         }
@@ -262,7 +262,7 @@ public class DBUtil {
                 capture.setStatus(rs.getString(6));
                 capture.setFileSizeLimit(rs.getInt(7));
                 capture.setDbFileSize(rs.getInt(8));
-                capture.setNumDBTransactions(rs.getInt(9));
+                capture.setTransactionCount(rs.getInt(9));
 
                 captures.add(capture);
             }

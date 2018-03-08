@@ -14,6 +14,7 @@ public class ReplayFilter extends LogFilter {
     {
         this.statementsToRemove = statementsToRemove;
         this.usersToRemove = usersToRemove;
+        this.transactionLimit = 0; // currently replay does not have a transactionLimit
     }
 
     private List<Statement> parseFromJSON(String logData)

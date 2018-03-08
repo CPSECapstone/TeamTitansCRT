@@ -1,5 +1,6 @@
 package webHandler;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -17,13 +18,12 @@ public class Capture {
     private int fileSizeLimit = NO_LIMIT;
     private int transactionLimit = NO_LIMIT;
 
-    private int dbFileSize = 0;
-    private int numDBTransactions = 0;
+    private long dbFileSize = 0;
+    private int transactionCount = 0;
 
     private List<String> filterStatements;
     private List<String> filterUsers;
 
-    private LogController logController;
 
     public Capture() {
 
@@ -74,7 +74,7 @@ public class Capture {
         if (startTime != null && currTime.compareTo(startTime) >= 0) {
             if ((endTime != null && currTime.compareTo(endTime) >= 0)
                     || (fileSizeLimit != NO_LIMIT && dbFileSize > fileSizeLimit)
-                    || (transactionLimit != NO_LIMIT && numDBTransactions > transactionLimit)) {
+                    || (transactionLimit != NO_LIMIT && transactionCount > transactionLimit)) {
                 this.status = "Finished";
             } else {
                 this.status = "Running";
@@ -84,15 +84,13 @@ public class Capture {
         }
     }
 
-    public void startCaptureLogs() {
-        if (logController == null) {
-            this.logController = new LogController(this);
-            this.logController.run();
-        }
+    public boolean hasReachedFileSizeLimit() {
+
+        return this.fileSizeLimit == NO_LIMIT ? false : this.dbFileSize >= this.fileSizeLimit;
     }
 
-    public void endCaptureLogs() {
-        this.logController.end();
+    public boolean hasReachedTransactonLimit() {
+        return this.transactionLimit == NO_LIMIT ? false : this.transactionCount >= this.transactionLimit;
     }
 
     public String getId() { return id; }
@@ -150,13 +148,13 @@ public class Capture {
 
     public void setTransactionLimit(int size) {this.transactionLimit = size; }
 
-    public int getDbFileSize() { return this.dbFileSize; }
+    public long getDbFileSize() { return this.dbFileSize; }
 
-    public void setDbFileSize(int size) {this.dbFileSize = size; }
+    public void setDbFileSize(long size) {this.dbFileSize = size; }
 
-    public int getNumDBTransactions() {return this.numDBTransactions; }
+    public int getTransactionCount() {return this.transactionCount; }
 
-    public void setNumDBTransactions(int num) {this.numDBTransactions = num; }
+    public void setTransactionCount(int num) {this.transactionCount = num; }
 
     public boolean hasTransactionLimit() {return this.getTransactionLimit() > NO_LIMIT; }
 
@@ -166,7 +164,7 @@ public class Capture {
     {
         if (this.filterStatements == null)
         {
-            return new ArrayList<String>();
+            this.filterStatements = new ArrayList<String>();
         }
         return this.filterStatements;
     }
@@ -180,7 +178,7 @@ public class Capture {
     {
         if (this.filterUsers == null)
         {
-            return new ArrayList<String>();
+            this.filterUsers = new ArrayList<String>();
         }
         return this.filterUsers;
     }

@@ -9,66 +9,19 @@ import java.util.stream.Collectors;
 
 public class LogController {
 
-    private final int UPDATE_PERIOD_HOUR = 1000 * 60 * 60;
-    private final String GeneralLogFileName = "general/mysql-general.log";
-
-    private Capture capture;
-
-    private RDSManager rdsManager;
-    private S3Manager s3Manager;
-    private LogFilter logFilter;
-
-    private boolean isRunning = false;
-    private boolean isFirstWrite = true;
+    private CaptureFilter logFilter;
 
     private String fileName;
+    private String captureId;
 
     public LogController(Capture capture) {
-        this.capture = capture;
+        logFilter = new CaptureFilter(capture);
 
-        rdsManager = new RDSManager();
-        s3Manager = new S3Manager();
-        logFilter = new CaptureFilter(capture.getStartTime(), capture.getEndTime(), capture.getTransactionLimit(),
-                capture.getFilterStatements(), capture.getFilterUsers());
-
-        fileName = capture.getId() + "-Workload.log";
+        this.fileName = capture.getId() + "-Workload.log";
+        this.captureId = capture.getId();
     }
 
-    public void run() {
-        if (isRunning) {
-            return;
-        }
-
-        isRunning = true;
-
-        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        int currMinute = calendar.get(Calendar.MINUTE);
-        int delay = UPDATE_PERIOD_HOUR - (1000 * 60 * currMinute);
-
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                int hour = calendar.get(Calendar.HOUR_OF_DAY);
-
-                if (isRunning) {
-                    logData(GeneralLogFileName + "." + hour);
-                } else {
-                    cancel();
-                }
-                calendar.add(Calendar.HOUR, 1);
-            }
-        }, delay, UPDATE_PERIOD_HOUR);
-    }
-
-    public void end() {
-        this.isRunning = false;
-        logData(GeneralLogFileName);
-        uploadToS3();
-    }
-
-    private void logData(String logFile) {
-        String logData = rdsManager.downloadLog(capture.getRds(), logFile);
-
+    public void logData(Capture capture, String logData, boolean isFirstWrite, boolean isFinalWrite) {
         if (logData ==  null) {
             return;
         }
@@ -86,18 +39,20 @@ public class LogController {
         }
 
         if (stream != null) {
-            writeToFile(filteredLogData);
+            updateCaptureController();
+            writeToFile(filteredLogData, isFirstWrite, isFinalWrite);
         }
     }
 
-    private void writeToFile(String logData) {
+    private void writeToFile(String logData, boolean isFirstWrite, boolean isFinalWrite) {
         BufferedWriter out = null;
 
-        if (!isRunning) {
-            logData += "\n]";
-        } else if (isFirstWrite) {
+        if (isFirstWrite) {
             logData = "[\n" + logData;
-            isFirstWrite = false;
+        }
+
+        if (isFinalWrite) {
+            logData += "\n]";
         }
 
         try {
@@ -105,18 +60,33 @@ public class LogController {
             out = new BufferedWriter(fileWriter);
             out.write(logData);
             out.close();
+
+            updateCaptureController();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private void uploadToS3() {
-        try {
-            File file = new File(this.fileName);
-            s3Manager.uploadFile(capture.getS3(), fileName, new FileInputStream(file), new ObjectMetadata());
-            file.delete();
-        } catch (Exception e) {
-            e.printStackTrace();
+    public File getFile() {
+        File file = new File(this.fileName);
+        if (file.isFile()) {
+            return file;
+        }
+        return null;
+    }
+
+    private void updateCaptureController()
+    {
+        File file = getFile();
+        if (file != null) {
+            CaptureController.getInstance().updateCaptureFileSize(this.captureId, file.length());
         }
     }
+
+    public void updateLogController(Capture capture)
+    {
+        logFilter.setEndTime(capture.getEndTime());
+        logFilter.setTransactionLimit(capture.getTransactionLimit());
+    }
+
 }

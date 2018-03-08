@@ -11,6 +11,8 @@ public abstract class LogFilter {
 
     protected int transactionCount = 0; // current number of non-connection transactions successfully filtered
 
+    protected int transactionLimit = 0; // the transaction limit -- default is 0
+
     // add the default user
     private void addDefaultUserFilterValues()
     {
@@ -18,6 +20,16 @@ public abstract class LogFilter {
         {
             usersToRemove.add("rdsadmin");
         }
+    }
+
+    public void setTransactionCount(int transactionCount)
+    {
+        this.transactionCount = transactionCount;
+    }
+
+    public void setTransactionLimit(int transactionLimit)
+    {
+        this.transactionLimit = transactionLimit;
     }
 
     // adds the default statements
@@ -71,6 +83,11 @@ public abstract class LogFilter {
     }
 
     public abstract List<Statement> filterLogData(String logData);
+
+    public boolean hasReachedTransactionLimit()
+    {
+        return this.transactionCount > this.transactionLimit;
+    }
 
     public int getTransactionCount()
     {
