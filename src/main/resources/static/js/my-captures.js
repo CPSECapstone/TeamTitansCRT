@@ -9,7 +9,7 @@ $(function() {
     var filterStatementsSelector = "filterStatementsSelector";
     var filterUsersSelector = "filterUsersSelector";
 
-    var saveBtnSelector = "btnCaptureStart";
+    var startBtnSelector = "btnCaptureStart";
 
     $("div.content-placeholder").replaceWith(`
     <div class="container">
@@ -46,12 +46,13 @@ $(function() {
                     ${createTextInput("Database Commands to Ignore (comma delimited):", filterStatementsSelector)}
                     ${createTextInput("Database Users to Ignore (comma delimited):", filterUsersSelector)}
                 </div>
-                <a href="javascript:void(0)" id="${saveBtnSelector}" class="btn btn-default">Start Capture</a>
+                <a href="javascript:void(0)" id="${startBtnSelector}" class="btn btn-default">Start Capture</a>
             </div>
         </div>
     </div>
     `);
-    // updateCaptureList();
+    updateCaptureList();
+    /*
     var data = [
         {
             id: "Test1",
@@ -69,10 +70,11 @@ $(function() {
         }
     ]
     addAllToCaptureList(data);
+    */
 
     populateRDSDropdown(rdsSelector);
     populateS3Dropdown(s3Selector);
-    $(`#${saveBtnSelector}`).on("click", function() {
+    $(`#${startBtnSelector}`).on("click", function() {
         var startTime = null;
         if ($(`#${startTimeSelector}`).val()) {
             startTime = new Date(String($(`#${startTimeSelector}`).val()));
@@ -133,7 +135,7 @@ function addToCaptureList(capture) {
     $("#CaptureList").append(createEditCaptureModal(capture));
 
     var id = capture["id"];
-    $("#" + id + " .save").on("click", function() {
+    $(`#${id}-save`).on("click", function() {
         updateCapture(id);
     });
 }
@@ -176,7 +178,7 @@ function createEditCaptureModal(capture) {
                     ${createTextInputValue("Max Number of Transactions:", transactionLimitSelector, transactionLimit)}
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button id="${id}-save" type="button" class="btn btn-secondary" data-dismiss="modal">Save</button>
                 </div>
             </div>
         </div>
@@ -187,13 +189,14 @@ function createEditCaptureModal(capture) {
  * Takes a capture id and send the update request to the backend
  * @param  {string}
  */
+// TODO fix the match between these selectors and the ones above on lines 172-178
 function updateCapture(id) {
     var body = {
         id: id,
-        startTime: $("#" + id + " .txtStartTime").val(),
-        endTime: $("#" + id + " .txtEndTime").val(),
-        fileSizeLimit: $("#" + id + " .txtMaxSize").val(),
-        transactionLimit: $("#" + id + " .txtMaxTrans").val()
+        startTime: $(`#${id}-modal .txtStartTime`).val(),
+        endTime: $(`#${id}-modal .txtEndTime`).val(),
+        fileSizeLimit: $(`#${id}-modal .txtMaxSize`).val(),
+        transactionLimit: $(`#${id}-modal .txtMaxTrans`).val()
     };
     
     $.ajax({
