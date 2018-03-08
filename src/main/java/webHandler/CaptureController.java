@@ -12,6 +12,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
 import java.util.*;
 
 @RestController
@@ -20,8 +21,7 @@ public class CaptureController {
     // Number of minutes to milliseconds to wait before updating captures.
     private final int UPDATE_PERIOD_MINUTE = 1000 * 60 * 1;
 
-    // TODO: Remove when Capture DAO addeds
-    private HashMap<String, Capture> captures = new HashMap<>();
+    DBUtil db = new DBUtil("captureDatabase.db");
 
     @RequestMapping(value = "/capture/start", method = RequestMethod.POST)
     public ResponseEntity<String> captureStart(@RequestBody Capture capture) {
@@ -73,21 +73,29 @@ public class CaptureController {
             }, 0, UPDATE_PERIOD_MINUTE);
         }
 
-        // TODO: Replace with Capture DAO code
-        captures.put(capture.getId(), capture);
+        HttpStatus status = HttpStatus.OK;
+        try {
+            db.saveCapture(capture);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(status);
     }
 
     @RequestMapping(value = "/capture/stop", method = RequestMethod.POST)
     public ResponseEntity<String> captureStop(@RequestBody Capture capture) {
 
-        Capture targetCapture = captures.get(capture.getId());
-        targetCapture.updateStatus();
-
-        if (targetCapture == null) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        Capture targetCapture;
+        try {
+            targetCapture = db.loadCapture(capture.getId());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
+        targetCapture.updateStatus();
 
         if (capture.getEndTime() == null) {
             targetCapture.setEndTime(new Date());
@@ -110,13 +118,27 @@ public class CaptureController {
             //TODO: Add check for file upload
         }
 
+        try {
+            db.saveCapture(targetCapture);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
         return new ResponseEntity<>(HttpStatus.OK);
     }
     
     @RequestMapping(value = "/capture/update", method = RequestMethod.POST)
     public ResponseEntity<String> captureUpdate(@RequestBody Capture capture) {
 
-        Capture targetCapture = captures.get(capture.getId());
+        Capture targetCapture;
+        try {
+            targetCapture = db.loadCapture(capture.getId());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
         targetCapture.setStartTime(capture.getStartTime());
         targetCapture.setEndTime(capture.getEndTime());
         targetCapture.setTransactionLimit(capture.getTransactionLimit());
@@ -158,12 +180,26 @@ public class CaptureController {
             //TODO: Add check for file upload
         }
 
+        try {
+            db.saveCapture(targetCapture);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @RequestMapping(value = "/capture/status", method = RequestMethod.GET)
     public ResponseEntity<Collection<Capture>> captureStatus() {
-        return new ResponseEntity<>(captures.values(), HttpStatus.OK);
+        ArrayList<Capture> captures;
+        try {
+            captures = db.loadAllCaptures();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<>(captures, HttpStatus.OK);
     }
 
     private int getFileSize(Capture capture) {
@@ -189,12 +225,6 @@ public class CaptureController {
         } catch(Exception e) {
             e.printStackTrace();
             return -1;
-        }
-    }
-
-    public void updateCaptures() {
-        for (Map.Entry<String, Capture> entry : captures.entrySet()) {
-            entry.getValue().updateStatus();
         }
     }
 }

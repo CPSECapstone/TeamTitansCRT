@@ -14,6 +14,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
 import java.util.Date;
 
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
@@ -27,19 +28,26 @@ import java.util.*;
 @RestController
 public class AnalysisServlet {
 
-    //TODO: Update to only take capture ID when persistent capture data is added.
+    DBUtil db = new DBUtil("captureDatabase.db");
+
     /**
      * Method to handle post requests to /analysis.
      * @param response HttpServletResponse to stream metric data to.
-     * @param capture Capture containing the id and s3 where metric data is stored.
+     * @param captureId Capture containing the id.
      * @throws IOException Throws an IOException if unable to copy stream to response.
      */
     @RequestMapping(value = "/analysis", method = RequestMethod.POST)
-    public void getMetrics(HttpServletResponse response, @RequestBody Capture capture) throws IOException {
+    public void getMetrics(HttpServletResponse response, @RequestBody Capture captureId) throws IOException {
 
         InputStream stream;
-        // TODO: Update parameter name from capture to captureId, add Capture DAO, sudo-code below
-        // Capture capture = DatabaseManager.getCaptureWithID(captureId.getId());
+        Capture capture = null;
+        try {
+            capture = db.loadCapture(captureId.getId());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            response.sendError(HttpStatus.BAD_REQUEST.value(), "Error: No capture found with given id:" + captureId.getId());
+            return;
+        }
 
         // Get metric stream
         if (capture.getStatus().equals("Running")) { // Obtain from CloudWatch if capture is currently running

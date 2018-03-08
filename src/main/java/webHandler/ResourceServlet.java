@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -15,6 +16,8 @@ import java.util.Date;
  */
 @RestController
 public class ResourceServlet {
+
+    DBUtil db = new DBUtil("captureDatabase.db");
 
     @RequestMapping(value = "/resource/rds", method = RequestMethod.GET)
     public ResponseEntity<Collection<String>> getRDSInstances() {
@@ -32,13 +35,13 @@ public class ResourceServlet {
 
     @RequestMapping(value = "/resource/history", method = RequestMethod.GET)
     public ResponseEntity<Collection<Capture>> getCaptureReplayHistory() {
-        // TODO: Replace with Capture DAO, sudo-code below
-        // Collection<Capture> captures = DatabaseManager.getAllCaptures();
-        //return new ResponseEntity<>(captures, HttpStatus.OK);
 
-        ArrayList<Capture> testCaptures = new ArrayList<>();
-        Capture capture = new Capture("TestCapture", "TestRDS", "TestS3", new Date(), null);
-        testCaptures.add(capture);
-        return new ResponseEntity<>(testCaptures, HttpStatus.OK);
+        ArrayList<Capture> captures = null;
+        try {
+            captures = db.loadAllCaptures();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return new ResponseEntity<>(captures, HttpStatus.OK);
     }
 }

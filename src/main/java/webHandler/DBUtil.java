@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 public class DBUtil {
 
+
     Connection conn;
     private String databaseFile;
     /**
@@ -23,6 +24,7 @@ public class DBUtil {
     {
         Connection conn = null;
         try {
+            Class.forName("org.sqlite.JDBC");
 
             conn = DriverManager.getConnection("jdbc:sqlite:" + databaseFile);
             //conn = DriverManager.getConnection("jdbc:sqlite:/Users/devin/chinook.db");
@@ -42,9 +44,9 @@ public class DBUtil {
             System.out.println("Connection to SQLite has been established.");
 
             stmt.close();
-        }
-
-        catch(SQLException e)
+        } catch(ClassNotFoundException e) {
+            System.err.println(e.getMessage());
+        } catch(SQLException e)
         {
             // if the error message is "out of memory",
             // it probably means no database file is found
@@ -52,16 +54,16 @@ public class DBUtil {
         }
         finally
         {
-            try
-            {
-                if(conn != null)
-                    conn.close();
-            }
-            catch(SQLException e)
-            {
-                // connection close failed.
-                System.err.println(e);
-            }
+//            try
+//            {
+//                if(conn != null)
+//                    conn.close();
+//            }
+//            catch(SQLException e)
+//            {
+//                // connection close failed.
+//                System.err.println(e);
+//            }
         }
         return conn;
     }
@@ -80,9 +82,8 @@ public class DBUtil {
 
     public static void createNewTable(String databaseFile) throws SQLException
     {
-
         String sql = "CREATE TABLE IF NOT EXISTS captures(\n"
-                +  " id INTEGER PRIMARY KEY,\n"
+                +  "id INTEGER PRIMARY KEY,\n"
                 + " rds TEXT,\n"
                 + " s3 TEXT,\n"
                 + " startTime TEXT,\n"
@@ -94,7 +95,7 @@ public class DBUtil {
                 + " numDbTransactions INTEGER\n"
                 +");";
 
-        Connection conn = DriverManager.getConnection(databaseFile);
+        Connection conn = DriverManager.getConnection("jdbc:sqlite:" + databaseFile);
         Statement stmt = conn.createStatement();
 
         stmt.execute(sql);
@@ -108,7 +109,7 @@ public class DBUtil {
         //inserts values, if value is there then it's replaced
         String sql = "INSERT OR REPLACE INTO captures(id, rds, s3, startTime, endTime, status, " +
                 "fileSizeLimit, transactionLimit, dbFileSize, numDbTransactions) " +
-                "VALUES (?,?,?,?,?,?,?,?,?)";
+                "VALUES (?,?,?,?,?,?,?,?,?,?)";
 
         PreparedStatement pstmt = conn.prepareStatement(sql);
         pstmt.setLong(1, Long.parseLong(capture.getId()));
@@ -118,8 +119,9 @@ public class DBUtil {
         pstmt.setTimestamp(5, new Timestamp(capture.getEndTime().getTime()));
         pstmt.setString(6, capture.getStatus());
         pstmt.setInt(7, capture.getFileSizeLimit());
-        pstmt.setInt(8, capture.getDbFileSize());
-        pstmt.setInt(9, capture.getNumDBTransactions());
+        pstmt.setInt(8, capture.getTransactionLimit());
+        pstmt.setInt(9, capture.getDbFileSize());
+        pstmt.setInt(10, capture.getNumDBTransactions());
         pstmt.executeUpdate();
 
         pstmt.close();
