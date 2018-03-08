@@ -30,7 +30,9 @@ $(function() {
                 <div class="${s3Selector}"></div>
                 ${createTextInput("Capture ID:", idSelector)}
 
-                <a data-toggle="collapse" href="#advanced">Advanced <span class="caret"></span></a>
+                <div class="block">
+                    <a data-toggle="collapse" href="#advanced">Advanced <span class="caret"></span></a>
+                </div>                
 
                 <div id="advanced" class="collapse">
                     <label class="input-label">Start Time:
@@ -73,8 +75,7 @@ $(function() {
                 fileSizeLimit: $(`#${fileSizeLimitSelector}`).val(),
                 transactionLimit: $(`#${transactionLimitSelector}`).val(),
                 filterStatements: $(`#${filterStatementsSelector}`).val().split(',').map(x => x.trim()),
-                filterUsers: $(`#${filterUsersSelector}`).val().split(',').map(x => x.trim()),
-                status: ""
+                filterUsers: $(`#${filterUsersSelector}`).val().split(',').map(x => x.trim())
             };
 
             startCapture(capture);
@@ -95,12 +96,12 @@ function startCapture(capture) {
         },
         data: JSON.stringify(capture),
         success: function() {
-            $("#lblStatus").html("<p>Started Successful.</p>" +
-                                 "<a href=\"manageCaptures\" id=\"btnManageCaptures\" class=\"btn btn-default\">Manage Captures</a>" +
-                                 "<a href=\"dashboard\" id=\"btnDashboard\" class=\"btn btn-default\">Go to Dashboard</a>");
+            $("#exampleModal div.modal-body").html("<p>Success</p>");
+            $("#exampleModal").modal("show");
         },
         error: function(err) {
-            $("#lblStatus").html("Startup failure.");
+            $("#exampleModal div.modal-body").html("<p>Failure</p>");
+            $("#exampleModal").modal("show");
 
             console.log("Error starting capture");
             console.log(err);
