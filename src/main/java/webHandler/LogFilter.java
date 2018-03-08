@@ -10,7 +10,6 @@ public abstract class LogFilter {
     protected List<String> usersToRemove; // list of user names to remove
 
     protected int transactionCount = 0; // current number of non-connection transactions successfully filtered
-
     protected int transactionLimit = 0; // the transaction limit -- default is 0
 
     // add the default user

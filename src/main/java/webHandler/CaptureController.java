@@ -11,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RestController
 public class CaptureController {
@@ -73,7 +72,7 @@ public class CaptureController {
     }
 
     private void updateCapture(Capture updatedCapture) {
-        Capture capture = captures.get(updatedCapture.getId());
+        Capture capture = getCapture(updatedCapture.getId());
         capture.setStartTime(updatedCapture.getStartTime());
         capture.setEndTime(updatedCapture.getEndTime());
         capture.setTransactionLimit(updatedCapture.getTransactionLimit());
@@ -82,12 +81,12 @@ public class CaptureController {
     }
 
     private void updateLogController(Capture capture) {
-        LogController logController = logControllers.get(capture.getId());
+        LogController logController = getLogController(capture.getId());
         logController.updateLogController(capture);
     }
 
     private void updateTimerController(Capture capture) {
-        TimerManager timerManager = timers.get(capture.getId());
+        TimerManager timerManager = getTimer(capture.getId());
         timerManager.updateTimeManager(capture.getStartTime(), capture.getEndTime());
     }
 
@@ -114,14 +113,77 @@ public class CaptureController {
     }
 
     public void writeHourlyLogFile(String id, int hour) {
-        Capture capture = captures.get(id);
-        LogController logController = logControllers.get(id);
+        Capture capture = getCapture(id);
+        LogController logController = getLogController(id);
         RDSManager rdsManager = new RDSManager();
+
+        if (capture == null)
+        {
+            System.out.println("Capture is null");
+            return;
+        }
 
         String logFile = GeneralLogFileName + "." + hour;
         String logData = rdsManager.downloadLog(capture.getRds(),  logFile);
 
         logController.logData(capture, logData, false, false);
+    }
+
+    private void addTimer(TimerManager timer, String id) {
+        getInstance().timers.put(id, timer);
+    }
+
+    private TimerManager getTimer(String id) {
+        if (doesTimersTableContain(id)) {
+            return getInstance().timers.get(id);
+        }
+        return null;
+    }
+
+    private void addLogController(LogController controller, String id) {
+        getInstance().logControllers.put(id, controller);
+    }
+
+    private LogController getLogController(String id) {
+        if (doesLogControllersTableContain(id)) {
+            return getInstance().logControllers.get(id);
+        }
+        return null;
+    }
+
+    private void addCapture(Capture capture) {
+        getInstance().captures.put(capture.getId(), capture);
+    }
+
+    private Capture getCapture(String id) {
+        if (doesCapturesTableContain(id)) {
+            return getInstance().captures.get(id);
+        }
+        return null;
+    }
+
+    private boolean doesCapturesTableContain(String id) {
+        if (getInstance().captures.containsKey(id)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean doesLogControllersTableContain(String id) {
+        if (getInstance().logControllers.containsKey(id)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean doesTimersTableContain(String id) {
+        if (getInstance().timers.containsKey(id)) {
+            return true;
+        }
+
+        return false;
     }
 
     @RequestMapping(value = "/capture/start", method = RequestMethod.POST)
@@ -137,22 +199,23 @@ public class CaptureController {
             capture.setStartTime(new Date());
         }
 
-        captures.put(capture.getId(), capture);
-        logControllers.put(capture.getId(), logController);
-        timers.put(capture.getId(), timerManager);
+        addCapture(capture);
+        addLogController(logController, capture.getId());
+        addTimer(timerManager, capture.getId());
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @RequestMapping(value = "/capture/stop", method = RequestMethod.POST)
-    public ResponseEntity<String> captureStop(@RequestBody String captureID) {
+    public ResponseEntity<String> captureStop(@RequestBody String id) {
 
+        System.out.println("CAPTURE STOP");
         // Send bad request on unknown capture ID
-        if (!captures.containsKey(captureID)) {
+        if (!doesCapturesTableContain(id)) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        Capture capture = captures.get(captureID);
+        Capture capture = getCapture(id);
         capture.setStatus("Finished");
         capture.setEndTime(new Date());
 
@@ -164,7 +227,7 @@ public class CaptureController {
 
     @RequestMapping(value = "/capture/update", method = RequestMethod.POST)
     public ResponseEntity<String> captureUpdate(@RequestBody Capture capture) {
-        if (!captures.containsKey(capture.getId())) {
+        if (!doesCapturesTableContain(capture.getId())) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 

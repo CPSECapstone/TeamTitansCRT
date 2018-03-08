@@ -25,6 +25,8 @@ public class TimerManager {
         startTimers();
     }
 
+    // Todo: Needs to update on the hour
+    // Todo: Needs to
     private void startTimers() {
         // Timer to handle downloading logs and concatenating them to a file on the hour
         hourTimer.schedule(new TimerTask() {
@@ -33,7 +35,6 @@ public class TimerManager {
                 Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
                 int hour = calendar.get(Calendar.HOUR_OF_DAY);
                 CaptureController.getInstance().writeHourlyLogFile(captureID, hour);
-                calendar.add(Calendar.HOUR, 1);
             }
         }, startTime, UPDATE_PERIOD_HOUR);
 
