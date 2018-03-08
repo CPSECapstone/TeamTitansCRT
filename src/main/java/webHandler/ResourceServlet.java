@@ -6,18 +6,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 
 /**
  * Servlet to handle all resource calls.
  */
 @RestController
 public class ResourceServlet {
-
-    DBUtil db = new DBUtil("captureDatabase.db");
 
     @RequestMapping(value = "/resource/rds", method = RequestMethod.GET)
     public ResponseEntity<Collection<String>> getRDSInstances() {
@@ -36,12 +32,12 @@ public class ResourceServlet {
     @RequestMapping(value = "/resource/history", method = RequestMethod.GET)
     public ResponseEntity<Collection<Capture>> getCaptureReplayHistory() {
 
-        ArrayList<Capture> captures = null;
-        try {
-            captures = db.loadAllCaptures();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        ArrayList<Capture> captures = DBUtil.getInstance().loadAllCaptures();
+
+        if (captures == null) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
         return new ResponseEntity<>(captures, HttpStatus.OK);
     }
 }

@@ -12,7 +12,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.sql.SQLException;
 import java.util.*;
 
 @RestController
@@ -20,8 +19,6 @@ public class CaptureController {
 
     // Number of minutes to milliseconds to wait before updating captures.
     private final int UPDATE_PERIOD_MINUTE = 1000 * 60 * 1;
-
-    DBUtil db = new DBUtil("captureDatabase.db");
 
     @RequestMapping(value = "/capture/start", method = RequestMethod.POST)
     public ResponseEntity<String> captureStart(@RequestBody Capture capture) {
@@ -74,10 +71,8 @@ public class CaptureController {
         }
 
         HttpStatus status = HttpStatus.OK;
-        try {
-            db.saveCapture(capture);
-        } catch (SQLException e) {
-            e.printStackTrace();
+
+        if (!DBUtil.getInstance().saveCapture(capture)) {
             status = HttpStatus.INTERNAL_SERVER_ERROR;
         }
 
@@ -87,11 +82,9 @@ public class CaptureController {
     @RequestMapping(value = "/capture/stop", method = RequestMethod.POST)
     public ResponseEntity<String> captureStop(@RequestBody Capture capture) {
 
-        Capture targetCapture;
-        try {
-            targetCapture = db.loadCapture(capture.getId());
-        } catch (SQLException e) {
-            e.printStackTrace();
+        Capture targetCapture = DBUtil.getInstance().loadCapture(capture.getId());
+
+        if (targetCapture == null) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
@@ -118,10 +111,7 @@ public class CaptureController {
             //TODO: Add check for file upload
         }
 
-        try {
-            db.saveCapture(targetCapture);
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if (!DBUtil.getInstance().saveCapture(targetCapture)) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
@@ -131,11 +121,9 @@ public class CaptureController {
     @RequestMapping(value = "/capture/update", method = RequestMethod.POST)
     public ResponseEntity<String> captureUpdate(@RequestBody Capture capture) {
 
-        Capture targetCapture;
-        try {
-            targetCapture = db.loadCapture(capture.getId());
-        } catch (SQLException e) {
-            e.printStackTrace();
+        Capture targetCapture = DBUtil.getInstance().loadCapture(capture.getId());
+
+        if (targetCapture == null) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
@@ -180,10 +168,7 @@ public class CaptureController {
             //TODO: Add check for file upload
         }
 
-        try {
-            db.saveCapture(targetCapture);
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if (!DBUtil.getInstance().saveCapture(targetCapture)) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
@@ -192,11 +177,9 @@ public class CaptureController {
 
     @RequestMapping(value = "/capture/status", method = RequestMethod.GET)
     public ResponseEntity<Collection<Capture>> captureStatus() {
-        ArrayList<Capture> captures;
-        try {
-            captures = db.loadAllCaptures();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        ArrayList<Capture> captures = DBUtil.getInstance().loadAllCaptures();
+
+        if (captures == null) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<>(captures, HttpStatus.OK);

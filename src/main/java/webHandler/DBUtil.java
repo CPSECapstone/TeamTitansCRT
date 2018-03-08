@@ -5,21 +5,31 @@ import java.util.ArrayList;
 
 public class DBUtil {
 
-    Connection conn;
-    private String databaseFile;
+    private static DBUtil instance = null;
+    private Connection conn;
+
+    public static DBUtil getInstance()
+    {
+        if (instance == null) {
+            instance = new DBUtil("captureReplay.db");
+        }
+
+        return instance;
+    }
 
     /**
      * Connect to a database
      *
      * @param databaseFile the database file name
      */
-
-    public DBUtil(String databaseFile)
+    private DBUtil(String databaseFile)
     {
         this.conn = connectSqlite(databaseFile);
+        createNewCaptureTable(databaseFile);
+        createNewReplayTable(databaseFile);
     }
 
-    public static Connection connectSqlite(String databaseFile)
+    private static Connection connectSqlite(String databaseFile)
     {
         Connection conn = null;
         try {
@@ -42,9 +52,6 @@ public class DBUtil {
             System.out.println("Connection to SQLite has been established.");
 
             stmt.close();
-
-            createNewCaptureTable(databaseFile);
-            createNewReplayTable(databaseFile);
         } catch(ClassNotFoundException e) {
             System.err.println(e.getMessage());
         } catch(SQLException e)
@@ -90,13 +97,13 @@ public class DBUtil {
         }
     }
 
-    public static void createNewCaptureTable(String databaseFile)
+    private void createNewCaptureTable(String databaseFile)
     {
 
         try
         {
             String sql = "CREATE TABLE IF NOT EXISTS captures(\n"
-                    + " dbId INTEGER PRIMARY KEY AUTOINCREMENT,\n"
+                    + " dbId INTEGER PRIMARY KEY AUTOINCREMENT,\n"
                     + " id TEXT,\n"
                     + " rds TEXT,\n"
                     + " s3 TEXT,\n"
@@ -109,11 +116,11 @@ public class DBUtil {
                     + " numDbTransactions INTEGER\n"
                     + ");";
 
-            Connection conn = DriverManager.getConnection("jdbc:sqlite:" + databaseFile);
+            //Connection conn = DriverManager.getConnection("jdbc:sqlite:" + databaseFile);
             Statement stmt = conn.createStatement();
 
             stmt.execute(sql);
-            conn.close();
+            //conn.close();
             stmt.close();
         }
 
@@ -123,7 +130,7 @@ public class DBUtil {
         }
     }
 
-    public static void createNewReplayTable(String databaseFile)
+    private void createNewReplayTable(String databaseFile)
     {
 
         try
@@ -140,11 +147,11 @@ public class DBUtil {
                     + " FOREIGN KEY(capture_id) REFERENCES captures(id)\n"
                     + ");";
 
-        Connection conn = DriverManager.getConnection("jdbc:sqlite:" + databaseFile);
-        Statement stmt = conn.createStatement();
+            //Connection conn = DriverManager.getConnection("jdbc:sqlite:" + databaseFile);
+            Statement stmt = conn.createStatement();
 
             stmt.execute(sql);
-            conn.close();
+            //conn.close();
             stmt.close();
         }
 
@@ -217,15 +224,15 @@ public class DBUtil {
                 return null;
             }
 
-            capture.setId(rs.getString(1));
-            capture.setRds(rs.getString(2));
-            capture.setS3(rs.getString(3));
-            capture.setStartTime(rs.getDate(4));
-            capture.setEndTime(rs.getDate(5));
-            capture.setStatus(rs.getString(6));
-            capture.setFileSizeLimit(rs.getInt(7));
-            capture.setDbFileSize(rs.getInt(8));
-            capture.setNumDBTransactions(rs.getInt(9));
+            capture.setId(rs.getString(2));
+            capture.setRds(rs.getString(3));
+            capture.setS3(rs.getString(4));
+            capture.setStartTime(rs.getDate(5));
+            capture.setEndTime(rs.getDate(6));
+            capture.setStatus(rs.getString(7));
+            capture.setFileSizeLimit(rs.getInt(8));
+            capture.setDbFileSize(rs.getInt(9));
+            capture.setNumDBTransactions(rs.getInt(10));
 
             return capture;
         }
@@ -251,15 +258,15 @@ public class DBUtil {
 
             while (rs.next()) {
                 Capture capture = new Capture();
-                capture.setId(rs.getString(1));
-                capture.setRds(rs.getString(2));
-                capture.setS3(rs.getString(3));
-                capture.setStartTime(rs.getDate(4));
-                capture.setEndTime(rs.getDate(5));
-                capture.setStatus(rs.getString(6));
-                capture.setFileSizeLimit(rs.getInt(7));
-                capture.setDbFileSize(rs.getInt(8));
-                capture.setNumDBTransactions(rs.getInt(9));
+                capture.setId(rs.getString(2));
+                capture.setRds(rs.getString(3));
+                capture.setS3(rs.getString(4));
+                capture.setStartTime(rs.getDate(5));
+                capture.setEndTime(rs.getDate(6));
+                capture.setStatus(rs.getString(7));
+                capture.setFileSizeLimit(rs.getInt(8));
+                capture.setDbFileSize(rs.getInt(9));
+                capture.setNumDBTransactions(rs.getInt(10));
 
                 captures.add(capture);
             }
@@ -274,6 +281,7 @@ public class DBUtil {
         }
     }
 
+    /*
     public boolean saveReplay(Replay replay)
     {
         //inserts values, if value is there then it's replaced
@@ -382,7 +390,7 @@ public class DBUtil {
             System.err.println(e.getMessage());
             return null;
         }
-    }
+    }*/
 
     /*public static void main (String[] args)
     {
