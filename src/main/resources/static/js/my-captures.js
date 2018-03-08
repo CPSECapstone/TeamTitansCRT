@@ -1,6 +1,15 @@
 $(function() {
+    var idSelector = "idSelector";
     var rdsSelector = "rdsSelector";
     var s3Selector = "s3Selector";
+    var startTimeSelector = "startTimeSelector";
+    var endTimeSelector = "endTimeSelector";
+    var fileSizeLimitSelector = "fileSizeLimitSelector";
+    var transactionLimitSelector = "transactionLimitSelector";
+    var filterStatementsSelector = "filterStatementsSelector";
+    var filterUsersSelector = "filterUsersSelector";
+
+    var saveBtnSelector = "btnCaptureStart";
 
     $("div.content-placeholder").replaceWith(`
     <div class="container">
@@ -19,29 +28,85 @@ $(function() {
                 <p class=""><strong>Start a Capture</strong></p>
                 <div class="${rdsSelector}"></div>
                 <div class="${s3Selector}"></div>
-                ${createTextInput("Capture ID:", "txtID")}
+                ${createTextInput("Capture ID:", idSelector)}
 
                 <a data-toggle="collapse" href="#advanced">Advanced <span class="caret"></span></a>
 
                 <div id="advanced" class="collapse">
                     <label class="input-label">Start Time:
-                        <input id="txtStartTime" class="form-control" type="datetime-local" value="">
+                        <input id="${startTimeSelector}" class="form-control" type="datetime-local" value="">
                     </label>
                     <label class="input-label">End Time:
-                        <input id="txtEndTime" class="form-control" type="datetime-local" value="">
+                        <input id="${endTimeSelector}" class="form-control" type="datetime-local" value="">
                     </label>
-                    ${createTextInput("Max Capture Size (mB):", "txtMaxSize")}
-                    ${createTextInput("Max Number of Transactions:", "txtMaxTrans")}
-                    ${createTextInput("Database Commands to Ignore (comma delimited):", "txtFilterStatements")}
-                    ${createTextInput("Database Users to Ignore (comma delimited):", "txtFilterUsers")}
+                    ${createTextInput("Max Capture Size (mB):", fileSizeLimitSelector)}
+                    ${createTextInput("Max Number of Transactions:", transactionLimitSelector)}
+                    ${createTextInput("Database Commands to Ignore (comma delimited):", filterStatementsSelector)}
+                    ${createTextInput("Database Users to Ignore (comma delimited):", filterUsersSelector)}
                 </div>
+                <a href="javascript:void(0)" id="${saveBtnSelector}" class="btn btn-default">Start Capture</a>
             </div>
         </div>
     </div>
     `);
     populateRDSDropdown(rdsSelector);
     populateS3Dropdown(s3Selector);
+    $(`#${saveBtnSelector}`).on("click", function() {
+        var startTime = null;
+        if ($(`#${startTimeSelector}`).val()) {
+            startTime = new Date(String($(`#${startTimeSelector}`).val()));
+        }
+
+        var endTime = null;
+        if ($(`#${endTimeSelector}`).val()) {
+            endTime = new Date(String($(`#${endTimeSelector}`).val()));
+        }
+
+        // Only start capture if rds and s3 selected
+        if ($(`#${rdsSelector}`).val() != '' && $(`#${s3Selector}`).val() != '') {
+            var capture = {
+                id: $(`#${idSelector}`).val(),
+                rds: $(`#${rdsSelector}`).val(),
+                s3: $(`#${s3Selector}`).val(),
+                startTime: startTime,
+                endTime: endTime,
+                fileSizeLimit: $(`#${fileSizeLimitSelector}`).val(),
+                transactionLimit: $(`#${transactionLimitSelector}`).val(),
+                filterStatements: $(`#${filterStatementsSelector}`).val().split(',').map(x => x.trim()),
+                filterUsers: $(`#${filterUsersSelector}`).val().split(',').map(x => x.trim()),
+                status: ""
+            };
+
+            startCapture(capture);
+        }
+    });
 });
+
+/**           
+ * Starts a capture using the given Capture object
+ * @param  {Capture} The Capture object to be started
+ */
+function startCapture(capture) {
+    $.ajax({
+        url: "/capture/start",
+        type: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        data: JSON.stringify(capture),
+        success: function() {
+            $("#lblStatus").html("<p>Started Successful.</p>" +
+                                 "<a href=\"manageCaptures\" id=\"btnManageCaptures\" class=\"btn btn-default\">Manage Captures</a>" +
+                                 "<a href=\"dashboard\" id=\"btnDashboard\" class=\"btn btn-default\">Go to Dashboard</a>");
+        },
+        error: function(err) {
+            $("#lblStatus").html("Startup failure.");
+
+            console.log("Error starting capture");
+            console.log(err);
+        }
+    });
+}
 
 /**
  * Populate rds dropdown
