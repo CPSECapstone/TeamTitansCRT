@@ -22,10 +22,13 @@ $(function() {
         <div class="row">
             <div class="col-lg-offset-2 col-lg-4 border-on-right">
                 <p class=""><strong>Manage Captures</strong></p>
+                <hr />
+                <div class="" id="loadingModal" tabindex="-1" role="dialog"><div class="spinner"></div></div>
                 <ul id="CaptureList" class="list-group"></ul>
             </div>
             <div class="col-lg-4 start-capture-form">
                 <p class=""><strong>Start a Capture</strong></p>
+                <hr />
                 <div class="${rdsSelector}"></div>
                 <div class="${s3Selector}"></div>
                 ${createTextInput("Capture ID:", idSelector)}
@@ -111,6 +114,13 @@ function updateCaptureList() {
     $.ajax({
         url: "/capture/status",
         type: "GET",
+        beforeSend: function() {
+            $("#loadingModal").show();
+        },
+        complete: function() {
+            $("#loadingModal").hide();
+        },
+
         success: function(data) {
             console.log(data);
             addAllToCaptureList(data);
