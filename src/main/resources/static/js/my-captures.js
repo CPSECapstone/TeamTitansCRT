@@ -22,7 +22,7 @@ $(function() {
         <div class="row">
             <div class="col-lg-offset-2 col-lg-4 border-on-right">
                 <p class=""><strong>Manage Captures</strong></p>
-                ${createCaptureTable()}
+                <ul id="CaptureList" class="list-group"></ul>
             </div>
             <div class="col-lg-4 start-capture-form">
                 <p class=""><strong>Start a Capture</strong></p>
@@ -51,6 +51,25 @@ $(function() {
         </div>
     </div>
     `);
+    // updateCaptureList();
+    var data = [
+        {
+            id: "Test1",
+            startTime: 10000000,
+            endTime: 10000000,
+            fileSizeLimit: 420,
+            transactionLimit: 840,
+        },
+        {
+            id: "Test2",
+            startTime: 10000000,
+            endTime: 10000000,
+            fileSizeLimit: 420,
+            transactionLimit: 840,
+        }
+    ]
+    addAllToCaptureList(data);
+
     populateRDSDropdown(rdsSelector);
     populateS3Dropdown(s3Selector);
     $(`#${saveBtnSelector}`).on("click", function() {
@@ -83,6 +102,122 @@ $(function() {
     });
 });
 
+/**
+ * Top level function for creating list of capture cards
+ */
+function updateCaptureList() {
+    $.ajax({
+        url: "/capture/status",
+        type: "GET",
+        success: function(data) {
+            console.log(data);
+            addAllToCaptureList(data);
+        },
+        error: function(err) {
+            console.log(err);
+        }
+    });
+}
+
+function addAllToCaptureList(data) {
+    // clears contents of the CaptureList
+    $('#CaptureList').empty();
+    data.map(addToCaptureList).join('')
+}
+
+/**
+ * Takes a capture, adds it to the list of capture cards, and creates the save binding
+ * @param {Capture}
+ */
+function addToCaptureList(capture) {
+    $("#CaptureList").append(createEditCaptureModal(capture));
+
+    var id = capture["id"];
+    $("#" + id + " .save").on("click", function() {
+        updateCapture(id);
+    });
+}
+
+/**
+ * Function that uses a template to create a card
+ * @param  {Capture}
+ * @return {string}
+ */
+function createEditCaptureModal(capture) {
+    var id = capture["id"];
+    var status = capture["status"];
+    
+    // to be fixed with user set timezone
+    var startTime = new Date(capture["startTime"]);
+    startTime.setHours(startTime.getHours() - 8);
+    startTime = startTime.toISOString().replace("Z", "");
+    var endTime = new Date(capture["endTime"]);
+    endTime.setHours(endTime.getHours() - 8);
+    endTime = endTime.toISOString().replace("Z", "");
+
+    var fileSizeLimit = capture["fileSizeLimit"];
+    var transactionLimit = capture["transactionLimit"];
+    return `
+    ${createCaptureListItem(id, `${id}-modal`)}
+    <div class="modal fade" id="${id}-modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">${id}</h5>
+                </div>
+                <div class="modal-body">
+                    <label class="input-label">Start Time:
+                        <input id="${startTimeSelector}" class="form-control" type="datetime-local" value="${startTime}">
+                    </label>
+                    <label class="input-label">End Time:
+                        <input id="${endTimeSelector}" class="form-control" type="datetime-local" value="${endTime}">
+                    </label>
+                    ${createTextInputValue("Max Capture Size (mB):", fileSizeLimitSelector, fileSizeLimit)}
+                    ${createTextInputValue("Max Number of Transactions:", transactionLimitSelector, transactionLimit)}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>`;
+}
+
+/**
+ * Takes a capture id and send the update request to the backend
+ * @param  {string}
+ */
+function updateCapture(id) {
+    var body = {
+        id: id,
+        startTime: $("#" + id + " .txtStartTime").val(),
+        endTime: $("#" + id + " .txtEndTime").val(),
+        fileSizeLimit: $("#" + id + " .txtMaxSize").val(),
+        transactionLimit: $("#" + id + " .txtMaxTrans").val()
+    };
+    
+    $.ajax({
+        url: "/capture/update",
+        type: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        data: JSON.stringify(body),
+        success: function() {
+            console.log(id + " success")
+            updateCaptureList();
+        },
+        error: function(err) {
+            $("#lblStatus").html("Startup failure.");
+            console.log(err);
+        }
+    });
+}
+
+function createCaptureListItem(id, selector) {
+    return `<li id="item-${id}" class="list-group-item">${id}<a data-toggle="modal" data-target="#${selector}" href="javascript:void(0)" class="pull-right">Edit</a></li>`;
+}
+
 /**           
  * Starts a capture using the given Capture object
  * @param  {Capture} The Capture object to be started
@@ -96,11 +231,11 @@ function startCapture(capture) {
         },
         data: JSON.stringify(capture),
         success: function() {
-            $("#exampleModal").html(createModalWindow("Successful"));
+            $("#exampleModal").html(createStartCaptureModal("Successful"));
             $("#exampleModal").modal("show");
         },
         error: function(err) {
-            $("#exampleModal").html(createModalWindow("Failure"));
+            $("#exampleModal").html(createStartCaptureModal("Failure"));
             $("#exampleModal").modal("show");
 
             console.log("Error starting capture");
@@ -109,7 +244,7 @@ function startCapture(capture) {
     });
 }
 
-function createModalWindow(result) {
+function createStartCaptureModal(result) {
     return `
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -173,6 +308,14 @@ function createTextInput(label, id) {
     </div>`;
 }
 
+function createTextInputValue(label, id, value) {
+    return `
+    <div class="form-group">
+        <label class="input-label">${label}</label>
+        <input id="${id}" class="form-control" type="text" value="${value}">
+    </div>`;
+}
+
 function createDropdown(label, id, options) {
     return `
     <div class="form-group">
@@ -185,15 +328,4 @@ function createDropdown(label, id, options) {
 
 function createOption(option) {
     return `<option value="${option}">${option}</option>`;
-}
-
-function createCaptureTable() {
-    return `
-    <ul class="list-group">
-      <li class="list-group-item">Cras justo odio <a href="javascript:void(0)" class="pull-right">Edit</a></li>
-      <li class="list-group-item">Dapibus ac facilisis in <a href="javascript:void(0)" class="pull-right">Edit</a></li>
-      <li class="list-group-item">Morbi leo risus <a href="javascript:void(0)" class="pull-right">Edit</a></li>
-      <li class="list-group-item">Porta ac consectetur ac <a href="javascript:void(0)" class="pull-right">Edit</a></li>
-      <li class="list-group-item">Vestibulum at eros <a href="javascript:void(0)" class="pull-right">Edit</a></li>
-    </ul>`;
 }
