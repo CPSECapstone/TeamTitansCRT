@@ -96,17 +96,37 @@ function startCapture(capture) {
         },
         data: JSON.stringify(capture),
         success: function() {
-            $("#exampleModal div.modal-body").html("<p>Success</p>");
+            $("#exampleModal").html(createModalWindow("Successful"));
             $("#exampleModal").modal("show");
         },
         error: function(err) {
-            $("#exampleModal div.modal-body").html("<p>Failure</p>");
+            $("#exampleModal").html(createModalWindow("Failure"));
             $("#exampleModal").modal("show");
 
             console.log("Error starting capture");
             console.log(err);
         }
     });
+}
+
+function createModalWindow(result) {
+    return `
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Capture ${result}</h5>
+            </div>
+            <div class="modal-body">
+                ${result === "Successful" ? 
+                    "<p>Your capture is in progress. Go to Dashboard to see the current status.</p>" :
+                    "<p>Your capture failed to start. Verify all fields are correct.</p>"}
+                
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>`;
 }
 
 /**
