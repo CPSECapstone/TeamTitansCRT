@@ -227,8 +227,8 @@ public class DBUtil {
             capture.setId(rs.getString(2));
             capture.setRds(rs.getString(3));
             capture.setS3(rs.getString(4));
-            capture.setStartTime(rs.getDate(5));
-            capture.setEndTime(rs.getDate(6));
+            capture.setStartTime(rs.getTimestamp(5));
+            capture.setEndTime(rs.getTimestamp(6));
             capture.setStatus(rs.getString(7));
             capture.setFileSizeLimit(rs.getInt(8));
             capture.setDbFileSize(rs.getInt(9));
@@ -261,8 +261,8 @@ public class DBUtil {
                 capture.setId(rs.getString(2));
                 capture.setRds(rs.getString(3));
                 capture.setS3(rs.getString(4));
-                capture.setStartTime(rs.getDate(5));
-                capture.setEndTime(rs.getDate(6));
+                capture.setStartTime(rs.getTimestamp(5));
+                capture.setEndTime(rs.getTimestamp(6));
                 capture.setStatus(rs.getString(7));
                 capture.setFileSizeLimit(rs.getInt(8));
                 capture.setDbFileSize(rs.getInt(9));
