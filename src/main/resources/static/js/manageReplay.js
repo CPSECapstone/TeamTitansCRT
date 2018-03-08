@@ -5,7 +5,7 @@ $(function() {
 
 function updateStatus() {
     $.ajax({
-        url: "/capture/status",
+        url: "/replay/status",
         type: "GET",
         success: function(data) {
             $('#accordion').html("");
@@ -55,11 +55,11 @@ function addToTable(capture) {
         "<\/div>"
     );
     $("#" + id + " .save").on("click", function() {
-        updateCapture(id);
+        updateReplay(id);
     });
 }
 
-function updateCapture(id) {
+function updateReplay(id) {
     var body = {
         id: id,
         startTime: $("#" + id + " .txtStartTime").val(),
@@ -69,7 +69,7 @@ function updateCapture(id) {
     };
     
     $.ajax({
-        url: "/capture/update",
+        url: "/replay/update",
         type: "POST",
         headers: {
             "Content-Type": "application/json",

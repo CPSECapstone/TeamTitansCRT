@@ -20,6 +20,12 @@ public class CrtController {
     @GetMapping("manageCaptures")
     public String manageCaptures() { return "manageCapturePage.html"; }
 
+    @GetMapping("replay")
+    public String replay() { return "startReplayPage.html"; }
+    
+    @GetMapping("manageReplays")
+    public String manageReplays() { return "manageReplayPage.html"; }
+
     @GetMapping("analyze")
     public String analyze() { return "analyzePage.html"; }
 

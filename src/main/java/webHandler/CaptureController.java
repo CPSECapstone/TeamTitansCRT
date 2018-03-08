@@ -8,20 +8,127 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @RestController
 public class CaptureController {
 
-    // Number of minutes to milliseconds to wait before updating captures.
-    private final int UPDATE_PERIOD_MINUTE = 1000 * 60 * 1;
+    private final String GeneralLogFileName = "general/mysql-general.log";
+
+    // Singleton
+    public static CaptureController captureController = null;
+
+    private HashMap<String, Capture> captures;
+    private HashMap<String, LogController> logControllers;
+    private HashMap<String, TimerManager> timers;
+
+    private CaptureController() {
+        captures = new HashMap<>();
+        logControllers = new HashMap<>();
+        timers = new HashMap<>();
+    }
+
+    public static CaptureController getInstance() {
+        if (captureController == null) {
+            captureController = new CaptureController();
+        }
+        return captureController;
+    }
+
+    /*
+   @return Returns true if successfully uploads, false otherwise
+    */
+    private boolean uploadLogToS3(Capture capture) {
+        String fileName = capture.getId() + "-Workload.log";
+        File workloadFile = new File(fileName);
+        FileInputStream stream = null;
+
+        try {
+            stream = new FileInputStream(workloadFile);
+        } catch (FileNotFoundException ex) {
+            ex.printStackTrace();
+            return false;
+        }
+
+        S3Manager s3Manager = new S3Manager();
+        s3Manager.uploadFile(capture.getS3(), fileName, stream, new ObjectMetadata());
+        return true;
+    }
+
+    /*
+   @return Returns true if successfully uploads, false otherwise
+    */
+    private boolean uploadMetricsToS3(Capture capture) {
+        CloudWatchManager cloudManager = new CloudWatchManager();
+        String stats = cloudManager.getAllMetricStatisticsAsJson(capture.getRds(), capture.getStartTime(), capture.getEndTime());
+        InputStream statStream = new ByteArrayInputStream(stats.getBytes(StandardCharsets.UTF_8));
+
+        // Store RDS workload in S3
+        S3Manager s3Manager = new S3Manager();
+        s3Manager.uploadFile(capture.getS3(), capture.getId() + "-Performance.log", statStream, new ObjectMetadata());
+        return true;
+    }
+
+    private void updateCapture(Capture updatedCapture) {
+        Capture capture = captures.get(updatedCapture.getId());
+        capture.setStartTime(updatedCapture.getStartTime());
+        capture.setEndTime(updatedCapture.getEndTime());
+        capture.setTransactionLimit(updatedCapture.getTransactionLimit());
+        capture.setFileSizeLimit(updatedCapture.getFileSizeLimit());
+        capture.updateStatus();
+
+        DBUtil.getInstance().saveCapture(capture);
+    }
+
+    private void updateLogController(Capture capture) {
+        LogController logController = logControllers.get(capture.getId());
+        logController.updateLogController(capture);
+    }
+
+    private void updateTimerController(Capture capture) {
+        TimerManager timerManager = timers.get(capture.getId());
+        timerManager.updateTimeManager(capture.getStartTime(), capture.getEndTime());
+    }
+
+    public void updateCaptureFileSize(String id, long fileSize) {
+        if (captures.containsKey(id)) {
+            Capture capture = captures.get(id);
+            capture.setDbFileSize(fileSize);
+            capture.updateStatus();
+            if (capture.hasFileSizeLimit()) {
+                captureStop(id);
+            }
+        }
+    }
+
+    public void updateCaptureTransactionCount(String id, int count) {
+        if (captures.containsKey(id)) {
+            Capture capture = captures.get(id);
+            capture.setTransactionCount(count);
+            capture.updateStatus();
+            if (capture.hasReachedTransactonLimit()) {
+                captureStop(id);
+            }
+        }
+    }
+
+    public void writeHourlyLogFile(String id, int hour) {
+        Capture capture = captures.get(id);
+        LogController logController = logControllers.get(id);
+        RDSManager rdsManager = new RDSManager();
+
+        String logFile = GeneralLogFileName + "." + hour;
+        String logData = rdsManager.downloadLog(capture.getRds(),  logFile);
+
+        logController.logData(capture, logData, false, false);
+    }
 
     @RequestMapping(value = "/capture/start", method = RequestMethod.POST)
     public ResponseEntity<String> captureStart(@RequestBody Capture capture) {
+        LogController logController = new LogController(capture);
+        TimerManager timerManager = new TimerManager(capture.getId(), capture.getStartTime(), capture.getEndTime());
 
         if (capture.getId() == null || capture.getS3() == null || capture.getRds() == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -31,183 +138,54 @@ public class CaptureController {
             capture.setStartTime(new Date());
         }
 
-        if (capture.getEndTime() != null) {
-            new Timer().schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    captureStop(capture);
-                }
-            }, capture.getEndTime());
-        }
-
-        capture.startCaptureLogs();
-
-        if (capture.hasFileSizeLimit()) {
-            new Timer().schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    int fileSize = getFileSize(capture);
-                    capture.setDbFileSize(fileSize);
-                    if (fileSize > capture.getFileSizeLimit()) {
-                        captureStop(capture);
-                        cancel();
-                    }
-                }
-            }, 0, UPDATE_PERIOD_MINUTE);
-        }
-
-        if (capture.hasTransactionLimit()) {
-            new Timer().schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    int numTransactions = getNumTransactions(capture);
-                    capture.setNumDBTransactions(numTransactions);
-                    if (numTransactions > capture.getTransactionLimit()) {
-                        captureStop(capture);
-                        cancel();
-                    }
-                }
-            }, 0, UPDATE_PERIOD_MINUTE);
-        }
-
-        HttpStatus status = HttpStatus.OK;
+        captures.put(capture.getId(), capture);
+        logControllers.put(capture.getId(), logController);
+        timers.put(capture.getId(), timerManager);
 
         if (!DBUtil.getInstance().saveCapture(capture)) {
-            status = HttpStatus.INTERNAL_SERVER_ERROR;
-        }
-
-        return new ResponseEntity<>(status);
-    }
-
-    @RequestMapping(value = "/capture/stop", method = RequestMethod.POST)
-    public ResponseEntity<String> captureStop(@RequestBody Capture capture) {
-
-        Capture targetCapture = DBUtil.getInstance().loadCapture(capture.getId());
-
-        if (targetCapture == null) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-        targetCapture.updateStatus();
-
-        if (capture.getEndTime() == null) {
-            targetCapture.setEndTime(new Date());
-        } else {
-            targetCapture.setEndTime(capture.getEndTime());
-        }
-
-        if (targetCapture.getStatus().equals("Finished")) {
-            // Grab RDS workload
-            capture.endCaptureLogs();
-
-            CloudWatchManager cloudManager = new CloudWatchManager();
-            String stats = cloudManager.getAllMetricStatisticsAsJson(targetCapture.getRds(), targetCapture.getStartTime(), targetCapture.getEndTime());
-            InputStream statStream = new ByteArrayInputStream(stats.getBytes(StandardCharsets.UTF_8));
-
-            // Store RDS workload in S3
-            S3Manager s3Manager = new S3Manager();
-            s3Manager.uploadFile(targetCapture.getS3(), targetCapture.getId() + "-Performance.log", statStream, new ObjectMetadata());
-
-            //TODO: Add check for file upload
-        }
-
-        if (!DBUtil.getInstance().saveCapture(targetCapture)) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
-    
+
+    @RequestMapping(value = "/capture/stop", method = RequestMethod.POST)
+    public ResponseEntity<String> captureStop(@RequestBody String captureID) {
+
+        // Send bad request on unknown capture ID
+        if (!captures.containsKey(captureID)) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        Capture capture = captures.get(captureID);
+        capture.setStatus("Finished");
+        capture.setEndTime(new Date());
+
+        uploadLogToS3(capture);
+        uploadMetricsToS3(capture);
+
+        if (!DBUtil.getInstance().saveCapture(capture)) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     @RequestMapping(value = "/capture/update", method = RequestMethod.POST)
     public ResponseEntity<String> captureUpdate(@RequestBody Capture capture) {
-
-        Capture targetCapture = DBUtil.getInstance().loadCapture(capture.getId());
-
-        if (targetCapture == null) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        if (!captures.containsKey(capture.getId())) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        targetCapture.setStartTime(capture.getStartTime());
-        targetCapture.setEndTime(capture.getEndTime());
-        targetCapture.setTransactionLimit(capture.getTransactionLimit());
-        targetCapture.setFileSizeLimit(capture.getFileSizeLimit());
-        
-        targetCapture.updateStatus();
-
-        if (targetCapture.getStatus().equals("Finished")) {
-            // Grab RDS workload
-            RDSManager rdsManager = new RDSManager();
-            String logData = rdsManager.downloadLog(targetCapture.getRds(),  "general/mysql-general.log");
-
-            LogParser parser = new LogParser();
-
-            String parsedLogData = parser.parseLogData(logData, capture.getFilterStatements(),
-                    capture.getFilterUsers(), capture.getStartTime(), capture.getEndTime());
-
-            InputStream stream = null;
-            try
-            {
-                stream = new ByteArrayInputStream(parsedLogData.getBytes(StandardCharsets.UTF_8.name()));
-            } catch (UnsupportedEncodingException enc) {
-                enc.printStackTrace();
-            }
-
-            if (stream == null) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-
-            CloudWatchManager cloudManager = new CloudWatchManager();
-            String stats = cloudManager.getAllMetricStatisticsAsJson(targetCapture.getRds(), targetCapture.getStartTime(), targetCapture.getEndTime());
-            InputStream statStream = new ByteArrayInputStream(stats.getBytes(StandardCharsets.UTF_8));
-
-            // Store RDS workload in S3
-            S3Manager s3Manager = new S3Manager();
-            s3Manager.uploadFile(targetCapture.getS3(), targetCapture.getId() + "-Workload.log", stream, new ObjectMetadata());
-            s3Manager.uploadFile(targetCapture.getS3(), targetCapture.getId() + "-Performance.log", statStream, new ObjectMetadata());
-
-            //TODO: Add check for file upload
-        }
-
-        if (!DBUtil.getInstance().saveCapture(targetCapture)) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        updateCapture(capture);
+        updateLogController(capture);
+        updateTimerController(capture);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @RequestMapping(value = "/capture/status", method = RequestMethod.GET)
     public ResponseEntity<Collection<Capture>> captureStatus() {
-        ArrayList<Capture> captures = DBUtil.getInstance().loadAllCaptures();
-
-        if (captures == null) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        return new ResponseEntity<>(captures, HttpStatus.OK);
-    }
-
-    private int getFileSize(Capture capture) {
-        try {
-            RDSManager rdsManager = new RDSManager();
-            String logData = rdsManager.downloadLog(capture.getRds(), "general/mysql-general.log");
-            String parsedLogData = new LogParser().parseLogData(logData, capture.getFilterStatements(),
-                    capture.getFilterUsers(), capture.getStartTime(), capture.getEndTime());
-            return parsedLogData.getBytes(StandardCharsets.UTF_8.name()).length;
-        } catch(UnsupportedEncodingException e) {
-            e.printStackTrace();
-            return -1;
-        }
-    }
-
-    private int getNumTransactions(Capture capture) {
-        try {
-            RDSManager rdsManager = new RDSManager();
-            String logData = rdsManager.downloadLog(capture.getRds(), "general/mysql-general.log");
-            String parsedLogData = new LogParser().parseLogData(logData, capture.getFilterStatements(),
-                    capture.getFilterUsers(), capture.getStartTime(), capture.getEndTime());
-            return parsedLogData.length()  - parsedLogData.replace("\n", "").length();
-        } catch(Exception e) {
-            e.printStackTrace();
-            return -1;
-        }
+        return new ResponseEntity<>(captures.values(), HttpStatus.OK);
     }
 }

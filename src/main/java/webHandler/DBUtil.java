@@ -36,7 +36,7 @@ public class DBUtil {
             Class.forName("org.sqlite.JDBC");
 
             conn = DriverManager.getConnection("jdbc:sqlite:" + databaseFile);
-            Statement stmt = conn.createStatement();
+            java.sql.Statement stmt = conn.createStatement();
 
             // Enable WAL-mode transactions for concurrent writing.
             stmt.execute("PRAGMA synchronous = NORMAL;");
@@ -117,7 +117,7 @@ public class DBUtil {
                     + ");";
 
             //Connection conn = DriverManager.getConnection("jdbc:sqlite:" + databaseFile);
-            Statement stmt = conn.createStatement();
+            java.sql.Statement stmt = conn.createStatement();
 
             stmt.execute(sql);
             //conn.close();
@@ -148,7 +148,7 @@ public class DBUtil {
                     + ");";
 
             //Connection conn = DriverManager.getConnection("jdbc:sqlite:" + databaseFile);
-            Statement stmt = conn.createStatement();
+            java.sql.Statement stmt = conn.createStatement();
 
             stmt.execute(sql);
             //conn.close();
@@ -179,8 +179,8 @@ public class DBUtil {
             pstmt.setString(6, capture.getStatus());
             pstmt.setInt(7, capture.getFileSizeLimit());
             pstmt.setInt(8, capture.getTransactionLimit());
-            pstmt.setInt(9, capture.getDbFileSize());
-            pstmt.setInt(10, capture.getNumDBTransactions());
+            pstmt.setLong(9, capture.getDbFileSize());
+            pstmt.setInt(10, capture.getTransactionCount());
             pstmt.executeUpdate();
 
             pstmt.close();
@@ -188,7 +188,7 @@ public class DBUtil {
 
             if (capture.getId() == null) //TODO: last row id implementation
             {
-                Statement stmt = conn.createStatement();
+                java.sql.Statement stmt = conn.createStatement();
                 ResultSet rs = stmt.executeQuery("SELECT last_insert_rowid");
                 rs.next();
                 String id = rs.getString(1);
@@ -232,7 +232,7 @@ public class DBUtil {
             capture.setStatus(rs.getString(7));
             capture.setFileSizeLimit(rs.getInt(8));
             capture.setDbFileSize(rs.getInt(9));
-            capture.setNumDBTransactions(rs.getInt(10));
+            capture.setTransactionCount(rs.getInt(10));
 
             return capture;
         }
@@ -266,7 +266,7 @@ public class DBUtil {
                 capture.setStatus(rs.getString(7));
                 capture.setFileSizeLimit(rs.getInt(8));
                 capture.setDbFileSize(rs.getInt(9));
-                capture.setNumDBTransactions(rs.getInt(10));
+                capture.setTransactionCount(rs.getInt(10));
 
                 captures.add(capture);
             }
@@ -281,7 +281,6 @@ public class DBUtil {
         }
     }
 
-    /*
     public boolean saveReplay(Replay replay)
     {
         //inserts values, if value is there then it's replaced
@@ -304,7 +303,7 @@ public class DBUtil {
 
             if (replay.getId() == null) //TODO: last row id implementation
             {
-                Statement stmt = conn.createStatement();
+                java.sql.Statement stmt = conn.createStatement();
                 ResultSet rs = stmt.executeQuery("SELECT last_insert_rowid");
                 rs.next();
                 String id = rs.getString(1);
@@ -341,12 +340,12 @@ public class DBUtil {
                 return null;
             }
 
-            replay.setId(rs.getString(1));
-            replay.setRds(rs.getString(2));
-            replay.setS3(rs.getString(3));
-            replay.setStartTime(rs.getDate(4));
-            replay.setEndTime(rs.getDate(5));
-            replay.setStatus(rs.getString(6));
+            replay.setId(rs.getString(2));
+            replay.setRds(rs.getString(3));
+            replay.setS3(rs.getString(4));
+            replay.setStartTime(rs.getDate(5));
+            replay.setEndTime(rs.getDate(6));
+            replay.setStatus(rs.getString(7));
 
             return replay;
         }
@@ -372,12 +371,12 @@ public class DBUtil {
 
             while (rs.next()) {
                 Replay replay = new Replay();
-                replay.setId(rs.getString(1));
-                replay.setRds(rs.getString(2));
-                replay.setS3(rs.getString(3));
-                replay.setStartTime(rs.getDate(4));
-                replay.setEndTime(rs.getDate(5));
-                replay.setStatus(rs.getString(6));
+                replay.setId(rs.getString(2));
+                replay.setRds(rs.getString(3));
+                replay.setS3(rs.getString(4));
+                replay.setStartTime(rs.getDate(5));
+                replay.setEndTime(rs.getDate(6));
+                replay.setStatus(rs.getString(7));
 
                 replays.add(replay);
             }
@@ -390,11 +389,6 @@ public class DBUtil {
             System.err.println(e.getMessage());
             return null;
         }
-    }*/
-
-    /*public static void main (String[] args)
-    {
-        connectSqlite("/Users/devin/test.db");
-    }*/
+    }
 }
 
