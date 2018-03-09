@@ -219,6 +219,41 @@ public class DBUtil {
         }
     }
 
+    public boolean checkCaptureNameDuplication(String name) {
+        String sql = "SELECT TOP 1 captures.id FROM captures WHERE captures.id = ?";
+        return checkNameDuplication(sql, name);
+    }
+
+    public boolean checkReplayNameDuplication(String name) {
+        String sql = "SELECT TOP 1 replays.id FROM replays WHERE replays.id = ?";
+        return checkNameDuplication(sql, name);
+    }
+
+    private boolean  checkNameDuplication(String sql, String name) {
+        try
+        {
+            ResultSet rs;
+
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, name);
+            pstmt.executeUpdate();
+
+            rs = pstmt.getResultSet();
+
+            if (!rs.next()) {
+                rs.close();
+                pstmt.close();
+                return false;
+            }
+            pstmt.close();
+            return true;
+        }
+        catch (SQLException e) {
+            System.err.println(e.getMessage());
+            return false;
+        }
+    }
+
     public boolean saveCapture (Capture capture)
     {
         //inserts values, if value is there then it's replaced
