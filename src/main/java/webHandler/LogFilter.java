@@ -10,7 +10,6 @@ public abstract class LogFilter {
     protected List<String> usersToRemove; // list of user names to remove
 
     protected int transactionCount = 0; // current number of non-connection transactions successfully filtered
-
     protected int transactionLimit = 0; // the transaction limit -- default is 0
 
     // add the default user
@@ -32,24 +31,11 @@ public abstract class LogFilter {
         this.transactionLimit = transactionLimit;
     }
 
-    // adds the default statements
-    private void addDefaultStatementFilterValues()
-    {
-        if (!statementsToRemove.contains("Statistics"))
-        {
-            statementsToRemove.add("Statistics");
-        }
-        if (!statementsToRemove.contains("Quit"))
-        {
-            statementsToRemove.add("Quit");
-        }
-    }
 
     // adds default users and statements
     protected void addDefaultFilterValues()
     {
        addDefaultUserFilterValues();
-       addDefaultStatementFilterValues();
     }
 
     protected boolean isConnectCommand(String command)
@@ -62,8 +48,9 @@ public abstract class LogFilter {
 
         for (String statementToRemove : statementsToRemove)
         {
+
             // Regex match any user-selected statements with current queries
-            if (statement.getQuery().matches("(?i)" + statementToRemove + ".*"))
+            if (!statementToRemove.equals("") && statement.getQuery().matches("(?i)" + statementToRemove + ".*"))
             {
                 return true;
             }
@@ -92,10 +79,5 @@ public abstract class LogFilter {
     public int getTransactionCount()
     {
         return this.transactionCount;
-    }
-
-    public static ArrayList<Statement> getStatements(InputStream stream)
-    {
-        return new ArrayList<>();
     }
 }

@@ -3,13 +3,13 @@ package webHandler;
 public class DatabaseInfo {
 
     private String dbUrl;
-    private String databse;
+    private String database;
     private String username;
     private String password;
 
-    public DatabaseInfo(String dbUrl, String databse, String username, String password) {
+    public DatabaseInfo(String dbUrl, String database, String username, String password) {
         this.dbUrl = dbUrl;
-        this.databse = databse;
+        this.database = database;
         this.username = username;
         this.password = password; // Should this be encrypted?
     }
@@ -18,8 +18,8 @@ public class DatabaseInfo {
         return this.dbUrl;
     }
 
-    public String getDatabse() {
-        return this.databse;
+    public String getDatabase() {
+        return this.database;
     }
 
     public String getUsername() {

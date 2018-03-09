@@ -134,7 +134,7 @@ public class Replay implements Session {
     }
 
     public String getDatabase() {
-        return this.databaseInfo.getDatabse();
+        return this.databaseInfo.getDatabase();
     }
 
     public String getDBUsername() {

@@ -103,6 +103,10 @@ public class CaptureFilter extends LogFilter {
     // Forces time to follow hh:mm:ss
     protected String adhereToTimeLayout(String time)
     {
+        if (time.equals("--:--:--"))
+        {
+            return time;
+        }
         String timeFormat = "%02d:%02d:%02d";
         return String.format(timeFormat, Arrays.stream(time.split(":")).map(Integer::parseInt).toArray());
     }
@@ -165,6 +169,7 @@ public class CaptureFilter extends LogFilter {
             {
                 continue;
             }
+
             // Filters the default rds statements, user-selected users and user-selected statements
             if (isRDSDefaultStatement(statement) ||
                     isUserSelectedUser(statement) ||

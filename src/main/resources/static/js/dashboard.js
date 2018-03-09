@@ -91,14 +91,7 @@ function addToTable(icon, id, status, startTime, endTime, button) {
 /* If you push the stop capture button, it ends immediately. */
 function stopCapture(id) {
     var url = "/capture/stop";
-    var body = {
-        id: id,
-        rds: null,
-        s3: null,
-        startTime: null,
-        endTime: null,
-        status: ""
-    };
+    var body = id;
     
     $.ajax({
         url: url,
@@ -106,7 +99,7 @@ function stopCapture(id) {
         headers: {
             "Content-Type": "application/json",
         },
-        data: JSON.stringify(body),
+        data: body,
         success: function() {
             $("#lblStatus").html("Stopped Successfully.");
             updateStatus();
