@@ -155,6 +155,8 @@ public class CaptureController {
             timers.remove(id);
         }
         captures.remove(id);
+
+        DBUtil.getInstance().saveCapture(capture);
     }
 
     public void stopCapture(String id)
@@ -221,6 +223,8 @@ public class CaptureController {
 
     public void addCapture(Capture capture) {
         captures.put(capture.getId(), capture);
+
+        DBUtil.getInstance().saveCapture(capture);
     }
 
     public Capture getCapture(String id) {

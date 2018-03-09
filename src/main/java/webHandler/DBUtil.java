@@ -106,7 +106,7 @@ public class DBUtil {
         {
             String sql = "CREATE TABLE IF NOT EXISTS captures(\n"
                     + " dbId INTEGER PRIMARY KEY AUTOINCREMENT,\n"
-                    + " id TEXT,\n"
+                    + " id TEXT UNIQUE,\n"
                     + " rds TEXT,\n"
                     + " s3 TEXT,\n"
                     + " startTime TEXT,\n"
@@ -139,7 +139,7 @@ public class DBUtil {
         {
             String sql = "CREATE TABLE IF NOT EXISTS replays(\n"
                     + " dbId INTEGER PRIMARY KEY AUTOINCREMENT,\n"
-                    + " capture_id TEXT,\n"
+                    + " capture_id TEXT UNIQUE,\n"
                     + " id TEXT,\n"
                     + " rds TEXT,\n"
                     + " s3 TEXT,\n"
