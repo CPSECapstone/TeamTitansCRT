@@ -29,6 +29,13 @@ public class TimerManager {
     // Todo: Needs to
     private void startTimers() {
         // Timer to handle downloading logs and concatenating them to a file on the hour
+        // TODO: Add delay to hourTimer so that it starts on the hour
+        startHourTimer();
+        startEndTimer();
+    }
+
+    private void startHourTimer()
+    {
         hourTimer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -36,13 +43,25 @@ public class TimerManager {
                 int hour = calendar.get(Calendar.HOUR_OF_DAY);
                 CaptureController.getInstance().writeHourlyLogFile(captureID, hour);
             }
-        }, startTime, UPDATE_PERIOD_HOUR);
+        }, roundToNextWholeHour(startTime), UPDATE_PERIOD_HOUR);
+    }
 
+    public Date roundToNextWholeHour(Date date) {
+        Calendar c = new GregorianCalendar();
+        c.setTime(date);
+        c.add(Calendar.HOUR, 1);
+        c.set(Calendar.MINUTE, 0);
+        c.set(Calendar.SECOND, 0);
+        return c.getTime();
+    }
+
+    private void startEndTimer()
+    {
         if (endTime != null) {
             endTimer.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    CaptureController.getInstance().captureStop(captureID);
+                    CaptureController.getInstance().stopCapture(captureID);
                 }
             }, endTime);
         }
@@ -53,10 +72,9 @@ public class TimerManager {
         this.startTime = startTime;
         this.endTime = endTime;
 
-        hourTimer.cancel();
         endTimer.cancel();
 
-        startTimers();
+        startEndTimer();
     }
 
     public void end() {

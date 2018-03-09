@@ -1,95 +1,53 @@
 package webHandler;
 
+import com.amazonaws.services.s3.model.ObjectMetadata;
+
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-
-import java.util.ArrayList;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.HashMap;
 
 public class ReplayController {
+    private HashMap<String, Replay> replays;
 
-    public final String WorkloadTag = "-Workload.log";
+    private static ReplayController instance = null;
 
-    @RequestMapping(value = "/replay/start", method = RequestMethod.POST)
-    public ResponseEntity<String> startReplay(@RequestBody Replay replay, String replayType) {
-        S3Manager s3Manager = new S3Manager();
-        InputStream statementsStream;
-        ArrayList<Statement> statements;
-
-        String filename = replay.getId() + WorkloadTag;
-        statementsStream = s3Manager.getFile(replay.getS3(), filename);
-
-        statements = LogFilter.getStatements(statementsStream);
-
-        switch (replayType) {
-            case "Time Sensitive":
-                replayTimeSensitive(replay, statements);
-                break;
-            case "Fast Mode":
-                replayFastMode(replay, statements);
-                break;
-            default:
-                System.out.println("Error --- Unknown replay type.");
-        }
-
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @RequestMapping(value = "/replay/stop", method = RequestMethod.POST)
-    public ResponseEntity<String> stopReplay(@RequestBody Replay replay)
+    public static ReplayController getInstance()
     {
-        return new ResponseEntity<>(HttpStatus.OK);
+        if (instance == null)
+        {
+            instance = new ReplayController();
+        }
+        return instance;
     }
 
-    private void replayTimeSensitive(Replay replay, ArrayList<Statement> statements) {
-        MySQLManager manager = new MySQLManager(replay.getDBUrl(),
-                replay.getDatabase(),
-                replay.getDBUsername(),
-                replay.getDBPassword());
-
-        long lastTime = Long.parseLong(statements.get(0).getTime());
-        long currTime;
-
-        for (Statement statement : statements) {
-            currTime = Long.parseLong(statement.getTime());
-
-            long toWait = currTime - lastTime;
-
-            try {
-                Thread.sleep(toWait);
-                if (!statement.getCommand().equals("Connect"))
-                {
-                    manager.query(statement.getQuery());
-                }
-            }
-            catch (InterruptedException ex) {
-                ex.printStackTrace();
-            }
-
-            lastTime = currTime;
-        }
-
-        manager.closeConnection();
+    public void addReplay(Replay replay)
+    {
+        replays.put(replay.getId(), replay);
     }
 
-    private void replayFastMode(Replay replay, ArrayList<Statement> statements) {
-        MySQLManager manager = new MySQLManager(replay.getDBUrl(),
-                replay.getDatabase(),
-                replay.getDBUsername(),
-                replay.getDBPassword());
+    public void removeReplay(String id)
+    {
+        replays.remove(id);
+    }
 
-        for (Statement statement : statements) {
-            if (!statement.getCommand().equals("Connect"))
-            {
-                manager.query(statement.getQuery());
-            }
+    public Collection<Replay> getAllReplays()
+    {
+        return replays.values();
+    }
 
-        }
+    /*
+        @return Returns true if successfully uploads, false otherwise
+    */
+    private boolean uploadMetricsToS3(Replay replay) {
+        CloudWatchManager cloudManager = new CloudWatchManager();
+        String stats = cloudManager.getAllMetricStatisticsAsJson(replay.getRds(), replay.getStartTime(), replay.getEndTime());
+        InputStream statStream = new ByteArrayInputStream(stats.getBytes(StandardCharsets.UTF_8));
 
-        manager.closeConnection();
+        // Store RDS workload in S3
+        S3Manager s3Manager = new S3Manager();
+        s3Manager.uploadFile(replay.getS3(), replay.getId() + "-Performance.log", statStream, new ObjectMetadata());
+        return true;
     }
 }

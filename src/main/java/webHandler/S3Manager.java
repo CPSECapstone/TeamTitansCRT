@@ -65,6 +65,22 @@ public class S3Manager {
        }
     }
 
+    public void uploadFile(String bucketName, String fileName, File file)
+    {
+        try {
+            System.out.println("Starting the upload of a file to S3.");
+            s3Client.putObject(new PutObjectRequest(bucketName, fileName, file));
+            System.out.println("Uploaded file to S3");
+        } catch (AmazonServiceException ase) {
+            System.out.println("Caught an AmazonServiceException");
+            System.out.println("Error Message: " + ase.getMessage());
+            System.out.println("Error Code: " + ase.getErrorCode());
+        } catch (AmazonClientException ace) {
+            System.out.println("Caught an AmazonClientException");
+            System.out.println("Error Message: " + ace.getMessage());
+        }
+    }
+
     public InputStream getFile(String bucketName, String fileName) {
         InputStream dataStream = null;
         try {
@@ -84,6 +100,31 @@ public class S3Manager {
             System.out.println("Error Message: " + ace.getMessage());
         }
         return dataStream;
+    }
+
+    public String getFileString(String bucketName, String fileName)
+    {
+        InputStream dataStream = null;
+        BufferedReader buffer = null;
+        try {
+            System.out.println("Downloading an object");
+            S3Object s3Object = s3Client.getObject(new GetObjectRequest(
+                    bucketName, fileName));
+            dataStream = s3Object.getObjectContent();
+            buffer = new BufferedReader(new InputStreamReader(dataStream));
+
+        } catch (AmazonServiceException ase) {
+            System.out.println("Caught an AmazonServiceException");
+            System.out.println("Error Message:    " + ase.getMessage());
+            System.out.println("HTTP Status Code: " + ase.getStatusCode());
+            System.out.println("AWS Error Code:   " + ase.getErrorCode());
+            System.out.println("Error Type:       " + ase.getErrorType());
+            System.out.println("Request ID:       " + ase.getRequestId());
+        } catch (AmazonClientException ace) {
+            System.out.println("Caught an AmazonClientException");
+            System.out.println("Error Message: " + ace.getMessage());
+        }
+        return buffer.lines().collect(Collectors.joining("\n"));
     }
 
     public List<String> getS3Buckets() {

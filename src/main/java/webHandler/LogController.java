@@ -1,7 +1,5 @@
 package webHandler;
 
-import com.amazonaws.services.s3.model.ObjectMetadata;
-
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -21,7 +19,7 @@ public class LogController {
         this.captureId = capture.getId();
     }
 
-    public void logData(Capture capture, String logData, boolean isFirstWrite, boolean isFinalWrite) {
+    public void logData(Capture capture, String logData, boolean isFinalWrite) {
         if (logData ==  null) {
             return;
         }
@@ -40,12 +38,14 @@ public class LogController {
 
         if (stream != null) {
             updateCaptureController();
-            writeToFile(filteredLogData, isFirstWrite, isFinalWrite);
+            writeToFile(filteredLogData, isFinalWrite);
         }
     }
 
-    private void writeToFile(String logData, boolean isFirstWrite, boolean isFinalWrite) {
+    private void writeToFile(String logData, boolean isFinalWrite) {
         BufferedWriter out = null;
+
+        boolean isFirstWrite = getFile() == null;
 
         if (isFirstWrite) {
             logData = "[\n" + logData;
