@@ -27,6 +27,8 @@ public class DBUtil {
         this.conn = connectSqlite(databaseFile);
         createNewCaptureTable(databaseFile);
         createNewReplayTable(databaseFile);
+        checkForFailedCaptures();
+        checkForFailedReplays();
     }
 
     private static Connection connectSqlite(String databaseFile)
@@ -153,6 +155,62 @@ public class DBUtil {
             stmt.execute(sql);
             //conn.close();
             stmt.close();
+        }
+
+        catch (SQLException e)
+        {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    private void checkForFailedCaptures() {
+        try
+        {
+            ResultSet rs;
+            String sql = "SELECT * FROM captures WHERE status in ('Running', 'Queued') AND startTime < CURRENT_TIMESTAMP";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.execute();
+            rs = pstmt.getResultSet();
+
+            while (rs.next()) {
+                String updateSql = "UPDATE captures SET status = 'Failed' WHERE dbId = ?";
+
+                PreparedStatement updatePstmt = conn.prepareStatement(updateSql);
+                updatePstmt.setInt(1, rs.getInt(1));
+                updatePstmt.executeUpdate();
+
+                updatePstmt.close();
+            }
+
+            pstmt.close();
+        }
+
+        catch (SQLException e)
+        {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    private void checkForFailedReplays() {
+        try
+        {
+            ResultSet rs;
+            String sql = "SELECT * FROM replays WHERE status in ('Running', 'Queued') AND startTime < CURRENT_TIMESTAMP";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.execute();
+            rs = pstmt.getResultSet();
+
+            while (rs.next()) {
+                String updateSql = "UPDATE replays SET status = 'Failed' WHERE dbId = ?";
+
+                PreparedStatement updatePstmt = conn.prepareStatement(updateSql);
+                updatePstmt.setInt(1, rs.getInt(1));
+                updatePstmt.executeUpdate();
+
+                updatePstmt.close();
+            }
+
+            pstmt.close();
         }
 
         catch (SQLException e)
