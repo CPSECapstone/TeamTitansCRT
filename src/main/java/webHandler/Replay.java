@@ -12,6 +12,7 @@ public class Replay implements Session {
     private String rds;
     private String s3;
     private String status;
+    private String logFileName;
 
     private Date startTime;
     private Date endTime;
@@ -27,6 +28,7 @@ public class Replay implements Session {
         this.id = id;
         this.rds = rds;
         this.s3 = s3;
+        this.logFileName = "";
         this.startTime = new Date();
         this.endTime = null;
         this.status = "Running";
@@ -36,6 +38,7 @@ public class Replay implements Session {
         this.id = id;
         this.rds = rds;
         this.s3 = s3;
+        this.logFileName = "";
         this.startTime = startTime;
         this.endTime = endTime;
         this.status = "Running";
@@ -105,7 +108,7 @@ public class Replay implements Session {
     {
         if (this.filterStatements == null)
         {
-            return new ArrayList<String>();
+            this.filterStatements = new ArrayList<String>();
         }
         return this.filterStatements;
     }
@@ -119,7 +122,7 @@ public class Replay implements Session {
     {
         if (this.filterUsers == null)
         {
-            return new ArrayList<String>();
+            this.filterUsers = new ArrayList<String>();
         }
         return this.filterUsers;
     }
@@ -147,5 +150,14 @@ public class Replay implements Session {
 
     public void setDatabaseInfo(DatabaseInfo info) {
         this.databaseInfo = info;
+    }
+
+    public String getLogFileName() {
+        return logFileName;
+    }
+
+    public int getTransactionLimit()
+    {
+        return 0;
     }
 }

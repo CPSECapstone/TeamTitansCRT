@@ -21,4 +21,6 @@ public interface Session {
     public List<String> getFilterStatements();
 
     public List<String> getFilterUsers();
+
+    public int getTransactionLimit();
 }

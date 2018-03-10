@@ -22,13 +22,15 @@ public class CaptureServlet {
             capture.setStartTime(new Date());
         }
 
-        LogController logController = new LogController(capture);
-        TimerManager timerManager = new TimerManager(capture.getId(), capture.getStartTime(), capture.getEndTime());
-        CaptureController instance = CaptureController.getInstance();
 
-        instance.addCapture(capture);
-        instance.addLogController(logController, capture.getId());
-        instance.addTimer(timerManager, capture.getId());
+
+        LogController logController = new CaptureLogController(capture);
+        TimerManager timerManager = new TimerManager(capture.getId(), capture.getStartTime(), capture.getEndTime());
+        CaptureController captureController = new CaptureController();
+
+        captureController.addCapture(capture);
+        captureController.addLogController(logController, capture.getId());
+        captureController.addTimer(timerManager, capture.getId());
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -36,31 +38,29 @@ public class CaptureServlet {
     @RequestMapping(value = "/capture/stop", method = RequestMethod.POST)
     public ResponseEntity<String> captureStop(@RequestBody String id) {
 
-        CaptureController instance = CaptureController.getInstance();
+
 
         // Send bad request on unknown capture ID
-        if (!instance.doesCapturesTableContain(id)) {
+        if (!CaptureController.doesCapturesTableContain(id)) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        Capture capture = instance.getCapture(id);
+        Capture capture = CaptureController.getCapture(id);
         capture.setStatus("Finished");
         capture.setEndTime(new Date());
 
-        instance.endCaptureResources(id);
-
-        instance.uploadLogsAndMetricsToS3(capture);
+        CaptureController.endCaptureResources(id);
+        CaptureController.uploadAllFiles(capture);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @RequestMapping(value = "/capture/update", method = RequestMethod.POST)
     public ResponseEntity<String> captureUpdate(@RequestBody Capture capture) {
-        CaptureController instance = CaptureController.getInstance();
-        if (!instance.doesCapturesTableContain(capture.getId())) {
+        if (!CaptureController.doesCapturesTableContain(capture.getId())) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        instance.updateAll(capture);
+        CaptureController.updateAll(capture);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -68,6 +68,6 @@ public class CaptureServlet {
 
     @RequestMapping(value = "/capture/status", method = RequestMethod.GET)
     public ResponseEntity<Collection<Capture>> captureStatus() {
-        return new ResponseEntity<>(CaptureController.getInstance().getAllCaptureValues(), HttpStatus.OK);
+        return new ResponseEntity<>(CaptureController.getAllCaptureValues(), HttpStatus.OK);
     }
 }

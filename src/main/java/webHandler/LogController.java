@@ -1,92 +1,56 @@
 package webHandler;
 
-import java.io.*;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import sun.misc.Perf;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
 
-public class LogController {
+public abstract class LogController
+{
+    protected final String PerformanceTag = "-Performance.log";
+    protected final String WorkloadTag = "-Workload.log";
 
-    private CaptureFilter logFilter;
+    protected LogFilter logFilter;
 
-    private String fileName;
-    private String captureId;
+    public abstract String getLogData(String resourceName, String fileName);
 
-    public LogController(Capture capture) {
-        logFilter = new CaptureFilter(capture);
-
-        this.fileName = capture.getId() + "-Workload.log";
-        this.captureId = capture.getId();
-    }
-
-    public void logData(Capture capture, String logData, boolean isFinalWrite) {
-        if (logData ==  null) {
-            return;
-        }
-
-        List<Statement> filteredStatementList = logFilter.filterLogData(logData);
-
-        List<String> filteredLogDataList = filteredStatementList.stream().
-                map(stmt -> stmt.toString()).collect(Collectors.toList());
-        String filteredLogData = String.join(",\n", filteredLogDataList);
-        InputStream stream = null;
-        try {
-            stream = new ByteArrayInputStream(filteredLogData.getBytes(StandardCharsets.UTF_8.name()));
-        } catch (UnsupportedEncodingException enc) {
-            enc.printStackTrace();
-        }
-
-        if (stream != null) {
-            updateCaptureController();
-            writeToFile(filteredLogData, isFinalWrite);
-        }
-    }
-
-    private void writeToFile(String logData, boolean isFinalWrite) {
-        BufferedWriter out = null;
-
-        boolean isFirstWrite = getFile() == null;
-
-        if (isFirstWrite) {
-            logData = "[\n" + logData;
-        }
-
-        if (isFinalWrite) {
-            logData += "\n]";
-        }
-
-        try {
-            FileWriter fileWriter = new FileWriter(this.fileName, true);
-            out = new BufferedWriter(fileWriter);
-            out.write(logData);
-            out.close();
-
-            updateCaptureController();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public File getFile() {
-        File file = new File(this.fileName);
-        if (file.isFile()) {
-            return file;
-        }
-        return null;
-    }
-
-    private void updateCaptureController()
+    public List<Statement> filterLogData(String logData)
     {
-        File file = getFile();
-        if (file != null) {
-            CaptureController.getInstance().updateCaptureFileSize(this.captureId, file.length());
-        }
+        return logFilter.filterLogData(logData);
     }
 
-    public void updateLogController(Capture capture)
+    public abstract void processData(Session session, int type);
+
+    public abstract void updateSessionController();
+
+    public void updateLogFilter(Session session) {
+        logFilter.update(session);
+    }
+
+    public abstract void uploadAllFiles(Session session);
+
+    public void uploadMetrics(Session session)
     {
-        logFilter.setEndTime(capture.getEndTime());
-        logFilter.setTransactionLimit(capture.getTransactionLimit());
+        CloudWatchManager cloudManager = new CloudWatchManager();
+        String stats = cloudManager.getAllMetricStatisticsAsJson(session.getRds(), session.getStartTime(),
+                session.getEndTime());
+        InputStream statStream = new ByteArrayInputStream(stats.getBytes(StandardCharsets.UTF_8));
+        uploadInputStream(session.getS3(), session.getId() + PerformanceTag, statStream);
     }
 
+    public void uploadInputStream(String s3, String fileName, InputStream stream)
+    {
+        S3Manager s3Manager = new S3Manager();
+        s3Manager.uploadFile(s3, fileName, stream, new ObjectMetadata());
+    }
+
+    public void uploadFile(String s3, String fileName, File file)
+    {
+        S3Manager s3Manager = new S3Manager();
+        s3Manager.uploadFile(s3, fileName, file);
+    }
 }

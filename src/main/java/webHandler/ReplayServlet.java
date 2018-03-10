@@ -18,32 +18,15 @@ public class ReplayServlet {
 
     @RequestMapping(value = "/replay/start", method = RequestMethod.POST)
     public ResponseEntity<String> startReplay(@RequestBody Replay replay, String replayType) {
-        S3Manager s3Manager = new S3Manager();
-
-        String filename = replay.getId() + WorkloadTag;
-        String logData = s3Manager.getFileString(replay.getS3(), filename);
-
-        ReplayController.getInstance().addReplay(replay);
+        LogController replayController = new ReplayLogController(replay);
 
         if (replay.getStartTime() == null)
         {
             replay.setStartTime(new Date());
         }
-
-        LogFilter replayFilter = new ReplayFilter(replay.getFilterStatements(), replay.getFilterUsers());
-        List<Statement> filteredStatementsList = replayFilter.filterLogData(logData);
-        // TODO: Don't forget to handle statements with time and date being --:--:-- and ------ respectively accordingly
-
-        switch (replayType) {
-            case "Time Sensitive":
-                replayTimeSensitive(replay, filteredStatementsList);
-                break;
-            case "Fast Mode":
-                replayFastMode(replay, filteredStatementsList);
-                break;
-            default:
-                System.out.println("Error --- Unknown replay type.");
-        }
+        // TODO: Add the ability to schedule replays
+        int type = replayType.equals("Fast Mode") ? ReplayLogController.FAST_MODE : ReplayLogController.TIME_SENSITIVE;
+        replayController.processData((Session) replay, type);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -51,57 +34,12 @@ public class ReplayServlet {
     @RequestMapping(value = "/replay/stop", method = RequestMethod.POST)
     public ResponseEntity<String> stopReplay(@RequestBody Replay replay)
     {
+        // TODO: Support manually ending the replay
+        ReplayController.removeReplay(replay.getId());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    // TODO: Fix time sensitive replay using SimpleDateFormat (look at CaptureFilter isWithinTimeInterval function)
-    private void replayTimeSensitive(Replay replay, List<Statement> statements) {
-        MySQLManager manager = new MySQLManager(replay.getDBUrl(),
-                replay.getDatabase(),
-                replay.getDBUsername(),
-                replay.getDBPassword());
 
-        long lastTime = Long.parseLong(statements.get(0).getTime());
-        long currTime;
 
-        for (Statement statement : statements) {
-            currTime = Long.parseLong(statement.getTime());
 
-            long toWait = currTime - lastTime;
-
-            try {
-                Thread.sleep(toWait);
-                if (!statement.getCommand().equals("Connect"))
-                {
-                    manager.query(statement.getQuery());
-                }
-            }
-            catch (InterruptedException ex) {
-                ex.printStackTrace();
-            }
-
-            lastTime = currTime;
-        }
-
-        manager.closeConnection();
-        replay.setEndTime(new Date());
-        ReplayController.getInstance().removeReplay(replay.getId());
-    }
-
-    private void replayFastMode(Replay replay, List<Statement> statements) {
-        MySQLManager manager = new MySQLManager(replay.getDBUrl(),
-                replay.getDatabase(),
-                replay.getDBUsername(),
-                replay.getDBPassword());
-
-        for (Statement statement : statements) {
-            if (!statement.getCommand().equals("Connect"))
-            {
-                manager.query(statement.getQuery());
-            }
-
-        }
-
-        manager.closeConnection();
-    }
 }
