@@ -1,10 +1,6 @@
 package webHandler;
 
-import java.io.InputStream;
-
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,24 +14,30 @@ public class ReplayServlet {
 
     @RequestMapping(value = "/replay/start", method = RequestMethod.POST)
     public ResponseEntity<String> startReplay(@RequestBody Replay replay, String replayType) {
-        LogController replayController = new ReplayLogController(replay);
-
         if (replay.getStartTime() == null)
         {
             replay.setStartTime(new Date());
         }
+
+        ReplayController.addReplay(replay);
+        LogController logController = new ReplayLogController(replay);
+
+        ReplayController.addLogController(logController, replay.getId());
         // TODO: Add the ability to schedule replays
         int type = replayType.equals("Fast Mode") ? ReplayLogController.FAST_MODE : ReplayLogController.TIME_SENSITIVE;
-        replayController.processData((Session) replay, type);
+        logController.processData(replay, type);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @RequestMapping(value = "/replay/stop", method = RequestMethod.POST)
-    public ResponseEntity<String> stopReplay(@RequestBody Replay replay)
+    public ResponseEntity<String> stopReplay(@RequestBody Replay tempReplay)
     {
         // TODO: Support manually ending the replay
-        ReplayController.removeReplay(replay.getId());
+        Replay replay = ReplayController.getReplay(tempReplay.getId());
+        replay.setEndTime(new Date());
+        ReplayController.removeReplay(tempReplay.getId());
+        ReplayController.removeLogController(tempReplay.getId());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

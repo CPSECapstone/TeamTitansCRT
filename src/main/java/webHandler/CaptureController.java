@@ -1,11 +1,6 @@
 package webHandler;
 
-import com.amazonaws.services.s3.model.ObjectMetadata;
-
-import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -58,7 +53,7 @@ public class CaptureController {
             Capture capture = captures.get(id);
             capture.setDbFileSize(fileSize);
             capture.updateStatus();
-            if (capture.hasReachedFileSizeLimit()) {
+            if (capture.hasReachedFileSizeLimit() && !capture.getStatus().equals("Finished")) {
                 stopCapture(id);
             }
         }
@@ -69,7 +64,7 @@ public class CaptureController {
             Capture capture = captures.get(id);
             capture.setTransactionCount(count);
             capture.updateStatus();
-            if (capture.hasReachedTransactonLimit()) {
+            if (capture.hasReachedTransactonLimit() && !capture.getStatus().equals("Finished")) {
                 stopCapture(id);
             }
         }
@@ -83,8 +78,6 @@ public class CaptureController {
 
         if (logController != null && capture != null)
         {
-            String logData = logController.getLogData(capture.getRds(), CaptureLogController.GeneralLogFileName);
-            logController.processData((Session) capture, CaptureLogController.END);
             logControllers.remove(id);
         }
         if (timerManager != null)
@@ -93,6 +86,16 @@ public class CaptureController {
             timers.remove(id);
         }
         captures.remove(id);
+    }
+
+    public static void endCapture(String id)
+    {
+        LogController logController = getLogController(id);
+        Capture capture = getCapture(id);
+        if (logController != null && capture != null)
+        {
+            logController.processData(capture, CaptureLogController.END);
+        }
     }
 
     public static void stopCapture(String id)
@@ -176,7 +179,10 @@ public class CaptureController {
 
     public static void uploadAllFiles(Capture capture)
     {
-        LogController logController = logControllers.get(capture.getId());
-        logController.uploadAllFiles((Session) capture);
+        if (doesLogControllersTableContain(capture.getId()))
+        {
+            LogController logController = logControllers.get(capture.getId());
+            logController.uploadAllFiles(capture);
+        }
     }
 }

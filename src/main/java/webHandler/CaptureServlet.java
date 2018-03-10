@@ -22,23 +22,18 @@ public class CaptureServlet {
             capture.setStartTime(new Date());
         }
 
-
-
         LogController logController = new CaptureLogController(capture);
         TimerManager timerManager = new TimerManager(capture.getId(), capture.getStartTime(), capture.getEndTime());
-        CaptureController captureController = new CaptureController();
 
-        captureController.addCapture(capture);
-        captureController.addLogController(logController, capture.getId());
-        captureController.addTimer(timerManager, capture.getId());
+        CaptureController.addCapture(capture);
+        CaptureController.addLogController(logController, capture.getId());
+        CaptureController.addTimer(timerManager, capture.getId());
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @RequestMapping(value = "/capture/stop", method = RequestMethod.POST)
     public ResponseEntity<String> captureStop(@RequestBody String id) {
-
-
 
         // Send bad request on unknown capture ID
         if (!CaptureController.doesCapturesTableContain(id)) {
@@ -49,8 +44,9 @@ public class CaptureServlet {
         capture.setStatus("Finished");
         capture.setEndTime(new Date());
 
-        CaptureController.endCaptureResources(id);
+        CaptureController.endCapture(id);
         CaptureController.uploadAllFiles(capture);
+        CaptureController.endCaptureResources(id);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

@@ -15,7 +15,7 @@ public class ReplayLogController extends LogController {
     @Override
     public String getLogData(String resourceName, String fileName) {
         S3Manager s3Manager = new S3Manager();
-        return s3Manager.getFileString(resourceName, fileName);
+        return s3Manager.getFileAsString(resourceName, fileName);
     }
 
     public void processData(Session session, int type) {

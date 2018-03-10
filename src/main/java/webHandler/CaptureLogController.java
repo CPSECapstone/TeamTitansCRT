@@ -13,7 +13,7 @@ public class CaptureLogController extends LogController
     public static final int HOURLY = 0;
     public static final int END = 1;
 
-    public static final String GeneralLogFileName = "general/mysql-general-log";
+    public static final String GeneralLogFileName = "general/mysql-general.log";
 
     private String localFileName;
     private String sessionID;
@@ -60,7 +60,10 @@ public class CaptureLogController extends LogController
         if (filteredLogData != null)
         {
             writeToFile(filteredLogData, isFinalWrite);
-            updateSessionController();
+            if (type == HOURLY)
+            {
+                updateSessionController();
+            }
         }
     }
 

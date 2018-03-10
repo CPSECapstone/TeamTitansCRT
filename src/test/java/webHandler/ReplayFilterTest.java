@@ -50,10 +50,14 @@ public class ReplayFilterTest {
     {
         List<String> statementsToRemove = new ArrayList<>();
         List<String> usersToRemove = new ArrayList<>();
+        Replay replay = new Replay();
+
 
         usersToRemove.add("admin");
+        replay.setFilterStatements(statementsToRemove);
+        replay.setFilterUsers(usersToRemove);
 
-        logFilter = new ReplayFilter(statementsToRemove, usersToRemove);
+        logFilter = new ReplayFilter(replay);
 
         List<Statement> filteredStatementList = logFilter.filterLogData(logData);
         List<String> noDataList = filteredStatementList.stream().
@@ -69,7 +73,10 @@ public class ReplayFilterTest {
         List<String> statementsToRemove = new ArrayList<>();
         List<String> usersToRemove = new ArrayList<>();
 
-        logFilter = new ReplayFilter(statementsToRemove, usersToRemove);
+        Replay replay = new Replay();
+        replay.setFilterStatements(statementsToRemove);
+        replay.setFilterUsers(usersToRemove);
+        logFilter = new ReplayFilter(replay);
 
         List<Statement> filteredStatementList = logFilter.filterLogData(logData);
         List<String> userDataList = filteredStatementList.stream().

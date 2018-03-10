@@ -28,7 +28,7 @@ public class Replay implements Session {
         this.id = id;
         this.rds = rds;
         this.s3 = s3;
-        this.logFileName = "";
+        this.logFileName = id + "-Workload.log";
         this.startTime = new Date();
         this.endTime = null;
         this.status = "Running";
@@ -38,7 +38,7 @@ public class Replay implements Session {
         this.id = id;
         this.rds = rds;
         this.s3 = s3;
-        this.logFileName = "";
+        this.logFileName = id + "-Workload.log";
         this.startTime = startTime;
         this.endTime = endTime;
         this.status = "Running";

@@ -139,6 +139,11 @@ public class CaptureFilter extends LogFilter {
         return statement;
     }
 
+    public boolean isQuitCommand(Statement statement)
+    {
+        return statement.getCommand().equals("Quit");
+    }
+
     public List<Statement> filterLogData(String logData)
     {
         // resulting filtered array of statements
@@ -161,7 +166,7 @@ public class CaptureFilter extends LogFilter {
             }
             // create a statement representation of the line
             Statement statement = createStatement(stmt);
-            if (statement.getQuery().equals("Quit") || statement.getQuery().equals("Statistics"))
+            if (isQuitCommand(statement))
             {
                 continue;
             }
