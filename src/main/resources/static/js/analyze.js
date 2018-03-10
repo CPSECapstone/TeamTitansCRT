@@ -189,7 +189,7 @@ $(function() {
                 var endTime = log['endTime'] == null ? 'N/A'  : new Date(log['endTime']);
 
                 table += '<tr>' +
-                    '<td><label><input class="rowCheckbox" type="checkbox" value="' + log['id'] + '"></label></td>' +
+                    '<td><label><input class="rowCheckbox" type="checkbox" value="' + log['id'] + '"' + (log['status'] == 'Failed' ? 'disabled' : '') + '></label></td>' +
                     '<td>' + log['id'] + '</td>' +
                     '<td>' + log['rds'] + '</td>' +
                     '<td>' + log['s3'] + '</td>' +
