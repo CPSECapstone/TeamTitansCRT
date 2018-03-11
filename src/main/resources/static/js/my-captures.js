@@ -23,12 +23,13 @@ $(function() {
             <div class="col-lg-offset-2 col-lg-4 border-on-right">
                 <p class=""><strong>Manage Captures</strong></p>
                 <hr />
-                <div class="" id="loadingModal" tabindex="-1" role="dialog"><div class="spinner"></div></div>
+                <div class="manageCapturesLoadingIcon" tabindex="-1" role="dialog"><div class="spinner"></div></div>
                 <ul id="CaptureList" class="list-group"></ul>
             </div>
             <div class="col-lg-4 start-capture-form">
                 <p class=""><strong>Start a Capture</strong></p>
                 <hr />
+                <div class="startCaptureLoadingIcon" tabindex="-1" role="dialog"><div class="spinner"></div></div>
                 <div class="${rdsSelector}"></div>
                 <div class="${s3Selector}"></div>
                 ${createTextInput("Capture ID:", idSelector)}
@@ -115,15 +116,15 @@ function updateCaptureList() {
         url: "/capture/status",
         type: "GET",
         beforeSend: function() {
-            $("#loadingModal").show();
+            $(".manageCapturesLoadingIcon").show();
         },
         complete: function() {
-            $("#loadingModal").hide();
+            $(".manageCapturesLoadingIcon").hide();
         },
-
         success: function(data) {
             console.log(data);
             addAllToCaptureList(data);
+            $(".manageCapturesLoadingIcon").hide();
         },
         error: function(err) {
             console.log(err);
@@ -285,6 +286,12 @@ function populateRDSDropdown(selector) {
     $.ajax({
         url: "/resource/rds",
         type: "GET",
+        beforeSend: function() {
+            $(".startCaptureLoadingIcon").show();
+        },
+        complete: function() {
+            $(".startCaptureLoadingIcon").hide();
+        },
         success: function(data) {
             $(`div.${selector}`).replaceWith(createDropdown("Select RDS Endpoint", selector, data));
         },
