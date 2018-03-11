@@ -15,9 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
-
-import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
-import com.amazonaws.services.cloudwatch.AmazonCloudWatchClientBuilder;
 import com.amazonaws.services.cloudwatch.model.*;
 
 import java.util.*;
@@ -49,18 +46,12 @@ public class AnalysisServlet {
             CloudWatchManager cloudManager = new CloudWatchManager();
             String metrics = cloudManager.getAllMetricStatisticsAsJson(capture.getRds(), capture.getStartTime(), new Date());
             stream = new ByteArrayInputStream(metrics.getBytes(StandardCharsets.UTF_8));
-        } else { // Obtain from S3 if capture has already finished
-            S3Manager s3Manager = new S3Manager();
-            stream = s3Manager.getFile(capture.getS3(), capture.getId() + "-Performance.log");
-        }
-
-        //TODO: Replace else statement with commented block when Capture DAO added (Test everything else before replacing).
-        /*else if (capture.getStatus().equals("Finished")) { // Obtain from S3 if capture has already finished
+        } else if (capture.getStatus().equals("Finished")) { // Obtain from S3 if capture has already finished
             S3Manager s3Manager = new S3Manager();
             stream = s3Manager.getFile(capture.getS3(), capture.getId() + "-Performance.log");
         } else {
             return;
-        }*/
+        }
 
         setResponseOutputStream(response, stream, capture.getId());
     }
