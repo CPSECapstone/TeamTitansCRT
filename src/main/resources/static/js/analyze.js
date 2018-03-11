@@ -21,7 +21,7 @@ $(function() {
 
         // Draw the graph after all ajax calls complete
         $.when.apply(this, requests).done(function() {
-            if (metricData.length > 0) {
+            if (!jQuery.isEmptyObject(metricData)) {
                 createChart(metricData[defaultMetric])
             }
         });
@@ -188,8 +188,10 @@ $(function() {
                 var startTime = log['startTime'] == null ? 'N/A'  : new Date(log['startTime']);
                 var endTime = log['endTime'] == null ? 'N/A'  : new Date(log['endTime']);
 
+                var disabled = log['status'] == 'Failed' || log['status'] == 'Queued' ? 'disabled' : '';
+
                 table += '<tr>' +
-                    '<td><label><input class="rowCheckbox" type="checkbox" value="' + log['id'] + '"' + (log['status'] == 'Failed' ? 'disabled' : '') + '></label></td>' +
+                    '<td><label><input class="rowCheckbox" type="checkbox" value="' + log['id'] + '"' + disabled + '></label></td>' +
                     '<td>' + log['id'] + '</td>' +
                     '<td>' + log['rds'] + '</td>' +
                     '<td>' + log['s3'] + '</td>' +
