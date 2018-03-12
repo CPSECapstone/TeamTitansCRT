@@ -11,8 +11,8 @@ public class CrtController {
     @GetMapping
     public String index() { return "setupPage.html"; }
 
-    @GetMapping("settings")
-    public String settings() { return "settingsPage.html"; }
+    @GetMapping("settings") 
+    public String settings() { return "my-settings.html"; }
 
     @GetMapping("capture")
     public String capture() { return "my-captures.html"; }
