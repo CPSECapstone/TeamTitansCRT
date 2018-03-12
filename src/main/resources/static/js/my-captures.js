@@ -123,8 +123,8 @@ function updateCaptureList() {
         },
         success: function(data) {
             console.log(data);
-            addAllToCaptureList(data);
             $(".manageCapturesLoadingIcon").hide();
+            addAllToCaptureList(data);
         },
         error: function(err) {
             console.log(err);
@@ -272,7 +272,8 @@ function createStartCaptureModal(result) {
                 
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <a href="dashboard" class="btn btn-default">Dashboard</a>
+                <a class="btn btn-secondary" data-dismiss="modal">Close</a>
             </div>
         </div>
     </div>`;

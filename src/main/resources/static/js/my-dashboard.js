@@ -7,14 +7,16 @@ $(function() {
             </div>
         </div>
         <div class="row">
-            <div class="col-lg-6 col-lg-offset-3">
+            <div class="col-lg-12">
+                <div class="manageCapturesLoadingIcon" tabindex="-1" role="dialog"><div class="spinner"></div></div>
                 <div class="dashboard-content"></div>
             </div>
         </div>
     </div>
     `);
     updateStatus();
-    /*var data = [
+    /*
+    var data = [
         {
             id: "Test1",
             startTime: 10000000,
@@ -32,7 +34,9 @@ $(function() {
             status: "Finished"
         }
     ]
-    $("div.dashboard-content").replaceWith(captureDashboard(data));*/
+    $("div.dashboard-content").replaceWith(captureDashboard(data));
+    fillTable(data);
+    */
 });
 
 function emptyDashboard() {
@@ -48,11 +52,20 @@ function updateStatus() {
     $.ajax({
         url: "/capture/status",
         type: "GET",
+        beforeSend: function() {
+            $(".manageCapturesLoadingIcon").show();
+        },
+        complete: function() {
+            $(".manageCapturesLoadingIcon").hide();
+        },
         success: function(data) {
             if (data.length > 0) {
+                $(".manageCapturesLoadingIcon").hide();
                 $("div.dashboard-content").replaceWith(captureDashboard(data));    
+                fillTable(data);
             }
             else {
+                $(".manageCapturesLoadingIcon").hide();
                 $("div.dashboard-content").replaceWith(emptyDashboard());    
             }
         },
@@ -76,37 +89,25 @@ function captureDashboard(data) {
                 <th scope="col"> </th>
             </tr>
         </thead>
-        <tbody>
-        ${fillTable(data)}
+        <tbody class="capture-table">
         </tbody>
     </table>`;
 }
 
 function fillTable(data) {
-    return `${data.map(createTableRow).join('')}`;
+    $("tbody.capture-table").empty();
+    data.map(createTableRow);
 }
 
 function createTableRow(capture) {
+    $("tbody.capture-table").append(createRow(capture));
     var id = capture["id"];
-    var status = capture["status"];
-    var startTime = capture["startTime"];
-    var endTime = capture["endTime"];
-    var button = "";
-    console.log("ID: " + id +
-        "\nStatus: " + status);
-    return `
-    <tr data-toggle="collapse" data-target="#accordion${id}" class="clickable">
-        <td width="(100/12)%">${createIcon(status)}</td>
-        <td width="(100/4)%">${id}</td>
-        <td width="(100/6)%">${status}</td>
-        <td width="(100/6)%">${formatTime(startTime, "MM/dd/yyyy HH:mm:ss")}</td>
-        <td width="(100/6)%">${formatTime(endTime, "MM/dd/yyyy HH:mm:ss")}</td>
-        <td width="(100/6)%">${createButton(id, status)}</td>
-    </tr>
-    `;
-
+    $(`a#stopButton${id}`).on("click", function() {
+        stopCapture(id);
+        updateStatus();
+    });
     /*
-        <tr>
+    <tr>
         <td colspan="3">
             <div id="accordion${id} class="collapse">
                 <ul class="stats-list">
@@ -117,9 +118,25 @@ function createTableRow(capture) {
             </div>
         </td>
     </tr>`;
-
-    
     */
+}
+
+function createRow(capture) {
+    var id = capture["id"];
+    var status = capture["status"];
+    var startTime = capture["startTime"];
+    var endTime = capture["endTime"];
+    console.log(`ID: ${id}\tStatus: ${status}`);
+
+    return `
+    <tr data-toggle="collapse" data-target="#accordion${id}" class="clickable">
+        <td width="(100/12)%">${createIcon(status)}</td>
+        <td width="(100/4)%">${id}</td>
+        <td width="(100/6)%">${status}</td>
+        <td width="(100/6)%">${formatTime(startTime, "MM/dd/yyyy HH:mm:ss")}</td>
+        <td width="(100/6)%">${formatTime(endTime, "MM/dd/yyyy HH:mm:ss")}</td>
+        <td width="(100/6)%">${createButton(id, status)}</td>
+    </tr>`;
 }
 
 function createIcon(status) {
@@ -148,6 +165,7 @@ function createButton(id, status) {
 
 /* If you push the stop capture button, it ends immediately. */
 function stopCapture(id) {
+    console.log(`Stopping capture: ${id}`);
     var url = "/capture/stop";
     var body = {
         id: id,
