@@ -30,5 +30,5 @@ public class CrtController {
     public String login() { return "setupPage.html"; }
 
     @GetMapping("dashboard")
-    public String dashboard() { return "dashboardPage.html"; }
+    public String dashboard() { return "my-dashboard.html"; }
 }
