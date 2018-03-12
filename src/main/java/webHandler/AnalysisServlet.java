@@ -42,13 +42,13 @@ public class AnalysisServlet {
 
         // Get metric stream
         if (capture.getStatus().equals("Running")) { // Obtain from CloudWatch if capture is currently running
-            CloudWatchManager cloudManager = new CloudWatchManager();
-            String metrics = cloudManager.getAllMetricStatisticsAsJson(capture.getRds(), capture.getStartTime(), new Date());
+            String metrics = LogController.getMetricsFromCloudWatch(capture.getRds(), capture.getStartTime(), new Date());
             stream = new ByteArrayInputStream(metrics.getBytes(StandardCharsets.UTF_8));
         } else if (capture.getStatus().equals("Finished")) { // Obtain from S3 if capture has already finished
-            S3Manager s3Manager = new S3Manager();
-            stream = s3Manager.getFile(capture.getS3(), capture.getId() + "-Performance.log");
+            String metrics = LogController.getMetricsFromS3(capture.getS3(), capture.getId() + "-Performance.log");
+            stream = new ByteArrayInputStream(metrics.getBytes(StandardCharsets.UTF_8));
         } else {
+            writeError(response, "Error: Capture is not 'Running' or 'Finished'");
             return;
         }
 

@@ -6,6 +6,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.List;
 
 public abstract class LogController
@@ -16,6 +17,12 @@ public abstract class LogController
     protected LogFilter logFilter;
 
     public abstract String getLogData(String resourceName, String fileName);
+
+    public static String getMetricsFromS3(String s3Bucket, String fileName)
+    {
+        S3Manager s3Manager = new S3Manager();
+        return s3Manager.getFileAsString(s3Bucket, fileName);
+    }
 
     public List<Statement> filterLogData(String logData)
     {
@@ -32,11 +39,15 @@ public abstract class LogController
 
     public abstract void uploadAllFiles(Session session);
 
-    public void uploadMetrics(Session session)
+    public static String getMetricsFromCloudWatch(String rds, Date startTime, Date endTime)
     {
         CloudWatchManager cloudManager = new CloudWatchManager();
-        String stats = cloudManager.getAllMetricStatisticsAsJson(session.getRds(), session.getStartTime(),
-                session.getEndTime());
+        return cloudManager.getAllMetricStatisticsAsJson(rds, startTime, endTime);
+    }
+
+    public void uploadMetrics(Session session)
+    {
+        String stats = getMetricsFromCloudWatch(session.getRds(), session.getStartTime(), session.getEndTime());
         InputStream statStream = new ByteArrayInputStream(stats.getBytes(StandardCharsets.UTF_8));
         uploadInputStream(session.getS3(), session.getId() + PerformanceTag, statStream);
     }
