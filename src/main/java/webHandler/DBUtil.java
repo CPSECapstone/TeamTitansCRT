@@ -263,12 +263,15 @@ public class DBUtil {
 
         try
         {
+            Timestamp startTime = capture.getStartTime() != null ? new Timestamp(capture.getStartTime().getTime()) : null;
+            Timestamp endTime = capture.getEndTime() != null ? new Timestamp(capture.getEndTime().getTime()) : null;
+
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, capture.getId());
             pstmt.setString(2, capture.getRds());
             pstmt.setString(3, capture.getS3());
-            pstmt.setTimestamp(4, new Timestamp(capture.getStartTime().getTime()));
-            pstmt.setTimestamp(5, new Timestamp(capture.getEndTime().getTime()));
+            pstmt.setTimestamp(4, startTime);
+            pstmt.setTimestamp(5, endTime);
             pstmt.setString(6, capture.getStatus());
             pstmt.setInt(7, capture.getFileSizeLimit());
             pstmt.setInt(8, capture.getTransactionLimit());
@@ -382,12 +385,15 @@ public class DBUtil {
 
         try
         {
+            Timestamp startTime = replay.getStartTime() != null ? new Timestamp(replay.getStartTime().getTime()) : null;
+            Timestamp endTime = replay.getEndTime() != null ? new Timestamp(replay.getEndTime().getTime()) : null;
+
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, replay.getId());
             pstmt.setString(2, replay.getRds());
             pstmt.setString(3, replay.getS3());
-            pstmt.setTimestamp(4, new Timestamp(replay.getStartTime().getTime()));
-            pstmt.setTimestamp(5, new Timestamp(replay.getEndTime().getTime()));
+            pstmt.setTimestamp(4, startTime);
+            pstmt.setTimestamp(5, endTime);
             pstmt.setString(6, replay.getStatus());
             pstmt.executeUpdate();
 

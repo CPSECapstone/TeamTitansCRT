@@ -29,6 +29,8 @@ public class CaptureController {
             capture.setFileSizeLimit(updatedCapture.getFileSizeLimit());
         }
         capture.updateStatus();
+
+        DBUtil.getInstance().saveCapture(capture);
     }
 
     private static void updateLogController(Capture capture) {
@@ -96,6 +98,8 @@ public class CaptureController {
         {
             logController.processData(capture, CaptureLogController.END);
         }
+
+        DBUtil.getInstance().saveCapture(capture);
     }
 
     public static void stopCapture(String id)
@@ -128,7 +132,10 @@ public class CaptureController {
     }
 
     public static void addCapture(Capture capture) {
+
         captures.put(capture.getId(), capture);
+
+        DBUtil.getInstance().saveCapture(capture);
     }
 
     public static Capture getCapture(String id) {
