@@ -9,17 +9,22 @@ $(function() {
 
         var requests = []; // Stores all ajax requests
 
+        var checkedCaptures = $('.rowCheckbox:checkbox:checked');
+
         // Makes ajax request for each specified capture
-        for (var i = 1; i <= $('#captureSelector').val(); i++) {
+        for (var i = 0; i < checkedCaptures.length; i++) {
             var body = {
-                id: $("#txtID-" + i).val(),
-                s3: $("#txtS3-" + i).val()
+                id: checkedCaptures[i].value
             };
             requests.push(requestMetrics(body));
         }
 
         // Draw the graph after all ajax calls complete
-        $.when.apply(this, requests).done(function() {createChart(metricData[defaultMetric])});
+        $.when.apply(this, requests).done(function() {
+            if (!jQuery.isEmptyObject(metricData)) {
+                createChart(metricData[defaultMetric])
+            }
+        });
 
         return false; // Stops page from jumping to top
     });
@@ -158,5 +163,47 @@ $(function() {
         }
 
         $('#captureInputs').html(captureInputs); // Injects html string
+    });
+});
+
+// Populate capture table with available captures
+$(function() {
+    $.ajax({
+        url: "/resource/history",
+        type: "GET",
+        success: function(data) {
+            var table = '<table class="table table-striped table-hover"><col width="40">'
+            table += '<tr>' +
+                '<th></th>' +
+                '<th>ID</th>' +
+                '<th>RDS</th>' +
+                '<th>S3</th>' +
+                '<th>Status</th>' +
+                '<th>Start</th>' +
+                '<th>End</th>' +
+                '</tr>';
+
+            for (var i = 0; i < data.length; i++) {
+                var log = data[i];
+                var startTime = log['startTime'] == null ? 'N/A'  : new Date(log['startTime']);
+                var endTime = log['endTime'] == null ? 'N/A'  : new Date(log['endTime']);
+
+                var disabled = log['status'] == 'Failed' || log['status'] == 'Queued' ? 'disabled' : '';
+
+                table += '<tr>' +
+                    '<td><label><input class="rowCheckbox" type="checkbox" value="' + log['id'] + '"' + disabled + '></label></td>' +
+                    '<td>' + log['id'] + '</td>' +
+                    '<td>' + log['rds'] + '</td>' +
+                    '<td>' + log['s3'] + '</td>' +
+                    '<td>' + log['status'] + '</td>' +
+                    '<td>' + startTime + '</td>' +
+                    '<td>' + endTime + '</td>' +
+                    '</tr>';
+            }
+            $('#performanceTable').html(table);
+        },
+        error: function(err) {
+            console.log(err);
+        }
     });
 });

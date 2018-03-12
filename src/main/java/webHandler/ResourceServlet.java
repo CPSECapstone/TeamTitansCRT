@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -26,5 +27,17 @@ public class ResourceServlet {
 
         S3Manager s3Manager = new S3Manager();
         return new ResponseEntity<>(s3Manager.getS3Buckets(), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/resource/history", method = RequestMethod.GET)
+    public ResponseEntity<Collection<Capture>> getCaptureReplayHistory() {
+
+        ArrayList<Capture> captures = DBUtil.getInstance().loadAllCaptures();
+
+        if (captures == null) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(captures, HttpStatus.OK);
     }
 }

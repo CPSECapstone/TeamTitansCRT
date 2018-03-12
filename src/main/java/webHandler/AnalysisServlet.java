@@ -15,9 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
-
-import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
-import com.amazonaws.services.cloudwatch.AmazonCloudWatchClientBuilder;
 import com.amazonaws.services.cloudwatch.model.*;
 
 import java.util.*;
@@ -27,35 +24,33 @@ import java.util.*;
 @RestController
 public class AnalysisServlet {
 
-    //TODO: Update to only take capture ID when persistent capture data is added.
     /**
      * Method to handle post requests to /analysis.
      * @param response HttpServletResponse to stream metric data to.
-     * @param capture Capture containing the id and s3 where metric data is stored.
-     * @throws IOException Throws an IOException if unable to copy stream to response.
+     * @param captureId Capture containing the id.
      */
     @RequestMapping(value = "/analysis", method = RequestMethod.POST)
-    public void getMetrics(HttpServletResponse response, @RequestBody Capture capture) throws IOException {
+    public void getMetrics(HttpServletResponse response, @RequestBody Capture captureId) {
 
         InputStream stream;
+        Capture capture = DBUtil.getInstance().loadCapture(captureId.getId());
+
+        if (capture == null) {
+            writeError(response, "Error: No capture found with given id:" + captureId.getId());
+            return;
+        }
 
         // Get metric stream
         if (capture.getStatus().equals("Running")) { // Obtain from CloudWatch if capture is currently running
             CloudWatchManager cloudManager = new CloudWatchManager();
             String metrics = cloudManager.getAllMetricStatisticsAsJson(capture.getRds(), capture.getStartTime(), new Date());
             stream = new ByteArrayInputStream(metrics.getBytes(StandardCharsets.UTF_8));
-        } else { // Obtain from S3 if capture has already finished
-            S3Manager s3Manager = new S3Manager();
-            stream = s3Manager.getFile(capture.getS3(), capture.getId() + "-Performance.log");
-        }
-
-        //TODO: Replace else statement with commented block when persistent capture data is added.
-        /*else if (capture.getStatus().equals("Finished")) { // Obtain from S3 if capture has already finished
+        } else if (capture.getStatus().equals("Finished")) { // Obtain from S3 if capture has already finished
             S3Manager s3Manager = new S3Manager();
             stream = s3Manager.getFile(capture.getS3(), capture.getId() + "-Performance.log");
         } else {
             return;
-        }*/
+        }
 
         setResponseOutputStream(response, stream, capture.getId());
     }
@@ -65,12 +60,11 @@ public class AnalysisServlet {
      * @param response HttpServletResponse to copy stream to.
      * @param stream Stream to copy to response.
      * @param id Stream file id.
-     * @throws IOException Thrown if error is unable to be written to response.
      */
-    public void setResponseOutputStream(HttpServletResponse response, InputStream stream, String id) throws IOException {
+    public void setResponseOutputStream(HttpServletResponse response, InputStream stream, String id) {
         // Return error if performance log not found
         if (stream == null) {
-            response.sendError(HttpStatus.BAD_REQUEST.value(), "Error: No capture performance log found in specified s3 bucket");
+            writeError(response, "Error: No capture performance log found in specified s3 bucket");
             return;
         }
 
@@ -79,7 +73,7 @@ public class AnalysisServlet {
             IOUtils.copy(stream, response.getOutputStream());
             response.flushBuffer();
         } catch (Exception e) {
-            response.sendError(HttpStatus.BAD_REQUEST.value(), "Error: Unable to copy metric stream to response.");
+            writeError(response, "Error: Unable to copy metric stream to response.");
             return;
         }
 
@@ -124,5 +118,18 @@ public class AnalysisServlet {
             averageSum += point.getAverage();
         }
         return averageSum/dataPoints.size();
+    }
+
+    /**
+     * Method which attempts to write error to response.
+     * @param response Response to write to
+     * @param message Error message
+     */
+    private void writeError(HttpServletResponse response, String message) {
+        try {
+            response.sendError(HttpStatus.BAD_REQUEST.value(), message);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

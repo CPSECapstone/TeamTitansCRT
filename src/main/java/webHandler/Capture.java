@@ -35,7 +35,7 @@ public class Capture implements Session {
         this.s3 = s3;
         this.startTime = new Date();
         this.endTime = null;
-        this.status = "Running";
+        updateStatus();
     }
 
     public Capture(String id, String rds, String s3, int fileSizeLimit, int transactionLimit) {
@@ -46,7 +46,7 @@ public class Capture implements Session {
         this.endTime = null;
         this.fileSizeLimit = fileSizeLimit;
         this.transactionLimit = transactionLimit;
-        this.status = "Running";
+        updateStatus();
     }
 
     public Capture(String id, String rds, String s3, Date startTime, Date endTime) {
@@ -55,7 +55,7 @@ public class Capture implements Session {
         this.s3 = s3;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.status = "Running";
+        updateStatus();
     }
 
     public Capture(String id, String rds, String s3, Date startTime, Date endTime, int fileSizeLimit, int transactionLimit) {
@@ -66,11 +66,16 @@ public class Capture implements Session {
         this.endTime = endTime;
         this.fileSizeLimit = fileSizeLimit;
         this.transactionLimit = transactionLimit;
-        this.status = "Running";
+        updateStatus();
     }
 
     public void updateStatus() {
         Date currTime = new Date();
+
+        if("Failed".equals(status)) {
+            return;
+        }
+
         if (startTime != null && currTime.compareTo(startTime) >= 0) {
             if ((endTime != null && currTime.compareTo(endTime) >= 0)
                     || (fileSizeLimit != NO_LIMIT && dbFileSize > fileSizeLimit)
