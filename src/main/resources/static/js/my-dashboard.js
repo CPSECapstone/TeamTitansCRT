@@ -53,25 +53,27 @@ function updateStatus() {
         url: "/capture/status",
         type: "GET",
         beforeSend: function() {
+            console.log("started update");
             $(".manageCapturesLoadingIcon").show();
         },
-        complete: function() {
-            $(".manageCapturesLoadingIcon").hide();
-        },
         success: function(data) {
-            if (data.length > 0) {
-                // $(".manageCapturesLoadingIcon").hide();
-                $("div.dashboard-content").replaceWith(captureDashboard(data));    
-                fillTable(data);
-            }
-            else {
-                // $(".manageCapturesLoadingIcon").hide();
-                $("div.dashboard-content").replaceWith(emptyDashboard());    
-            }
+            setTimeout(function()
+            {
+                $(".manageCapturesLoadingIcon").hide();
+                if (data.length > 0) {
+                    $("div.dashboard-content").replaceWith(captureDashboard(data));    
+                    fillTable(data);
+                }
+                else {
+                    $("div.dashboard-content").replaceWith(emptyDashboard());    
+                }
+            },
+            500);
         },
         error: function(err) {
             console.log(err);
             console.log("Error updating the status.")
+            $(".manageCapturesLoadingIcon").hide();
         }
     });
 }
@@ -178,12 +180,6 @@ function stopCapture(id) {
             "Content-Type": "application/json",
         },
         data: JSON.stringify(body),
-        beforeSend: function() {
-            $(".manageCapturesLoadingIcon").show();
-        },
-        complete: function() {
-            $(".manageCapturesLoadingIcon").hide();
-        },
         success: function() {
             $("#lblStatus").html("Stopped Successfully.");
             updateStatus();

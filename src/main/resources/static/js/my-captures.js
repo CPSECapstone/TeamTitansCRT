@@ -123,8 +123,17 @@ function updateCaptureList() {
         },
         success: function(data) {
             console.log(data);
-            // $(".manageCapturesLoadingIcon").hide();
-            addAllToCaptureList(data);
+            if (data.length > 0) {
+                setTimeout(function()
+                {
+                    $(".manageCapturesLoadingIcon").hide();
+                    addAllToCaptureList(data);
+                },
+                500);
+            }
+            else {
+                $("#CaptureList").append(`<p>You have no capture history</p>`);
+            }
         },
         error: function(err) {
             console.log(err);
@@ -269,6 +278,9 @@ function startCapture(capture) {
         data: JSON.stringify(capture),
         success: function() {
             $("#exampleModal").html(createStartCaptureModal("Successful"));
+            $('#exampleModal').on('hidden.bs.modal', function () {
+                updateCaptureList();
+            });
             $("#exampleModal").modal("show");
         },
         error: function(err) {
