@@ -20,13 +20,7 @@ $(function() {
             </div>
         </div>
         <div class="row">
-            <div class="col-lg-offset-2 col-lg-4 border-on-right">
-                <p class=""><strong>Manage Captures</strong></p>
-                <hr />
-                <div class="manageCapturesLoadingIcon" tabindex="-1" role="dialog"><div class="spinner"></div></div>
-                <ul id="CaptureList" class="list-group"></ul>
-            </div>
-            <div class="col-lg-4 start-capture-form">
+            <div class="col-lg-6 start-capture-form border-on-right">
                 <p class=""><strong>Start a Capture</strong></p>
                 <hr />
                 <div class="startCaptureLoadingIcon" tabindex="-1" role="dialog"><div class="spinner"></div></div>
@@ -52,11 +46,17 @@ $(function() {
                 </div>
                 <a href="javascript:void(0)" id="${startBtnSelector}" class="btn btn-default">Start Capture</a>
             </div>
+            <div class="col-lg-6">
+                <p class=""><strong>Manage Captures</strong></p>
+                <hr />
+                <div class="manageCapturesLoadingIcon" tabindex="-1" role="dialog"><div class="spinner"></div></div>
+                <ul id="CaptureList" class="list-group"></ul>
+            </div>
         </div>
     </div>
     `);
-    updateCaptureList();
-    /*
+    //updateCaptureList();
+    
     var data = [
         {
             id: "Test1",
@@ -74,7 +74,7 @@ $(function() {
         }
     ]
     addAllToCaptureList(data);
-    */
+    
 
     populateRDSDropdown(rdsSelector);
     populateS3Dropdown(s3Selector);

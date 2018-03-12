@@ -32,6 +32,27 @@
     padding-right: 5em;
 }
 
+#bg {
+  position: fixed; 
+  top: 0; 
+  left: 50%; 
+	
+  /* Preserve aspet ratio */
+  min-width: 50%;
+  max-width: 50%;
+  min-height: 100%;
+}
+
+/* Centered text */
+.centered {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, 20%);
+    text-align: center;
+    color: white;
+}
+
 /*-------------------------------*/
 /*           Wrappers            */
 /*-------------------------------*/
@@ -509,4 +530,9 @@ body {
 
 a.defaultLinkColor {
   color: var(--secondary);
+}
+
+.welcome {
+  color: var(--primary);
+  text-decoration: underline var(--secondary);
 }

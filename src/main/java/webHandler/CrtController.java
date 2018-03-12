@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class CrtController {
 
     @GetMapping
-    public String index() { return "setupPage.html"; }
+    public String index() { return "my-setup.html"; }
 
     @GetMapping("settings") 
     public String settings() { return "my-settings.html"; }
@@ -27,7 +27,7 @@ public class CrtController {
     public String analyze() { return "analyzePage.html"; }
 
     @GetMapping("login")
-    public String login() { return "setupPage.html"; }
+    public String login() { return "my-setup.html"; }
 
     @GetMapping("dashboard")
     public String dashboard() { return "my-dashboard.html"; }
