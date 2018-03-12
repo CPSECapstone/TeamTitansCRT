@@ -105,7 +105,8 @@ public class CaptureController {
     public static void stopCapture(String id)
     {
         CaptureServlet servlet = new CaptureServlet();
-        servlet.captureStop(id);
+        Capture capture = captures.get(id);
+        servlet.captureStop(capture);
     }
 
 

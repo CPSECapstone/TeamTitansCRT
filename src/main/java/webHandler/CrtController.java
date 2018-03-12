@@ -11,14 +11,11 @@ public class CrtController {
     @GetMapping
     public String index() { return "setupPage.html"; }
 
-    @GetMapping("settings")
-    public String settings() { return "settingsPage.html"; }
+    @GetMapping("settings") 
+    public String settings() { return "my-settings.html"; }
 
     @GetMapping("capture")
-    public String capture() { return "startCapturePage.html"; }
-    
-    @GetMapping("manageCaptures")
-    public String manageCaptures() { return "manageCapturePage.html"; }
+    public String capture() { return "my-captures.html"; }
 
     @GetMapping("replay")
     public String replay() { return "startReplayPage.html"; }
@@ -33,5 +30,5 @@ public class CrtController {
     public String login() { return "setupPage.html"; }
 
     @GetMapping("dashboard")
-    public String dashboard() { return "dashboardPage.html"; }
+    public String dashboard() { return "my-dashboard.html"; }
 }

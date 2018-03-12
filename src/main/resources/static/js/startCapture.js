@@ -1,6 +1,5 @@
-$(document).ready(function() {
-    setDateFields();
-    $('#example-getting-started').multiselect();
+$(function() {
+    populateFields();
 
     $("#btnCaptureStart").on("click", function() {
         var startTime = null;
@@ -15,7 +14,7 @@ $(document).ready(function() {
 
         // Only start capture if rds and s3 selected
         if ($('#rdsSelector').val() != '' && $('#s3Selector').val() != '') {
-            var body = {
+            var capture = {
                 id: $("#txtID").val(),
                 rds: $("#rdsSelector").val(),
                 s3: $("#s3Selector").val(),
@@ -28,30 +27,24 @@ $(document).ready(function() {
                 status: ""
             };
 
-            startCapture("/capture/start", body);
+            startCapture(capture);
         }
     });
 
 });
 
-function setDateFields() {
-    var now = new Date();
-    // TODO i think this is bc Pacific Time Zone
-    now.setHours(now.getHours() - 8);
-    $("#txtStartTime").val(String(now.toISOString().replace("Z", "")));
-    // TODO: fix bug about 24 + 2
-    now.setHours(now.getHours() + 2);
-    $("#txtEndTime").val(String(now.toISOString().replace("Z", "")));
-}
-
-function startCapture(url, body) {
+/**           
+ * Starts a capture using the given Capture object
+ * @param  {Capture} The Capture object to be started
+ */
+function startCapture(capture) {
     $.ajax({
-        url: url,
+        url: "/capture/start",
         type: "POST",
         headers: {
             "Content-Type": "application/json",
         },
-        data: JSON.stringify(body),
+        data: JSON.stringify(capture),
         success: function() {
             $("#lblStatus").html("<p>Started Successful.</p>" +
                                  "<a href=\"manageCaptures\" id=\"btnManageCaptures\" class=\"btn btn-default\">Manage Captures</a>" +
@@ -59,13 +52,38 @@ function startCapture(url, body) {
         },
         error: function(err) {
             $("#lblStatus").html("Startup failure.");
+
+            console.log("Error starting capture");
             console.log(err);
         }
     });
 }
 
-// Populate rds dropdown
-$(function() {
+function populateFields() {
+    var timeDifference = -8;
+    setDateFields(timeDifference);
+    populateRDSDropdown();
+    populateS3Dropdown();    
+}
+
+/**
+ * Automatically sets date fields to current time and +2hr
+ * @param {int} timeDifference the time difference as an int (ex: -8)
+ */
+function setDateFields(timeDifference) {
+    var now = new Date();
+    // TODO i think this is bc Pacific Time Zone
+    now.setHours(now.getHours() + timeDifference);
+    $("#txtStartTime").val(String(now.toISOString().replace("Z", "")));
+    // TODO: fix bug about 24 + 2
+    now.setHours(now.getHours() + 2);
+    $("#txtEndTime").val(String(now.toISOString().replace("Z", "")));
+}
+
+/**
+ * Populate rds dropdown
+ */
+function populateRDSDropdown() {
     $.ajax({
         url: "/resource/rds",
         type: "GET",
@@ -77,13 +95,16 @@ $(function() {
             $('#rdsSelector').html(selector);
         },
         error: function(err) {
+            console.log("Error populating rds dropdown")
             console.log(err);
         }
     });
-});
+}
 
-// Populate s3 dropdown
-$(function() {
+/**
+ * Populate s3 dropdown
+ */
+function populateS3Dropdown() {
     $.ajax({
         url: "/resource/s3",
         type: "GET",
@@ -95,7 +116,8 @@ $(function() {
             $('#s3Selector').html(selector);
         },
         error: function(err) {
+            console.log("Error populating s3 dropdown")
             console.log(err);
         }
     });
-});
+}

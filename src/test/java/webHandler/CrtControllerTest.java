@@ -22,7 +22,7 @@ public class CrtControllerTest {
 
     @Test
     public void settings() throws Exception {
-        assertEquals("settingsPage.html", crtCon.settings());
+        assertEquals("my-settings.html", crtCon.settings());
     }
 
     @Test
@@ -37,7 +37,7 @@ public class CrtControllerTest {
     
     @Test
     public void dashboard() throws Exception {
-        assertEquals("dashboardPage.html", crtCon.dashboard());
+        assertEquals("my-dashboard.html", crtCon.dashboard());
     }
 
     @After

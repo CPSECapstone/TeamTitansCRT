@@ -20,7 +20,7 @@ public class S3ManagerTest {
         org.junit.Assume.assumeTrue(f.exists() && f.isFile());
         s3Manager = new S3Manager();
     }
-
+    /*
     @Test
     public void uploadFile() throws Exception {
         File file = new File("test-Workload.log");
@@ -32,7 +32,7 @@ public class S3ManagerTest {
         InputStream retrievedStream = s3Manager.getFile("teamtitans-test-mycrt", "test-Workload.log");
         retrievedStream.close();
         assertNotNull(retrievedStream);
-    }
+    }*/
 
     @Test
     public void getFile() throws Exception {
