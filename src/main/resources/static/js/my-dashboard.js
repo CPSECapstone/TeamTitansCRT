@@ -8,7 +8,7 @@ $(function() {
         </div>
         <div class="row">
             <div class="col-lg-12">
-                <div class="manageCapturesLoadingIcon" tabindex="-1" role="dialog"><div class="spinner"></div></div>
+                <div class="manageCapturesLoadingIcon" tabindex="-1" role="dialog">Loading...<div class="spinner"></div></div>
                 <div class="dashboard-content"></div>
             </div>
         </div>
@@ -60,12 +60,12 @@ function updateStatus() {
         },
         success: function(data) {
             if (data.length > 0) {
-                $(".manageCapturesLoadingIcon").hide();
+                // $(".manageCapturesLoadingIcon").hide();
                 $("div.dashboard-content").replaceWith(captureDashboard(data));    
                 fillTable(data);
             }
             else {
-                $(".manageCapturesLoadingIcon").hide();
+                // $(".manageCapturesLoadingIcon").hide();
                 $("div.dashboard-content").replaceWith(emptyDashboard());    
             }
         },
@@ -178,6 +178,12 @@ function stopCapture(id) {
             "Content-Type": "application/json",
         },
         data: JSON.stringify(body),
+        beforeSend: function() {
+            $(".manageCapturesLoadingIcon").show();
+        },
+        complete: function() {
+            $(".manageCapturesLoadingIcon").hide();
+        },
         success: function() {
             $("#lblStatus").html("Stopped Successfully.");
             updateStatus();
