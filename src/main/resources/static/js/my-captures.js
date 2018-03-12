@@ -23,7 +23,7 @@ $(function() {
             <div class="col-lg-6 start-capture-form border-on-right">
                 <p class=""><strong>Start a Capture</strong></p>
                 <hr />
-                <div class="startCaptureLoadingIcon" tabindex="-1" role="dialog"><div class="spinner"></div></div>
+                <div class="startCaptureLoadingIcon" tabindex="-1" role="dialog">Loading...<div class="spinner"></div></div>
                 <div class="${rdsSelector}"></div>
                 <div class="${s3Selector}"></div>
                 ${createTextInput("Capture ID:", idSelector)}
@@ -55,8 +55,8 @@ $(function() {
         </div>
     </div>
     `);
-    //updateCaptureList();
-    
+    updateCaptureList();
+    /*
     var data = [
         {
             id: "Test1",
@@ -74,7 +74,7 @@ $(function() {
         }
     ]
     addAllToCaptureList(data);
-    
+    */
 
     populateRDSDropdown(rdsSelector);
     populateS3Dropdown(s3Selector);
@@ -123,8 +123,17 @@ function updateCaptureList() {
         },
         success: function(data) {
             console.log(data);
-            $(".manageCapturesLoadingIcon").hide();
-            addAllToCaptureList(data);
+            if (data.length > 0) {
+                setTimeout(function()
+                {
+                    $(".manageCapturesLoadingIcon").hide();
+                    addAllToCaptureList(data);
+                },
+                500);
+            }
+            else {
+                $("#CaptureList").append(`<p>You have no capture history</p>`);
+            }
         },
         error: function(err) {
             console.log(err);
@@ -171,12 +180,12 @@ function createEditCaptureModal(capture) {
     var fileSizeLimit = capture["fileSizeLimit"];
     var transactionLimit = capture["transactionLimit"];
     return `
-    ${createCaptureListItem(id, `${id}-modal`)}
+    ${createCaptureListItem(id, status, `${id}-modal`)}
     <div class="modal fade" id="${id}-modal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">${id}</h5>
+                    <h5 class="modal-title">${id}  - ${status}</h5>
                 </div>
                 <div class="modal-body">
                     <label class="input-label">Start Time:
@@ -189,7 +198,9 @@ function createEditCaptureModal(capture) {
                     ${createTextInputValue("Max Number of Transactions:", transactionLimitSelector, transactionLimit)}
                 </div>
                 <div class="modal-footer">
-                    <button id="${id}-save" type="button" class="btn btn-secondary" data-dismiss="modal">Save</button>
+                    ${status == "Finished" ? 
+                        `<a class="btn btn-secondary" data-dismiss="modal">Close</a>` : 
+                        `<a id="${id}-save" class="btn btn-primary" data-dismiss="modal">Save</a>`}
                 </div>
             </div>
         </div>
@@ -228,8 +239,29 @@ function updateCapture(id) {
     });
 }
 
-function createCaptureListItem(id, selector) {
-    return `<li id="item-${id}" class="list-group-item">${id}<a data-toggle="modal" data-target="#${selector}" href="javascript:void(0)" class="pull-right">Edit</a></li>`;
+function createCaptureListItem(id, status, selector) {
+    return `
+    <li id="item-${id}" class="list-group-item">
+        ${createIcon(status)}${id}
+        <a data-toggle="modal" data-target="#${selector}" href="javascript:void(0)" class="pull-right">
+        ${status == "Finished" ? "View" : "Edit"}
+        </a>
+    </li>`;
+}
+
+function createIcon(status) {
+    if (status == "Running") {
+        return `<img src="../img/running.png" alt="running">`;
+    }                
+    else if (status == "Queued") {
+        return `<img src="../img/queued.png" alt="queued">`;
+    }
+    else if (status == "Finished") {
+        return `<img src="../img/finished.png" alt="finished">`;
+    }
+    else {
+        return `<img src="../img/failed.png" alt="failed">`;
+    }
 }
 
 /**           
@@ -246,6 +278,9 @@ function startCapture(capture) {
         data: JSON.stringify(capture),
         success: function() {
             $("#exampleModal").html(createStartCaptureModal("Successful"));
+            $('#exampleModal').on('hidden.bs.modal', function () {
+                updateCaptureList();
+            });
             $("#exampleModal").modal("show");
         },
         error: function(err) {

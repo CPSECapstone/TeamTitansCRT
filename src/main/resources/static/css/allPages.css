@@ -499,7 +499,7 @@ body {
   height: 40px;
   background-color: var(--s-light);
 
-  margin: 100px auto;
+  margin: 0px auto;
   -webkit-animation: sk-rotateplane 1.2s infinite ease-in-out;
   animation: sk-rotateplane 1.2s infinite ease-in-out;
 }

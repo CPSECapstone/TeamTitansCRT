@@ -87,7 +87,7 @@ public class CaptureController {
             timerManager.end();
             timers.remove(id);
         }
-        captures.remove(id);
+        // captures.remove(id);
     }
 
     public static void endCapture(String id)

@@ -8,7 +8,7 @@ $(function() {
         </div>
         <div class="row">
             <div class="col-lg-12">
-                <div class="manageCapturesLoadingIcon" tabindex="-1" role="dialog"><div class="spinner"></div></div>
+                <div class="manageCapturesLoadingIcon" tabindex="-1" role="dialog">Loading...<div class="spinner"></div></div>
                 <div class="dashboard-content"></div>
             </div>
         </div>
@@ -19,16 +19,16 @@ $(function() {
     var data = [
         {
             id: "Test1",
-            startTime: 10000000,
-            endTime: 10000000,
+            startTime: 1520871274784,
+            endTime: null,
             fileSizeLimit: 420,
             transactionLimit: 840,
             status: "Running"
         },
         {
             id: "Test2",
-            startTime: 10000000,
-            endTime: 10000000,
+            startTime: 1520871274784,
+            endTime: 1520881274784,
             fileSizeLimit: 420,
             transactionLimit: 840,
             status: "Finished"
@@ -53,25 +53,27 @@ function updateStatus() {
         url: "/capture/status",
         type: "GET",
         beforeSend: function() {
+            console.log("started update");
             $(".manageCapturesLoadingIcon").show();
         },
-        complete: function() {
-            $(".manageCapturesLoadingIcon").hide();
-        },
         success: function(data) {
-            if (data.length > 0) {
+            setTimeout(function()
+            {
                 $(".manageCapturesLoadingIcon").hide();
-                $("div.dashboard-content").replaceWith(captureDashboard(data));    
-                fillTable(data);
-            }
-            else {
-                $(".manageCapturesLoadingIcon").hide();
-                $("div.dashboard-content").replaceWith(emptyDashboard());    
-            }
+                if (data.length > 0) {
+                    $("div.dashboard-content").replaceWith(captureDashboard(data));    
+                    fillTable(data);
+                }
+                else {
+                    $("div.dashboard-content").replaceWith(emptyDashboard());    
+                }
+            },
+            500);
         },
         error: function(err) {
             console.log(err);
             console.log("Error updating the status.")
+            $(".manageCapturesLoadingIcon").hide();
         }
     });
 }
@@ -168,12 +170,7 @@ function stopCapture(id) {
     console.log(`Stopping capture: ${id}`);
     var url = "/capture/stop";
     var body = {
-        id: id,
-        rds: null,
-        s3: null,
-        startTime: null,
-        endTime: null,
-        status: ""
+        id: id
     };
     
     $.ajax({
@@ -196,6 +193,10 @@ function stopCapture(id) {
 
 /* Formarts the time from milliseconds to month day year hour minutes seconds. */
 function formatTime(time, format) {
+    if (time === null) {
+        return 'Not Specified';
+    }
+
     var t = new Date(time);
     var tf = function (i) { return (i < 10 ? '0' : '') + i };
     return format.replace(/yyyy|MM|dd|HH|mm|ss/g, function (a) {
