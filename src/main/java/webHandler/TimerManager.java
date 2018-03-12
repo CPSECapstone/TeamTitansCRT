@@ -25,11 +25,8 @@ public class TimerManager {
         startTimers();
     }
 
-    // Todo: Needs to update on the hour
-    // Todo: Needs to
     private void startTimers() {
         // Timer to handle downloading logs and concatenating them to a file on the hour
-        // TODO: Add delay to hourTimer so that it starts on the hour
         startHourTimer();
         startEndTimer();
     }
@@ -39,9 +36,7 @@ public class TimerManager {
         hourTimer.schedule(new TimerTask() {
             @Override
             public void run() {
-                Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-                int hour = calendar.get(Calendar.HOUR_OF_DAY);
-                CaptureController.getInstance().writeHourlyLogFile(captureID, hour);
+                CaptureController.hourlyCaptureLogUpdate(captureID);
             }
         }, roundToNextWholeHour(startTime), UPDATE_PERIOD_HOUR);
     }
@@ -61,13 +56,13 @@ public class TimerManager {
             endTimer.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    CaptureController.getInstance().stopCapture(captureID);
+                    CaptureController captureController = new CaptureController();
+                    captureController.stopCapture(captureID);
                 }
             }, endTime);
         }
     }
 
-    // Todo: If timer has already started it should wait until the hour to go off, as of right now it will possibly double write to the file
     public void updateTimeManager(Date startTime, Date endTime) {
         this.startTime = startTime;
         this.endTime = endTime;

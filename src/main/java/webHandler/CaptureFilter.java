@@ -13,7 +13,7 @@ public class CaptureFilter extends LogFilter {
     private int transactionLimit;
     private String captureID;
 
-    public CaptureFilter(Capture capture)
+    public CaptureFilter(Session capture)
     {
         this.captureID = capture.getId();
         this.startTime = capture.getStartTime();
@@ -139,6 +139,11 @@ public class CaptureFilter extends LogFilter {
         return statement;
     }
 
+    public boolean isQuitCommand(Statement statement)
+    {
+        return statement.getCommand().equals("Quit");
+    }
+
     public List<Statement> filterLogData(String logData)
     {
         // resulting filtered array of statements
@@ -161,7 +166,7 @@ public class CaptureFilter extends LogFilter {
             }
             // create a statement representation of the line
             Statement statement = createStatement(stmt);
-            if (statement.getQuery().equals("Quit") || statement.getQuery().equals("Statistics"))
+            if (isQuitCommand(statement))
             {
                 continue;
             }
@@ -195,7 +200,6 @@ public class CaptureFilter extends LogFilter {
             filteredLogStatements.add(statement);
         }
 
-        updateCaptureController();
         return filteredLogStatements;
     }
 
@@ -208,7 +212,10 @@ public class CaptureFilter extends LogFilter {
         this.transactionLimit = limit;
     }
 
-    private void updateCaptureController() {
-        CaptureController.getInstance().updateCaptureTransactionCount(captureID, transactionCount);
+
+    public void update(Session capture)
+    {
+        setEndTime(capture.getEndTime());
+        setTransactionLimit(capture.getTransactionLimit());
     }
 }

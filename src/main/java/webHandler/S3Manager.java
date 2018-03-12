@@ -102,7 +102,7 @@ public class S3Manager {
         return dataStream;
     }
 
-    public String getFileString(String bucketName, String fileName)
+    public String getFileAsString(String bucketName, String fileName)
     {
         InputStream dataStream = null;
         BufferedReader buffer = null;
