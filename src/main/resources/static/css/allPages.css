@@ -501,3 +501,12 @@ body {
     -webkit-transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
   }
 }
+
+.thead-dark {
+  background-color: var(--primary);
+  color: white;
+}
+
+a.defaultLinkColor {
+  color: var(--secondary);
+}

@@ -7,33 +7,39 @@ $(function() {
             </div>
         </div>
         <div class="row">
-            ${emptyDashboard()}
+            <div class="col-lg-6 col-lg-offset-3">
+                <div class="dashboard-content"></div>
+            </div>
         </div>
     </div>
     `);
+    // updateStatus();
+    var data = [
+        {
+            id: "Test1",
+            startTime: 10000000,
+            endTime: 10000000,
+            fileSizeLimit: 420,
+            transactionLimit: 840,
+            status: "Running"
+        },
+        {
+            id: "Test2",
+            startTime: 10000000,
+            endTime: 10000000,
+            fileSizeLimit: 420,
+            transactionLimit: 840,
+            status: "Finished"
+        }
+    ]
+    $("div.dashboard-content").replaceWith(captureDashboard(data));
 });
 
 function emptyDashboard() {
     return `
-    <div class="col-lg-6 col-lg-offset-3">
-        <p class="text-center">You have no captures or replays! Let's get started!</p>
-        <div class="text-center">
-            <a href="capture" class="btn btn-default">Start new capture</a>
-        </div>
-    </div>`;
-}
-
-function dashboardWithContent() {
-    return `
-    <div class="col-lg-offset-2 col-lg-4 border-on-right">
-        <p class=""><strong>Manage Captures</strong></p>
-        <hr />
-        <div class="manageCapturesLoadingIcon" tabindex="-1" role="dialog"><div class="spinner"></div></div>
-    </div>
-    <div class="col-lg-4 start-capture-form">
-        <p class=""><strong>Start a Capture</strong></p>
-        <hr />
-        <div class="startCaptureLoadingIcon" tabindex="-1" role="dialog"><div class="spinner"></div></div>
+    <p class="text-center">You have no captures or replays! Let's get started!</p>
+    <div class="text-center">
+        <a href="capture" class="btn btn-default">Start new capture</a>
     </div>`;
 }
 
@@ -43,29 +49,11 @@ function updateStatus() {
         url: "/capture/status",
         type: "GET",
         success: function(data) {
-            $('#statusTable > tbody').html("");
-            for (var i = 0; i < data.length; i++) {
-                var capture = data[i];
-                var id = capture["id"];
-                var status = capture["status"];
-                var startTime = capture["startTime"];
-                var endTime = capture["endTime"];
-                var button = "";
-                var icon = "";
-                console.log("ID: " + id +
-                    "\nStatus: " + status);
-                
-                if (status == "Running") {
-                    icon = "<img src=\"../img/running.png\" alt=\"running\">";
-                    button =
-                        "<a href=\"#\" id=\"stopButton" + id +
-                        "\" class=\"btn btn-default btn-stop\">Stop Capture</a>";
-                    addToTable(icon, id, status, startTime, endTime, button);
-                }                
-                else if (status == "Queued") {
-                    icon = "<img src=\"../img/queued.png\" alt=\"queued\">";
-                    addToTable(icon, id, status, startTime, endTime, button);
-                }
+            if (data.length > 0) {
+                $("div.dashboard-content").replaceWith(captureDashboard(data));    
+            }
+            else {
+                $("div.dashboard-content").replaceWith(emptyDashboard());    
             }
         },
         error: function(err) {
@@ -75,49 +63,87 @@ function updateStatus() {
     });
 }
 
-/* Adds new captures to the table. Takes the capture's id and gets its status, start time, and end time. Also, adds an icon to show the status of the capture visually. If the capture is running, there will be a stop capture button as well. */
-function addToTable(icon, id, status, startTime, endTime, button) {
-    var body = {
-        id: id,
-        startTime: startTime,
-        endTime: endTime,
-        metrics: ["CPUUtilization", "FreeStorageSpace", "WriteThroughput"]
-    };
+function captureDashboard(data) {
+    return `
+    <table class="table" width="100%">
+        <thead class="thead-dark">
+            <tr class="">
+                <th scope="col"> </th> 
+                <th scope="col">Name</th>
+                <th scope="col">Status</th>
+                <th scope="col">Start Time</th>
+                <th scope="col">End Time</th>
+                <th scope="col"> </th>
+            </tr>
+        </thead>
+        <tbody>
+        ${fillTable(data)}
+        </tbody>
+    </table>`;
+}
+
+function fillTable(data) {
+    return `${data.map(createTableRow).join('')}`;
+}
+
+function createTableRow(capture) {
+    var id = capture["id"];
+    var status = capture["status"];
+    var startTime = capture["startTime"];
+    var endTime = capture["endTime"];
+    var button = "";
+    console.log("ID: " + id +
+        "\nStatus: " + status);
+    return `
+    <tr data-toggle="collapse" data-target="#accordion${id}" class="clickable">
+        <td width="(100/12)%">${createIcon(status)}</td>
+        <td width="(100/4)%">${id}</td>
+        <td width="(100/6)%">${status}</td>
+        <td width="(100/6)%">${formatTime(startTime, "MM/dd/yyyy HH:mm:ss")}</td>
+        <td width="(100/6)%">${formatTime(endTime, "MM/dd/yyyy HH:mm:ss")}</td>
+        <td width="(100/6)%">${createButton(id, status)}</td>
+    </tr>
+    `;
+
+    /*
+        <tr>
+        <td colspan="3">
+            <div id="accordion${id} class="collapse">
+                <ul class="stats-list">
+                    <li>CPU Utilization (percent): ${data[0]}</li>
+                    <li>Free Storage Space Available (bytes): ${data[1]} </li>
+                    <li>Write Throughput (bytes/sec): ${data[2]} </li>
+                </ul>
+            </div>
+        </td>
+    </tr>`;
+
     
-    $.ajax({
-        url: "/cloudwatch/average",
-        type: "POST",
-        headers: { "Content-Type": "application/json" },
-        data: JSON.stringify(body),
-        success: function(data) {
-            
-            // manually append html string
-            $('#statusTable > tbody').append(
-                "<tr data-toggle=\"collapse\" data-target=\"#accordion" + id + "\" class=\"clickable\">" +
-                "<td width=\"(100/12)%\">" + icon +
-                "</td><td width=\"(100/4)%\">" + id +
-                "</td><td width=\"(100/6)%\">" + status +
-                "</td><td width=\"(100/6)%\">" + formatTime(startTime, "MM/dd/yyyy HH:mm:ss") +
-                "</td><td width=\"(100/6)%\">" + formatTime(endTime, "MM/dd/yyyy HH:mm:ss") +
-                "</td><td width=\"(100/6)%\">" + button +
-                "</td></tr>" +
-                "<tr>" +
-                    "<td colspan=\"3\">" +
-                        "<div id=\"accordion" + id + "\" class=\"collapse\">" +
-                            "<ul class=\"stats-list\">" +
-                                "<li>CPU Utilization (percent): " + data[0] + "</li>" +
-                                "<li>Free Storage Space Available (bytes): " + data[1] + "</li>" +
-                                "<li>Write Throughput (bytes/sec): " + data[2] + "</li>" +
-                            "</ul>" +
-                        "</div>" +
-                    "</td>" +
-                "</tr>");
-        },
-        error: function(err) {
-            console.log(err);
-            console.log("Error adding the the table on the dashboard.");
-        }
-    });
+    */
+}
+
+function createIcon(status) {
+    if (status == "Running") {
+        return `<img src="../img/running.png" alt="running">`;
+    }                
+    else if (status == "Queued") {
+        return `<img src="../img/queued.png" alt="queued">`;
+    }
+    else if (status == "Finishd") {
+        return `<img src="../img/finished.png" alt="finished">`;
+    }
+    else {
+        return `<img src="../img/failed.png" alt="failed">`;
+    }
+}
+
+function createButton(id, status) {
+    if (status == "Running") {
+        return `<a href="javascript:void(0)" id="stopButton${id}" class="defaultLinkColor">Stop Capture</a>`;
+    }
+    else if (status == "Finished") {
+        return `<a href="analyze" class="defaultLinkColor">Analyze</a>`;
+    }
 }
 
 /* If you push the stop capture button, it ends immediately. */
