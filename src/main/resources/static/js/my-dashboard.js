@@ -19,16 +19,16 @@ $(function() {
     var data = [
         {
             id: "Test1",
-            startTime: 10000000,
-            endTime: 10000000,
+            startTime: 1520871274784,
+            endTime: null,
             fileSizeLimit: 420,
             transactionLimit: 840,
             status: "Running"
         },
         {
             id: "Test2",
-            startTime: 10000000,
-            endTime: 10000000,
+            startTime: 1520871274784,
+            endTime: 1520881274784,
             fileSizeLimit: 420,
             transactionLimit: 840,
             status: "Finished"
@@ -168,12 +168,7 @@ function stopCapture(id) {
     console.log(`Stopping capture: ${id}`);
     var url = "/capture/stop";
     var body = {
-        id: id,
-        rds: null,
-        s3: null,
-        startTime: null,
-        endTime: null,
-        status: ""
+        id: id
     };
     
     $.ajax({
@@ -196,6 +191,10 @@ function stopCapture(id) {
 
 /* Formarts the time from milliseconds to month day year hour minutes seconds. */
 function formatTime(time, format) {
+    if (time === null) {
+        return 'Not Specified';
+    }
+
     var t = new Date(time);
     var tf = function (i) { return (i < 10 ? '0' : '') + i };
     return format.replace(/yyyy|MM|dd|HH|mm|ss/g, function (a) {
