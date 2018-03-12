@@ -33,8 +33,9 @@ public class CaptureServlet {
     }
 
     @RequestMapping(value = "/capture/stop", method = RequestMethod.POST)
-    public ResponseEntity<String> captureStop(@RequestBody String id) {
+    public ResponseEntity<String> captureStop(@RequestBody Capture tempCapture) {
 
+        String id = tempCapture.getId();
         // Send bad request on unknown capture ID
         if (!CaptureController.doesCapturesTableContain(id)) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
