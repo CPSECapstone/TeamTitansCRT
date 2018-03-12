@@ -134,23 +134,17 @@ public class S3Manager {
     }
   
     /**
-     * @param bucketName S3 bucket name. ex: teamtitans-test-mycrt
-     * @param fileName file to search for
-     * @param filePath where the file will be saved. ex: src/main/resources/filename.tmp
-     * @return void it will create a new file and write the inputstream's content to it
+     * Download file from S3 bucket.
+     * @param  bucketName S3 bucket name. ex: teamtitans-test-mycrt.
+     * @param  fileName   File to search for.
+     * @param  filePath   Where the file will be saved. ex: src/main/resources/filename.tmp.
+     * @return
      */
     public void downloadFileLocally (String bucketName, String fileName, String filePath) throws IOException {
-        //this is the datastream of the file being downloaded
         InputStream inStream = getFile(bucketName, fileName);
-
-        //creates the new local file and creates an outputstream for it
         File newFile = new File(filePath);
         OutputStream outStream = new FileOutputStream(newFile);
-
-        //this will copy the content of the inputstream to the new fiel
         IOUtils.copy(inStream,outStream);
-
-        //close after use
         inStream.close();
         outStream.close();
     }

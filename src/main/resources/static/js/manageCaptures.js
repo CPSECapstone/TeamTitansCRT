@@ -1,11 +1,12 @@
+var domain = "http://localhost:8080";
+
 $(document).ready(function() {
     $("#btnStatus").on("click", function() {
-        updateStatus();       
+        updateStatus();
     });
     updateStatus();
 });
 
-/* Updates the table to represent what is actually happening for capture. Only running and queued captures are visible in the table. */
 function updateStatus() {
     $.ajax({
         url: "/capture/status",
@@ -29,28 +30,32 @@ function updateStatus() {
                     button =
                         "<a href=\"#\" id=\"stopButton" + id +
                         "\" class=\"btn btn-default btn-stop\">Stop Capture</a>";
-                    addToTable(icon, id, rds, status, startTime, endTime, button);
                 }                
                 else if (status == "Queued") {
                     icon = "<img src=\"../img/queued.png\" alt=\"queued\">";
-                    addToTable(icon, id, rds, status, startTime, endTime, button);
                 }
+                else if (status == "Finished") {
+                    icon = "<img src=\"../img/finished.png\" alt=\"finished\">";
+                }
+                else {
+                    icon = "<img src=\"../img/failed.png\" alt=\"failed\">";
+                }
+                
+                addToTable(icon, id, rds, status, startTime, endTime, button);
             }
         },
         error: function(err) {
             console.log(err);
-            console.log("Error updating the status.")
         }
     });
 }
 
-/* Adds new captures to the table. Takes the capture's id and gets its status, start time, and end time. Also, adds an icon to show the status of the capture visually. If the capture is running, there will be a stop capture button as well. */
 function addToTable(icon, id, rds, status, startTime, endTime, button) {
     var body = {
         rds: rds,
         startTime: startTime,
         endTime: endTime,
-        metrics: ["CPUUtilization", "FreeStorageSpace", "WriteThroughput"]
+        metric: "CPUUtilization"
     };
     
     $.ajax({
@@ -74,25 +79,25 @@ function addToTable(icon, id, rds, status, startTime, endTime, button) {
                     "<td colspan=\"3\">" +
                         "<div id=\"accordion" + id + "\" class=\"collapse\">" +
                             "<ul class=\"stats-list\">" +
-                                "<li>CPU Utilization (percent): " + data[0] + "</li>" +
-                                "<li>Free Storage Space Available (bytes): " + data[1] + "</li>" +
-                                "<li>Write Throughput (bytes/sec): " + data[2] + "</li>" +
+                                "<li>CPU Utilization: " + data + "</li>" +
                             "</ul>" +
                         "</div>" +
                     "</td>" +
                 "</tr>");
-        },
-        error: function(err) {
-            console.log(err);
-            console.log("Error adding the the table on the dashboard.");
         }
     });
 }
 
-/* If you push the stop capture button, it ends immediately. */
 function stopCapture(id) {
     var url = "/capture/stop";
-    var body = id;
+    var body = {
+        id: id,
+        rds: null,
+        s3: null,
+        startTime: null,
+        endTime: null,
+        status: ""
+    };
     
     $.ajax({
         url: url,
@@ -100,45 +105,44 @@ function stopCapture(id) {
         headers: {
             "Content-Type": "application/json",
         },
-        data: body,
+        data: JSON.stringify(body),
         success: function() {
             $("#lblStatus").html("Stopped Successfully.");
             updateStatus();
         },
         error: function(err) {
             console.log(err);
-            console.log("Error stopping capture on dashboard");
         }
     });
 }
 
-/* Formarts the time from milliseconds to month day year hour minutes seconds. */
 function formatTime(time, format) {
     var t = new Date(time);
     var tf = function (i) { return (i < 10 ? '0' : '') + i };
     return format.replace(/yyyy|MM|dd|HH|mm|ss/g, function (a) {
         switch (a) {
-            case 'yyyy': //year
+            case 'yyyy':
                 return tf(t.getFullYear());
                 break;
-            case 'MM': //month
+            case 'MM':
                 return tf(t.getMonth() + 1);
                 break;
-            case 'mm': //minutes
+            case 'mm':
                 return tf(t.getMinutes());
                 break;
-            case 'dd': //day
+            case 'dd':
                 return tf(t.getDate());
                 break;
-            case 'HH': //hour
+            case 'HH':
                 return tf(t.getHours());
                 break;
-            case 'ss': //seconds
+            case 'ss':
                 return tf(t.getSeconds());
                 break;
         }
     })
 }
+    
 
 $(function() {
     $('#statusTable').on('click', '[id^=stopButton]' , function() {

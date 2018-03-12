@@ -83,30 +83,32 @@ public class AnalysisServlet {
     }
     
     /**
-     * @param request MetricRequest contains String id, Date start, Date end, String... metrics
-     * @return A list of averages
+     * Calculates the average of metrics for a time span.
+     * @param  request MetricRequest contains String rds, Date start, Date end, String... metrics
+     * @return         Averages of metrics.
      */
     @RequestMapping(value = "/cloudwatch/average", method = RequestMethod.POST)
     public ResponseEntity<List<Double>> calculateAverages(@RequestBody MetricRequest request){
         List<Double> averages = new ArrayList<Double>();
 
         for(String metric : request.getMetrics()) {
-            averages.add(calculateAverage(request.getID(), request.getStartTime(), request.getEndTime(), metric));
+            averages.add(calculateAverage(request.getRDS(), request.getStartTime(), request.getEndTime(), metric));
         }
 
         return new ResponseEntity<List<Double>>(averages, HttpStatus.OK);
     }
 
     /**
-     * @param id      The database to get data from
-     * @param start     The (capture's) start time
-     * @param end       The end time. For current time use (new Date(System.currentTimeMillis()))
-     * @param metric   Metric name to request ex. "CPUUtilization"
-     * @return          The average through the timespan as a Double
+     * Calculate the average of a metric for a time span.
+     * @param  rds    Database to get data from.
+     * @param  start  Capture's Start time.
+     * @param  end    Capture's end time. For current time use (new Date(System.currentTimeMillis())).
+     * @param  metric Metric name to request ex. "CPUUtilization".
+     * @return        Average of a single metric.
      */
-    public Double calculateAverage(String id, Date start, Date end, String metric) {
+    public Double calculateAverage(String rds, Date start, Date end, String metric) {
         CloudWatchManager cloudManager = new CloudWatchManager();
-        GetMetricStatisticsResult result = cloudManager.getMetricStatistics(id, start, end, metric);
+        GetMetricStatisticsResult result = cloudManager.getMetricStatistics(rds, start, end, metric);
         List<Datapoint> dataPoints = result.getDatapoints();
         Double averageSum = 0.0;
 
