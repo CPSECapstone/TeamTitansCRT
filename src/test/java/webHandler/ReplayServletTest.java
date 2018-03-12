@@ -17,10 +17,10 @@ public class ReplayServletTest {
         replayServlet = new ReplayServlet();
     }
 
-    // This will replay 3 commands in MyCaptureKyleTest26-Workload.log onto the database
+    // This will replay an already captured workload in the S3 bucket onto the database
     @Test
     public void testReplayStart() throws Exception {
-        Replay replay = new Replay("MyCaptureKyleTest26", "testRDS", "teamtitans-test-mycrt");
+        Replay replay = new Replay("MyCaptureTestKyle33", "testRDS", "teamtitans-test-mycrt");
         replay.setDatabaseInfo(new DatabaseInfo("testdb.cgtpml3lsh3i.us-west-1.rds.amazonaws.com:3306",
                 "testdb", "admin", "TeamTitans!"));
 
@@ -32,7 +32,7 @@ public class ReplayServletTest {
     public void testReplayStop() throws Exception {
         Replay replay = new Replay("id", "testRDS", "testS3");
         replay.setDatabaseInfo(new DatabaseInfo("", "", "", ""));
-
+        ReplayController.addReplay(replay);
         HttpStatus status = replayServlet.stopReplay(replay).getStatusCode();
         assertEquals(HttpStatus.OK,status);
     }

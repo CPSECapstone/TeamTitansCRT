@@ -80,4 +80,6 @@ public abstract class LogFilter {
     {
         return this.transactionCount;
     }
+
+    public abstract void update(Session session);
 }

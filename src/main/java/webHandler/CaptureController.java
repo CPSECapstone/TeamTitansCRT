@@ -1,92 +1,16 @@
 package webHandler;
 
-import com.amazonaws.services.s3.model.ObjectMetadata;
-
-import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class CaptureController {
 
-    private final String GeneralLogFileName = "general/mysql-general.log";
+    private final static Map<String, Capture> captures = new ConcurrentHashMap<>();
+    private final static Map<String, LogController> logControllers = new ConcurrentHashMap<>();
+    private final static Map<String, TimerManager> timers = new ConcurrentHashMap<>();
 
-    private static CaptureController instance = null; // singleton instance
-
-    private HashMap<String, Capture> captures;
-    private HashMap<String, LogController> logControllers;
-    private HashMap<String, TimerManager> timers;
-
-    // Initializes the hash maps. Private constructor due to singleton class
-    private CaptureController()
-    {
-        this.captures = new HashMap<>();
-        this.logControllers = new HashMap<>();
-        this.timers = new HashMap<>();
-    }
-
-    // return singleton instance
-    public static CaptureController getInstance()
-    {
-        if (instance == null)
-        {
-            instance = new CaptureController();
-        }
-        return instance;
-    }
-
-    /*
-   @return Returns true if successfully uploads, false otherwise
-    */
-    private boolean uploadLogToS3(Capture capture) {
-        String fileName = capture.getId() + "-Workload.log";
-        File workloadFile = new File(fileName);
-        FileInputStream stream = null;
-
-        try {
-            stream = new FileInputStream(workloadFile);
-        } catch (FileNotFoundException ex) {
-            ex.printStackTrace();
-            return false;
-        }
-
-        S3Manager s3Manager = new S3Manager();
-        s3Manager.uploadFile(capture.getS3(), fileName, workloadFile);
-        //s3Manager.uploadFile(capture.getS3(), fileName, stream, new ObjectMetadata());
-        return true;
-    }
-
-    /*
-@return Returns true if successfully uploads, false otherwise
-*/
-    private boolean uploadMetricsToS3(Capture capture) {
-        CloudWatchManager cloudManager = new CloudWatchManager();
-        String stats = cloudManager.getAllMetricStatisticsAsJson(capture.getRds(), capture.getStartTime(), capture.getEndTime());
-        InputStream statStream = new ByteArrayInputStream(stats.getBytes(StandardCharsets.UTF_8));
-
-        // Store RDS workload in S3
-        S3Manager s3Manager = new S3Manager();
-        s3Manager.uploadFile(capture.getS3(), capture.getId() + "-Performance.log", statStream, new ObjectMetadata());
-        return true;
-    }
-
-    private void deleteFile(String id)
-    {
-        new File(id + "-Workload.log").delete();
-    }
-
-
-    public boolean uploadLogsAndMetricsToS3(Capture capture)
-    {
-        if (uploadLogToS3(capture) && uploadMetricsToS3(capture))
-        {
-            deleteFile(capture.getId());
-            return true;
-        }
-        return false;
-    }
-
-    private void updateCapture(Capture updatedCapture) {
+    private static void updateCapture(Capture updatedCapture) {
         Capture capture = getCapture(updatedCapture.getId());
         if (updatedCapture.getStartTime() != null)
         {
@@ -105,39 +29,48 @@ public class CaptureController {
             capture.setFileSizeLimit(updatedCapture.getFileSizeLimit());
         }
         capture.updateStatus();
-
-        DBUtil.getInstance().saveCapture(capture);
     }
 
-    private void updateLogController(Capture capture) {
+    private static void updateLogController(Capture capture) {
         LogController logController = getLogController(capture.getId());
-        logController.updateLogController(capture);
+        logController.updateLogFilter((Session) capture);
     }
 
-    private void updateTimerController(Capture capture) {
+    private static void updateTimerController(Capture capture) {
         TimerManager timerManager = getTimer(capture.getId());
         timerManager.updateTimeManager(capture.getStartTime(), capture.getEndTime());
     }
 
-    public void updateAll(Capture capture)
+    public static void updateAll(Capture capture)
     {
         updateCapture(capture);
         updateLogController(capture);
         updateTimerController(capture);
     }
 
-    public void updateCaptureFileSize(String id, long fileSize) {
+    public static void updateCaptureFileSize(String id, long fileSize) {
         if (captures.containsKey(id)) {
             Capture capture = captures.get(id);
             capture.setDbFileSize(fileSize);
             capture.updateStatus();
-            if (capture.hasReachedFileSizeLimit()) {
+            if (capture.hasReachedFileSizeLimit() && !capture.getStatus().equals("Finished")) {
                 stopCapture(id);
             }
         }
     }
 
-    public void endCaptureResources(String id)
+    public static void updateCaptureTransactionCount(String id, int count) {
+        if (captures.containsKey(id)) {
+            Capture capture = captures.get(id);
+            capture.setTransactionCount(count);
+            capture.updateStatus();
+            if (capture.hasReachedTransactonLimit() && !capture.getStatus().equals("Finished")) {
+                stopCapture(id);
+            }
+        }
+    }
+
+    public static void endCaptureResources(String id)
     {
         LogController logController = getLogController(id);
         TimerManager timerManager = getTimer(id);
@@ -145,8 +78,6 @@ public class CaptureController {
 
         if (logController != null && capture != null)
         {
-            String logData = downloadLog(capture.getRds(), GeneralLogFileName);
-            logController.logData(capture, logData, true);
             logControllers.remove(id);
         }
         if (timerManager != null)
@@ -155,86 +86,59 @@ public class CaptureController {
             timers.remove(id);
         }
         captures.remove(id);
-
-        DBUtil.getInstance().saveCapture(capture);
     }
 
-    public void stopCapture(String id)
+    public static void endCapture(String id)
+    {
+        LogController logController = getLogController(id);
+        Capture capture = getCapture(id);
+        if (logController != null && capture != null)
+        {
+            logController.processData(capture, CaptureLogController.END);
+        }
+    }
+
+    public static void stopCapture(String id)
     {
         CaptureServlet servlet = new CaptureServlet();
         servlet.captureStop(id);
     }
 
-    public void updateCaptureTransactionCount(String id, int count) {
-        if (captures.containsKey(id)) {
-            Capture capture = captures.get(id);
-            capture.setTransactionCount(count);
-            capture.updateStatus();
-            if (capture.hasReachedTransactonLimit()) {
-                stopCapture(id);
-            }
-        }
-    }
 
-    public String downloadLog(String rds, String logFileName)
-    {
-        RDSManager rdsManager = new RDSManager();
-        return rdsManager.downloadLog(rds, logFileName);
-
-    }
-
-    public void writeHourlyLogFile(String id, int hour) {
-        Capture capture = getCapture(id);
-        LogController logController = getLogController(id);
-        RDSManager rdsManager = new RDSManager();
-
-        if (capture == null)
-        {
-            return;
-        }
-
-        String logFile = GeneralLogFileName + "." + hour;
-        String logData = downloadLog(capture.getRds(), logFile);
-
-        logController.logData(capture, logData, false);
-    }
-
-    public void addTimer(TimerManager timer, String id) {
+    public static void addTimer(TimerManager timer, String id) {
         timers.put(id, timer);
     }
 
-    private TimerManager getTimer(String id) {
+    private static TimerManager getTimer(String id) {
         if (doesTimersTableContain(id)) {
             return timers.get(id);
         }
         return null;
     }
 
-    public void addLogController(LogController controller, String id) {
+    public static void addLogController(LogController controller, String id) {
         logControllers.put(id, controller);
     }
 
-    private LogController getLogController(String id) {
+    private static LogController getLogController(String id) {
         if (doesLogControllersTableContain(id)) {
             return logControllers.get(id);
         }
         return null;
     }
 
-    public void addCapture(Capture capture) {
+    public static void addCapture(Capture capture) {
         captures.put(capture.getId(), capture);
-
-        DBUtil.getInstance().saveCapture(capture);
     }
 
-    public Capture getCapture(String id) {
+    public static Capture getCapture(String id) {
         if (doesCapturesTableContain(id)) {
             return captures.get(id);
         }
         return null;
     }
 
-    public boolean doesCapturesTableContain(String id) {
+    public static boolean doesCapturesTableContain(String id) {
         if (captures.containsKey(id)) {
             return true;
         }
@@ -242,7 +146,7 @@ public class CaptureController {
         return false;
     }
 
-    public boolean doesLogControllersTableContain(String id) {
+    public static boolean doesLogControllersTableContain(String id) {
         if (logControllers.containsKey(id)) {
             return true;
         }
@@ -250,7 +154,7 @@ public class CaptureController {
         return false;
     }
 
-    public boolean doesTimersTableContain(String id) {
+    public static boolean doesTimersTableContain(String id) {
         if (timers.containsKey(id)) {
             return true;
         }
@@ -258,8 +162,27 @@ public class CaptureController {
         return false;
     }
 
-    public Collection<Capture> getAllCaptureValues()
+    public static void hourlyCaptureLogUpdate(String captureID)
+    {
+        if (doesLogControllersTableContain(captureID))
+        {
+            LogController logController = logControllers.get(captureID);
+            Capture capture = captures.get(captureID);
+            logController.processData((Session) capture, CaptureLogController.HOURLY);
+        }
+    }
+
+    public static Collection<Capture> getAllCaptureValues()
     {
         return captures.values();
+    }
+
+    public static void uploadAllFiles(Capture capture)
+    {
+        if (doesLogControllersTableContain(capture.getId()))
+        {
+            LogController logController = logControllers.get(capture.getId());
+            logController.uploadAllFiles(capture);
+        }
     }
 }

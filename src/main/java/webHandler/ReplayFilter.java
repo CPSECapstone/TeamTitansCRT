@@ -10,10 +10,10 @@ import org.json.simple.parser.ParseException;
 
 public class ReplayFilter extends LogFilter {
 
-    public ReplayFilter(List<String> statementsToRemove, List<String> usersToRemove)
+    public ReplayFilter(Replay replay)
     {
-        this.statementsToRemove = statementsToRemove;
-        this.usersToRemove = usersToRemove;
+        this.statementsToRemove = replay.getFilterStatements();
+        this.usersToRemove = replay.getFilterUsers();
         this.transactionLimit = 0; // currently replay does not have a transactionLimit
     }
 
@@ -80,6 +80,11 @@ public class ReplayFilter extends LogFilter {
         }
 
         return filteredLogStatements;
+    }
+
+    public void update(Session replay)
+    {
+
     }
 
 
