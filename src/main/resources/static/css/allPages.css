@@ -532,7 +532,6 @@ a.defaultLinkColor {
   color: var(--secondary);
 }
 
-.welcome {
-  color: var(--primary);
-  text-decoration: underline var(--secondary);
+.top-buffer { 
+    margin-top: 50px;
 }

@@ -7,26 +7,27 @@ $(function() {
             
         </div>
         <div class="row">
-            <div class="col-lg-6 start-capture-form border-on-right">
-                
-                <p><div class="welcome"><strong>MyCRT</strong></div></p>
+            <div class="row top top-buffer">
+                <div class="col-lg-6 start-capture-form border-on-right" style="text-align: center">
+                    <img src="../img/MyCRT.PNG" alt="crtLogo">
 
-                <input type="text" placeholder="Name" name="uname" required>
+                    <input type="text" placeholder="Name" name="uname" required>
 
-                <p><a href="/dashboard" class="btn btn-default gray" >Use My Instance Profile</a></p>
+                    <p><a href="/dashboard" class="btn btn-default gray" >Use My Instance Profile</a></p>
 
-                <p>or <a href="javascript:void(0)" class="" data-toggle="modal" data-target="#${instProfHelpSelector}">Set Up An Instance Profile</a></p>
+                    <p>or <a href="javascript:void(0)" class="" data-toggle="modal" data-target="#${instProfHelpSelector}">Set Up An Instance Profile</a></p>
 
-                <div id="${instProfHelpSelector}" class="modal fade" role="dialog">
-                    ${createInstanceProfHelpModal(instProfHelpSelector)}
-                </div>       
+                    <div id="${instProfHelpSelector}" class="modal fade" role="dialog">
+                        ${createInstanceProfHelpModal(instProfHelpSelector)}
+                    </div>       
+                </div>
             </div>
             <div class="col-lg-6">
                 <div class="pull-right">
                     <img src="../img/laptopguy.jpg" id="bg" alt="welcome">
                     <div class="centered">Find the most optimal database by comparing db captures and replays.</div>
                 </div>
-            </div>
+            </div>            
         </div>
     </div>
     `);
