@@ -26,6 +26,8 @@ public class AnalysisServletTest {
         stream = new ByteArrayInputStream( "Testing response steam.".getBytes() );
 
         mockOutput = mock(ServletOutputStream.class);
+
+        // Set the mock object to return mockOutput for the output stream
         when(mockResponse.getOutputStream()).thenReturn(mockOutput);
     }
 
@@ -33,6 +35,7 @@ public class AnalysisServletTest {
     public void testSetResponseOutputStreamSuccess() throws Exception {
         new AnalysisServlet().setResponseOutputStream(mockResponse, stream, "test");
 
+        // Verify checks if the called function was invoked on the mockResponse the specified number of times
         verify(mockResponse, times(1)).addHeader("Content-disposition", "attachment;filename=test-Performance.log");
         verify(mockResponse, times(1)).setContentType("txt/plain");
         verify(mockResponse, times(1)).flushBuffer();
@@ -42,6 +45,7 @@ public class AnalysisServletTest {
     public void testSetResponseOutputStreamNullStream() throws Exception {
         new AnalysisServlet().setResponseOutputStream(mockResponse, null, "test");
 
+        // Verify checks if the called function was invoked on the mockResponse the specified number of times
         verify(mockResponse, times(1)).sendError(HttpStatus.BAD_REQUEST.value(), "Error: No capture performance log found in specified s3 bucket");
         verify(mockResponse, never()).addHeader("Content-disposition", "attachment;filename=test-Performance.log");
         verify(mockResponse, never()).setContentType("txt/plain");
@@ -50,9 +54,11 @@ public class AnalysisServletTest {
 
     @Test
     public void testSetResponseOutputStreamBadCopy() throws Exception {
+        // Set the mockResponse to return null for the output stream
         when(mockResponse.getOutputStream()).thenReturn(null);
         new AnalysisServlet().setResponseOutputStream(mockResponse, stream, "test");
 
+        // Verify checks if the called function was invoked on the mockResponse the specified number of times
         verify(mockResponse, times(1)).sendError(HttpStatus.BAD_REQUEST.value(), "Error: Unable to copy metric stream to response.");
         verify(mockResponse, never()).addHeader("Content-disposition", "attachment;filename=test-Performance.log");
         verify(mockResponse, never()).setContentType("txt/plain");

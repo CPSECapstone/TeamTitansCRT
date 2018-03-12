@@ -28,16 +28,15 @@ public class AnalysisServlet {
      * Method to handle post requests to /analysis.
      * @param response HttpServletResponse to stream metric data to.
      * @param captureId Capture containing the id.
-     * @throws IOException Throws an IOException if unable to copy stream to response.
      */
     @RequestMapping(value = "/analysis", method = RequestMethod.POST)
-    public void getMetrics(HttpServletResponse response, @RequestBody Capture captureId) throws IOException {
+    public void getMetrics(HttpServletResponse response, @RequestBody Capture captureId) {
 
         InputStream stream;
         Capture capture = DBUtil.getInstance().loadCapture(captureId.getId());
 
         if (capture == null) {
-            response.sendError(HttpStatus.BAD_REQUEST.value(), "Error: No capture found with given id:" + captureId.getId());
+            writeError(response, "Error: No capture found with given id:" + captureId.getId());
             return;
         }
 
@@ -61,12 +60,11 @@ public class AnalysisServlet {
      * @param response HttpServletResponse to copy stream to.
      * @param stream Stream to copy to response.
      * @param id Stream file id.
-     * @throws IOException Thrown if error is unable to be written to response.
      */
-    public void setResponseOutputStream(HttpServletResponse response, InputStream stream, String id) throws IOException {
+    public void setResponseOutputStream(HttpServletResponse response, InputStream stream, String id) {
         // Return error if performance log not found
         if (stream == null) {
-            response.sendError(HttpStatus.BAD_REQUEST.value(), "Error: No capture performance log found in specified s3 bucket");
+            writeError(response, "Error: No capture performance log found in specified s3 bucket");
             return;
         }
 
@@ -75,7 +73,7 @@ public class AnalysisServlet {
             IOUtils.copy(stream, response.getOutputStream());
             response.flushBuffer();
         } catch (Exception e) {
-            response.sendError(HttpStatus.BAD_REQUEST.value(), "Error: Unable to copy metric stream to response.");
+            writeError(response, "Error: Unable to copy metric stream to response.");
             return;
         }
 
@@ -120,5 +118,18 @@ public class AnalysisServlet {
             averageSum += point.getAverage();
         }
         return averageSum/dataPoints.size();
+    }
+
+    /**
+     * Method which attempts to write error to response.
+     * @param response Response to write to
+     * @param message Error message
+     */
+    private void writeError(HttpServletResponse response, String message) {
+        try {
+            response.sendError(HttpStatus.BAD_REQUEST.value(), message);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
