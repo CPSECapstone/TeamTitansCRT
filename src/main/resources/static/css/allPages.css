@@ -276,7 +276,7 @@
 .hamburger.is-open .hamb-top,
 .hamburger.is-open .hamb-middle,
 .hamburger.is-open .hamb-bottom {
-  background-color: var(--secondary);
+  background-color: var(--primary);
 }
 .hamburger.is-open .hamb-top,
 .hamburger.is-open .hamb-bottom {
