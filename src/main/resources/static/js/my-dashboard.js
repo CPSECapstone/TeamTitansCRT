@@ -15,7 +15,10 @@ $(function() {
     </div>
     `);
     updateStatus();
-    /*
+    // testDashboardTable();
+});
+
+function testDashboardTable() {
     var data = [
         {
             id: "Test1",
@@ -36,8 +39,7 @@ $(function() {
     ]
     $("div.dashboard-content").replaceWith(captureDashboard(data));
     fillTable(data);
-    */
-});
+}
 
 function insertLoadingSpinner(selector) {
     return `
