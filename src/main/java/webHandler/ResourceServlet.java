@@ -30,18 +30,6 @@ public class ResourceServlet {
         return new ResponseEntity<>(s3Manager.getS3Buckets(), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/resource/history", method = RequestMethod.GET)
-    public ResponseEntity<Collection<Capture>> getCaptureReplayHistory() {
-
-        ArrayList<Capture> captures = DBUtil.getInstance().loadAllCaptures();
-
-        if (captures == null) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-        return new ResponseEntity<>(captures, HttpStatus.OK);
-    }
-
     @RequestMapping(value = "/resource/captures", method = RequestMethod.GET)
     public ResponseEntity<Collection<Capture>> getAllCaptureHistory() {
 

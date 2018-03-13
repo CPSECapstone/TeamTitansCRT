@@ -169,7 +169,7 @@ $(function() {
 // Populate capture table with available captures
 $(function() {
     $.ajax({
-        url: "/resource/history",
+        url: "/resource/captures",
         type: "GET",
         success: function(data) {
             var table = '<table class="table table-striped table-hover"><col width="40">'
