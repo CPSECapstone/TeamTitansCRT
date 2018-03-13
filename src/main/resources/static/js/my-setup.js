@@ -7,20 +7,17 @@ $(function() {
             
         </div>
         <div class="row">
-            <div class="row top top-buffer">
-                <div class="col-lg-6 start-capture-form border-on-right" style="text-align: center">
-                    <img src="../img/MyCRT.PNG" alt="crtLogo">
-
-                    <input type="text" placeholder="Name" name="uname" required>
+            <div class="col-lg-6 start-capture-form border-on-right" style="text-align: center">
+                <div class="welcome">
+                    <div class="center-welcome">MyCRT</div>
 
                     <p><a href="/dashboard" class="btn btn-default gray" >Use My Instance Profile</a></p>
 
-                    <p>or <a href="javascript:void(0)" class="" data-toggle="modal" data-target="#${instProfHelpSelector}">Set Up An Instance Profile</a></p>
-
-                    <div id="${instProfHelpSelector}" class="modal fade" role="dialog">
-                        ${createInstanceProfHelpModal(instProfHelpSelector)}
-                    </div>       
+                    <p>or <a href="javascript:void(0)" class="" data-toggle="modal" data-target="#${instProfHelpSelector}">Set Up An Instance Profile</a></p>                    
                 </div>
+                <div id="${instProfHelpSelector}" class="modal fade" role="dialog">
+                    ${createInstanceProfHelpModal(instProfHelpSelector)}
+                </div>  
             </div>
             <div class="col-lg-6">
                 <div class="pull-right">
@@ -31,10 +28,6 @@ $(function() {
         </div>
     </div>
     `);
-    /*
-    $(`#${instProfHelpSelector}`).on("click", function() {
-        createInstanceProfHelpModal(instProfHelpSelector);
-    });*/
 });
 
 
