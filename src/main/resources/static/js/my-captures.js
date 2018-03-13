@@ -23,7 +23,7 @@ $(function() {
             <div class="col-lg-6 start-capture-form border-on-right">
                 <p class=""><strong>Start a Capture</strong></p>
                 <hr />
-                <div class="startCaptureLoadingIcon" tabindex="-1" role="dialog">Loading...<div class="spinner"></div></div>
+                ${insertLoadingSpinner("startCaptureLoadingIcon")}
                 <div class="${rdsSelector}"></div>
                 <div class="${s3Selector}"></div>
                 ${createTextInput("Capture ID:", idSelector)}
@@ -49,7 +49,7 @@ $(function() {
             <div class="col-lg-6">
                 <p class=""><strong>Manage Captures</strong></p>
                 <hr />
-                <div class="manageCapturesLoadingIcon" tabindex="-1" role="dialog"><div class="spinner"></div></div>
+                ${insertLoadingSpinner("manageCapturesLoadingIcon")}
                 <ul id="CaptureList" class="list-group"></ul>
             </div>
         </div>
@@ -107,6 +107,14 @@ $(function() {
         }
     });
 });
+
+function insertLoadingSpinner(selector) {
+    return `
+    <div class="${selector}" tabindex="-1" role="dialog">
+        <div class="text-center">Loading...</div>
+        <div class="spinner"></div>
+    </div>`;
+}
 
 /**
  * Top level function for creating list of capture cards

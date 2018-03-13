@@ -8,8 +8,8 @@ $(function() {
         </div>
         <div class="row">
             <div class="col-lg-12">
-                <div class="manageCapturesLoadingIcon" tabindex="-1" role="dialog">Loading...<div class="spinner"></div></div>
                 <div class="dashboard-content"></div>
+                ${insertLoadingSpinner("tableLoadingIcon")}
             </div>
         </div>
     </div>
@@ -39,6 +39,14 @@ $(function() {
     */
 });
 
+function insertLoadingSpinner(selector) {
+    return `
+    <div class="${selector}" tabindex="-1" role="dialog">
+        <div class="text-center">Loading...</div>
+        <div class="spinner"></div>
+    </div>`;
+}
+
 function emptyDashboard() {
     return `
     <p class="text-center">You have no captures or replays! Let's get started!</p>
@@ -53,13 +61,14 @@ function updateStatus() {
         url: "/capture/status",
         type: "GET",
         beforeSend: function() {
-            console.log("started update");
-            $(".manageCapturesLoadingIcon").show();
+            console.log("show");
+            $(".tableLoadingIcon").show();
         },
         success: function(data) {
             setTimeout(function()
             {
-                $(".manageCapturesLoadingIcon").hide();
+                console.log("hide");
+                $(".tableLoadingIcon").hide();
                 if (data.length > 0) {
                     $("div.dashboard-content").replaceWith(captureDashboard(data));    
                     fillTable(data);
@@ -73,7 +82,7 @@ function updateStatus() {
         error: function(err) {
             console.log(err);
             console.log("Error updating the status.")
-            $(".manageCapturesLoadingIcon").hide();
+            $(".tableLoadingIcon").hide();
         }
     });
 }
