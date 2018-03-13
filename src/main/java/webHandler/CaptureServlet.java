@@ -21,7 +21,7 @@ public class CaptureServlet {
         if (capture.getStartTime() == null) {
             capture.setStartTime(new Date());
         }
-
+        
         LogController logController = new CaptureLogController(capture);
         TimerManager timerManager = new TimerManager(capture.getId(), capture.getStartTime(), capture.getEndTime());
 
