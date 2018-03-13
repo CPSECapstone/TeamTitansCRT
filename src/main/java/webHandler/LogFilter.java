@@ -2,7 +2,6 @@ package webHandler;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.io.InputStream;
 
 public abstract class LogFilter {
     protected List<Integer> idToRemove = new ArrayList<>(); // list of connection id's to remove

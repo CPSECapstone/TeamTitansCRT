@@ -1,7 +1,6 @@
 package webHandler;
 
 import java.util.Date;
-import java.util.List;
 
 public class MetricRequest {
 

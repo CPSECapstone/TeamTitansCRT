@@ -5,14 +5,13 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.springframework.http.ResponseEntity;
 import webHandler.CloudWatchManager;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertEquals;
 
 public class CloudWatchTest {
 

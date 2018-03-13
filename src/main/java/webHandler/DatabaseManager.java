@@ -1,10 +1,9 @@
 package webHandler;
 
-import java.sql.SQLException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.function.Function;
 
 public abstract class DatabaseManager {
     private String dbms;

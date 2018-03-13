@@ -2,7 +2,6 @@ package webHandler;
 
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ReplayLogController extends LogController {
     public static final int FAST_MODE = 0;

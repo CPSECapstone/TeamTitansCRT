@@ -7,16 +7,14 @@ import org.springframework.http.ResponseEntity;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 
-import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertTrue;
 import static org.mockito.Mockito.*;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class AnalysisServletTest {
 

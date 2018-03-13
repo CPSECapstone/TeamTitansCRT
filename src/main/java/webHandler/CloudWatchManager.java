@@ -1,8 +1,5 @@
 package webHandler;
 
-import java.io.File;
-import java.io.FileReader;
-import java.util.*;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
@@ -10,19 +7,14 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatchClientBuilder;
 import com.amazonaws.services.cloudwatch.model.*;
-
 import org.json.simple.JSONArray;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.JSONObject;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.http.ResponseEntity;
+import org.json.simple.parser.JSONParser;
 
+import java.io.File;
+import java.io.FileReader;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.stream.Collectors;
 
 public class CloudWatchManager {
 
