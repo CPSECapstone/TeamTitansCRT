@@ -18,7 +18,7 @@ public class CrtControllerTest {
 
     @Test
     public void index() throws Exception {
-        assertEquals("setupPage.html", crtCon.index());
+        assertEquals("my-setup.html", crtCon.index());
     }
 
     @Test
@@ -33,7 +33,7 @@ public class CrtControllerTest {
     
     @Test
     public void login() throws Exception {
-        assertEquals("setupPage.html", crtCon.login());
+        assertEquals("my-setup.html", crtCon.login());
     }
     
     @Test
