@@ -18,10 +18,7 @@ public class CrtController {
     public String capture() { return "my-captures.html"; }
 
     @GetMapping("replay")
-    public String replay() { return "startReplayPage.html"; }
-    
-    @GetMapping("manageReplays")
-    public String manageReplays() { return "manageReplayPage.html"; }
+    public String replay() { return "my-replays.html"; }
 
     @GetMapping("analyze")
     public String analyze() { return "analyzePage.html"; }

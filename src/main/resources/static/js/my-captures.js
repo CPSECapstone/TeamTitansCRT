@@ -125,7 +125,7 @@ function insertLoadingSpinner(selector) {
  */
 function updateCaptureList() {
     $.ajax({
-        url: "/capture/status",
+        url: "/resource/captures",
         type: "GET",
         beforeSend: function() {
             $(".manageCapturesLoadingIcon").show();
