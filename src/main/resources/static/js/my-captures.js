@@ -56,25 +56,7 @@ $(function() {
     </div>
     `);
     updateCaptureList();
-    /*
-    var data = [
-        {
-            id: "Test1",
-            startTime: 10000000,
-            endTime: 10000000,
-            fileSizeLimit: 420,
-            transactionLimit: 840,
-        },
-        {
-            id: "Test2",
-            startTime: 10000000,
-            endTime: 10000000,
-            fileSizeLimit: 420,
-            transactionLimit: 840,
-        }
-    ]
-    addAllToCaptureList(data);
-    */
+    // testCaptureList();
 
     populateRDSDropdown(rdsSelector);
     populateS3Dropdown(s3Selector);
@@ -108,6 +90,28 @@ $(function() {
     });
 });
 
+function testCaptureList() {
+    var data = [
+        {
+            id: "Test1",
+            startTime: 1520871274784,
+            endTime: null,
+            fileSizeLimit: 420,
+            transactionLimit: 840,
+            status: "Running"
+        },
+        {
+            id: "Test2",
+            startTime: 1520871274784,
+            endTime: 1520881274784,
+            fileSizeLimit: 420,
+            transactionLimit: 840,
+            status: "Finished"
+        }
+    ]
+    addAllToCaptureList(data);
+}
+
 function insertLoadingSpinner(selector) {
     return `
     <div class="${selector}" tabindex="-1" role="dialog">
@@ -126,9 +130,6 @@ function updateCaptureList() {
         beforeSend: function() {
             $(".manageCapturesLoadingIcon").show();
         },
-        complete: function() {
-            $(".manageCapturesLoadingIcon").hide();
-        },
         success: function(data) {
             console.log(data);
             if (data.length > 0) {
@@ -140,11 +141,13 @@ function updateCaptureList() {
                 500);
             }
             else {
+                $(".manageCapturesLoadingIcon").hide();
                 $("#CaptureList").append(`<p>You have no capture history</p>`);
             }
         },
         error: function(err) {
             console.log(err);
+            $(".manageCapturesLoadingIcon").hide();
         }
     });
 }
@@ -181,9 +184,15 @@ function createEditCaptureModal(capture) {
     var startTime = new Date(capture["startTime"]);
     startTime.setHours(startTime.getHours() - 8);
     startTime = startTime.toISOString().replace("Z", "");
-    var endTime = new Date(capture["endTime"]); // TODO: If there is no endtime, display nothing
-    endTime.setHours(endTime.getHours() - 8);
-    endTime = endTime.toISOString().replace("Z", "");
+    var endTime = capture["endTime"];
+    if (endTime != null) {
+        endTime = new Date(endTime);
+        endTime.setHours(endTime.getHours() - 8);
+        endTime = endTime.toISOString().replace("Z", "");
+    }
+    else {
+        endTime = "";
+    }
 
     var fileSizeLimit = capture["fileSizeLimit"];
     var transactionLimit = capture["transactionLimit"];
