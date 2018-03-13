@@ -1,5 +1,7 @@
 package webHandler;
 
+import org.springframework.util.StringUtils;
+
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -377,6 +379,48 @@ public class DBUtil {
         }
     }
 
+    public ArrayList<Capture> loadCapturesWithStatus(String status)
+    {
+        status = StringUtils.capitalize(status);
+        if (!(status.equals("Finished") || status.equals("Running") || status.equals("Queued") || status.equals("Failed"))) {
+            return null;
+        }
+
+        try
+        {
+            ResultSet rs;
+            ArrayList<Capture> captures = new ArrayList<>();
+
+            String sql = "SELECT * FROM captures WHERE status = '" + status + "'";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.execute();
+            rs = pstmt.getResultSet();
+
+            while (rs.next()) {
+                Capture capture = new Capture();
+                capture.setId(rs.getString(2));
+                capture.setRds(rs.getString(3));
+                capture.setS3(rs.getString(4));
+                capture.setStartTime(rs.getTimestamp(5));
+                capture.setEndTime(rs.getTimestamp(6));
+                capture.setStatus(rs.getString(7));
+                capture.setFileSizeLimit(rs.getInt(8));
+                capture.setDbFileSize(rs.getInt(9));
+                capture.setTransactionCount(rs.getInt(10));
+
+                captures.add(capture);
+            }
+
+            return captures;
+        }
+
+        catch (SQLException e)
+        {
+            System.err.println(e.getMessage());
+            return null;
+        }
+    }
+
     public boolean saveReplay(Replay replay)
     {
         //inserts values, if value is there then it's replaced
@@ -464,6 +508,45 @@ public class DBUtil {
             ArrayList<Replay> replays = new ArrayList<>();
 
             String sql = "SELECT * FROM replays";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.execute();
+            rs = pstmt.getResultSet();
+
+            while (rs.next()) {
+                Replay replay = new Replay();
+                replay.setId(rs.getString(2));
+                replay.setRds(rs.getString(3));
+                replay.setS3(rs.getString(4));
+                replay.setStartTime(rs.getDate(5));
+                replay.setEndTime(rs.getDate(6));
+                replay.setStatus(rs.getString(7));
+
+                replays.add(replay);
+            }
+
+            return replays;
+        }
+
+        catch (SQLException e)
+        {
+            System.err.println(e.getMessage());
+            return null;
+        }
+    }
+
+    public ArrayList<Replay> loadReplaysWithStatus(String status)
+    {
+        status = StringUtils.capitalize(status);
+        if (!(status.equals("Finished") || status.equals("Running") || status.equals("Queued") || status.equals("Failed"))) {
+            return null;
+        }
+
+        try
+        {
+            ResultSet rs;
+            ArrayList<Replay> replays = new ArrayList<>();
+
+            String sql = "SELECT * FROM replays WHERE status = '\" + status + \"'\"";
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.execute();
             rs = pstmt.getResultSet();
