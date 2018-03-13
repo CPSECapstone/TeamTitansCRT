@@ -34,17 +34,17 @@ $(function() {
 
                 <div id="advanced" class="collapse">
                     <label class="input-label">Start Time:
-                        <input id="${startTimeSelector}" class="form-control" type="datetime-local" value="">
+                        <input id="" class="${startTimeSelector} form-control" type="datetime-local" value="">
                     </label>
                     <label class="input-label">End Time:
-                        <input id="${endTimeSelector}" class="form-control" type="datetime-local" value="">
+                        <input id="" class="${endTimeSelector} form-control" type="datetime-local" value="">
                     </label>
                     ${createTextInput("Max Capture Size (mB):", fileSizeLimitSelector)}
                     ${createTextInput("Max Number of Transactions:", transactionLimitSelector)}
                     ${createTextInput("Database Commands to Ignore (comma delimited):", filterStatementsSelector)}
                     ${createTextInput("Database Users to Ignore (comma delimited):", filterUsersSelector)}
                 </div>
-                <a href="javascript:void(0)" id="${startBtnSelector}" class="btn btn-default">Start Capture</a>
+                <a href="javascript:void(0)" id="" class="${startBtnSelector} btn btn-default">Start Capture</a>
             </div>
             <div class="col-lg-6">
                 <p class=""><strong>Manage Captures</strong></p>
@@ -60,29 +60,29 @@ $(function() {
 
     populateRDSDropdown(rdsSelector);
     populateS3Dropdown(s3Selector);
-    $(`#${startBtnSelector}`).on("click", function() {
+    $(`.${startBtnSelector}`).on("click", function() {
         var startTime = null;
-        if ($(`#${startTimeSelector}`).val()) {
-            startTime = new Date(String($(`#${startTimeSelector}`).val()));
+        if ($(`.${startTimeSelector}`).val()) {
+            startTime = new Date(String($(`.${startTimeSelector}`).val()));
         }
 
         var endTime = null;
-        if ($(`#${endTimeSelector}`).val()) {
-            endTime = new Date(String($(`#${endTimeSelector}`).val()));
+        if ($(`.${endTimeSelector}`).val()) {
+            endTime = new Date(String($(`.${endTimeSelector}`).val()));
         }
 
         // Only start capture if rds and s3 selected
-        if ($(`#${rdsSelector}`).val() != '' && $(`#${s3Selector}`).val() != '') {
+        if ($(`.${rdsSelector}`).val() != '' && $(`.${s3Selector}`).val() != '') {
             var capture = {
-                id: $(`#${idSelector}`).val(),
-                rds: $(`#${rdsSelector}`).val(),
-                s3: $(`#${s3Selector}`).val(),
+                id: $(`.${idSelector}`).val(),
+                rds: $(`.${rdsSelector}`).val(),
+                s3: $(`.${s3Selector}`).val(),
                 startTime: startTime,
                 endTime: endTime,
-                fileSizeLimit: $(`#${fileSizeLimitSelector}`).val(),
-                transactionLimit: $(`#${transactionLimitSelector}`).val(),
-                filterStatements: $(`#${filterStatementsSelector}`).val().split(',').map(x => x.trim()),
-                filterUsers: $(`#${filterUsersSelector}`).val().split(',').map(x => x.trim())
+                fileSizeLimit: $(`.${fileSizeLimitSelector}`).val(),
+                transactionLimit: $(`.${transactionLimitSelector}`).val(),
+                filterStatements: $(`.${filterStatementsSelector}`).val().split(',').map(x => x.trim()),
+                filterUsers: $(`.${filterUsersSelector}`).val().split(',').map(x => x.trim())
             };
 
             startCapture(capture);
@@ -182,12 +182,12 @@ function createEditCaptureModal(capture) {
     
     // to be fixed with user set timezone
     var startTime = new Date(capture["startTime"]);
-    startTime.setHours(startTime.getHours() - 8);
+    startTime.setHours(startTime.getHours() - 7); // daylight savings lol
     startTime = startTime.toISOString().replace("Z", "");
     var endTime = capture["endTime"];
     if (endTime != null) {
         endTime = new Date(endTime);
-        endTime.setHours(endTime.getHours() - 8);
+        endTime.setHours(endTime.getHours() - 7); // daylight savings lol
         endTime = endTime.toISOString().replace("Z", "");
     }
     else {
@@ -206,13 +206,13 @@ function createEditCaptureModal(capture) {
                 </div>
                 <div class="modal-body">
                     <label class="input-label">Start Time:
-                        <input id="${startTimeSelector}" class="form-control" type="datetime-local" value="${startTime}">
+                        <input id="" class="txtStartTime form-control" type="datetime-local" value="${startTime}">
                     </label>
                     <label class="input-label">End Time:
-                        <input id="${endTimeSelector}" class="form-control" type="datetime-local" value="${endTime}">
+                        <input id="" class="txtEndTime form-control" type="datetime-local" value="${endTime}">
                     </label>
-                    ${createTextInputValue("Max Capture Size (mB):", fileSizeLimitSelector, fileSizeLimit)}
-                    ${createTextInputValue("Max Number of Transactions:", transactionLimitSelector, transactionLimit)}
+                    ${createTextInputValue("Max Capture Size (mB):", "txtMaxSize", fileSizeLimit)}
+                    ${createTextInputValue("Max Number of Transactions:", "txtMaxTrans", transactionLimit)}
                 </div>
                 <div class="modal-footer">
                     ${status == "Finished" ? 
@@ -230,10 +230,20 @@ function createEditCaptureModal(capture) {
  */
 // TODO fix the match between these selectors and the ones above on lines 172-178
 function updateCapture(id) {
+    var startTime = null;
+    if ($(`#${id}-modal .txtStartTime`).val()) {
+        startTime = new Date(String($(`#${id}-modal .txtStartTime`).val()));
+    }
+
+    var endTime = null;
+    if ($(`#${id}-modal .txtEndTime`).val()) {
+        endTime = new Date(String($(`#${id}-modal .txtEndTime`).val()));
+    }
+    
     var body = {
         id: id,
-        startTime: $(`#${id}-modal .txtStartTime`).val(),
-        endTime: $(`#${id}-modal .txtEndTime`).val(),
+        startTime: startTime,
+        endTime: endTime,
         fileSizeLimit: $(`#${id}-modal .txtMaxSize`).val(),
         transactionLimit: $(`#${id}-modal .txtMaxTrans`).val()
     };
@@ -377,7 +387,7 @@ function createTextInput(label, id) {
     return `
     <div class="form-group">
         <label class="input-label">${label}</label>
-        <input id="${id}" class="form-control" type="text" value="">
+        <input id="" class="${id} form-control" type="text" value="">
     </div>`;
 }
 
@@ -385,7 +395,7 @@ function createTextInputValue(label, id, value) {
     return `
     <div class="form-group">
         <label class="input-label">${label}</label>
-        <input id="${id}" class="form-control" type="text" value="${value}">
+        <input id="" class="${id} form-control" type="text" value="${value}">
     </div>`;
 }
 
@@ -393,7 +403,7 @@ function createDropdown(label, id, options) {
     return `
     <div class="form-group">
         <label class="input-label">${label}</label>
-        <select class="form-control" id="${id}">
+        <select class="${id} form-control" id="">
             ${options.map(createOption).join('')}
         </select>
     </div>`;

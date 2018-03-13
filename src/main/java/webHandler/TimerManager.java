@@ -52,6 +52,7 @@ public class TimerManager {
 
     private void startEndTimer()
     {
+        endTimer = new Timer();
         if (endTime != null) {
             endTimer.schedule(new TimerTask() {
                 @Override
@@ -66,6 +67,8 @@ public class TimerManager {
     public void updateTimeManager(Date startTime, Date endTime) {
         this.startTime = startTime;
         this.endTime = endTime;
+        System.out.println(startTime);
+        System.out.println(endTime);
 
         endTimer.cancel();
 
