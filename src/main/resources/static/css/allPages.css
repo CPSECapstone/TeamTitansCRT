@@ -532,6 +532,19 @@ a.defaultLinkColor {
   color: var(--secondary);
 }
 
-.top-buffer { 
-    margin-top: 50px;
+.welcome { 
+    margin-top: 200px;
+    transform: translate(-20%, 0%);
+}
+
+/* Centered welcome text */
+.center-welcome {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, -120%);
+    text-align: center;
+    color: black;
+    text-decoration: underline;
+    text-decoration-color: orange;
+    font-size: 7rem;
 }
