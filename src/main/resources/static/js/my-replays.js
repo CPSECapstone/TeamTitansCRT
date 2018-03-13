@@ -10,6 +10,9 @@ $(function() {
     var filterStatementsSelector = "filterStatementsSelector";
     var filterUsersSelector = "filterUsersSelector";
 
+    var usernameSelector = "usernameSelector";
+    var passwordSelector = "passwordSelector";
+
     var startBtnSelector = "btnReplayStart";
 
     $("div.content-placeholder").replaceWith(`
@@ -28,6 +31,8 @@ $(function() {
                 <div class="${captureSelector}"></div>
                 <div class="${rdsSelector}"></div>
                 <div class="${s3Selector}"></div>
+                ${createTextInput("Replay RDS Username:", usernameSelector)}
+                ${createTextInput("Replay RDS Password:", passwordSelector)}
 
                 <div class="block">
                     <a data-toggle="collapse" href="#advanced">Advanced <span class="caret"></span></a>
@@ -45,19 +50,19 @@ $(function() {
                     ${createTextInput("Database Commands to Ignore (comma delimited):", filterStatementsSelector)}
                     ${createTextInput("Database Users to Ignore (comma delimited):", filterUsersSelector)}
                 </div>
-                <a href="javascript:void(0)" id="" class="${startBtnSelector} btn btn-default">Start Capture</a>
+                <a href="javascript:void(0)" id="" class="${startBtnSelector} btn btn-default">Start Replay</a>
             </div>
             <div class="col-lg-6">
-                <p class=""><strong>Manage Captures</strong></p>
+                <p class=""><strong>Manage Replays</strong></p>
                 <hr />
-                ${insertLoadingSpinner("manageCapturesLoadingIcon")}
-                <ul id="CaptureList" class="list-group"></ul>
+                ${insertLoadingSpinner("manageReplaysLoadingIcon")}
+                <ul id="ReplayList" class="list-group"></ul>
             </div>
         </div>
     </div>
     `);
-    updateCaptureList();
-    // testCaptureList();
+    updateReplayList();
+    // testReplayList();
 
     populateCapturesDropdown(captureSelector);
     populateRDSDropdown(rdsSelector);
@@ -87,12 +92,12 @@ $(function() {
                 filterUsers: $(`.${filterUsersSelector}`).val().split(',').map(x => x.trim())
             };
 
-            startCapture(capture);
+            startReplay(capture);
         }
     });
 });
 
-function testCaptureList() {
+function testReplayList() {
     var data = [
         {
             id: "Test1",
@@ -111,7 +116,7 @@ function testCaptureList() {
             status: "Finished"
         }
     ]
-    addAllToCaptureList(data);
+    addAllToReplayList(data);
 }
 
 function insertLoadingSpinner(selector) {
@@ -125,47 +130,47 @@ function insertLoadingSpinner(selector) {
 /**
  * Top level function for creating list of capture cards
  */
-function updateCaptureList() {
+function updateReplayList() {
     $.ajax({
         url: "/capture/status",
         type: "GET",
         beforeSend: function() {
-            $(".manageCapturesLoadingIcon").show();
+            $(".manageReplaysLoadingIcon").show();
         },
         success: function(data) {
             console.log(data);
             if (data.length > 0) {
                 setTimeout(function()
                 {
-                    $(".manageCapturesLoadingIcon").hide();
-                    addAllToCaptureList(data);
+                    $(".manageReplaysLoadingIcon").hide();
+                    addAllToReplayList(data);
                 },
                 500);
             }
             else {
-                $(".manageCapturesLoadingIcon").hide();
-                $("#CaptureList").append(`<p>You have no capture history</p>`);
+                $(".manageReplaysLoadingIcon").hide();
+                $("#ReplayList").append(`<p>You have no capture history</p>`);
             }
         },
         error: function(err) {
             console.log(err);
-            $(".manageCapturesLoadingIcon").hide();
+            $(".manageReplaysLoadingIcon").hide();
         }
     });
 }
 
-function addAllToCaptureList(data) {
-    // clears contents of the CaptureList
-    $('#CaptureList').empty();
-    data.map(addToCaptureList).join('')
+function addAllToReplayList(data) {
+    // clears contents of the ReplayList
+    $('#ReplayList').empty();
+    data.map(addToReplayList).join('')
 }
 
 /**
  * Takes a capture, adds it to the list of capture cards, and creates the save binding
  * @param {Capture}
  */
-function addToCaptureList(capture) {
-    $("#CaptureList").append(createEditCaptureModal(capture));
+function addToReplayList(capture) {
+    $("#ReplayList").append(createEditCaptureModal(capture));
 
     var id = capture["id"];
     $(`#${id}-save`).on("click", function() {
@@ -199,7 +204,7 @@ function createEditCaptureModal(capture) {
     var fileSizeLimit = capture["fileSizeLimit"];
     var transactionLimit = capture["transactionLimit"];
     return `
-    ${createCaptureListItem(id, status, `${id}-modal`)}
+    ${createReplayListItem(id, status, `${id}-modal`)}
     <div class="modal fade" id="${id}-modal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -259,7 +264,7 @@ function updateCapture(id) {
         data: JSON.stringify(body),
         success: function() {
             console.log(id + " success")
-            updateCaptureList();
+            updateReplayList();
         },
         error: function(err) {
             $("#lblStatus").html("Startup failure.");
@@ -268,7 +273,7 @@ function updateCapture(id) {
     });
 }
 
-function createCaptureListItem(id, status, selector) {
+function createReplayListItem(id, status, selector) {
     return `
     <li id="item-${id}" class="list-group-item">
         ${createIcon(status)}${id}
@@ -297,7 +302,7 @@ function createIcon(status) {
  * Starts a capture using the given Capture object
  * @param  {Capture} The Capture object to be started
  */
-function startCapture(capture) {
+function startReplay(capture) {
     $.ajax({
         url: "/capture/start",
         type: "POST",
@@ -306,14 +311,14 @@ function startCapture(capture) {
         },
         data: JSON.stringify(capture),
         success: function() {
-            $("#exampleModal").html(createStartCaptureModal("Successful"));
+            $("#exampleModal").html(createStartReplayModal("Successful"));
             $('#exampleModal').on('hidden.bs.modal', function () {
-                updateCaptureList();
+                updateReplayList();
             });
             $("#exampleModal").modal("show");
         },
         error: function(err) {
-            $("#exampleModal").html(createStartCaptureModal("Failure"));
+            $("#exampleModal").html(createStartReplayModal("Failure"));
             $("#exampleModal").modal("show");
 
             console.log("Error starting capture");
@@ -322,7 +327,7 @@ function startCapture(capture) {
     });
 }
 
-function createStartCaptureModal(result) {
+function createStartReplayModal(result) {
     return `
     <div class="modal-dialog" role="document">
         <div class="modal-content">
