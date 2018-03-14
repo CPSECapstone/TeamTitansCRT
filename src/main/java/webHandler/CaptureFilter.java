@@ -1,23 +1,27 @@
 package webHandler;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+
 public class CaptureFilter extends LogFilter {
     private String previousTime = ""; // the time of the previous statement
     private String previousDate = ""; // the date of the previous statement
-    private Date startTime; // the start time of the capture
-    private Date endTime; // the end time of the capture
+    private LocalDateTime startTime; // the start time of the capture
+    private LocalDateTime endTime; // the end time of the capture
     private int transactionLimit;
     private String captureID;
 
     public CaptureFilter(Session capture)
     {
         this.captureID = capture.getId();
-        this.startTime = capture.getStartTime();
-        this.endTime = capture.getEndTime();
+        setStartTime(capture.getStartTime());
+        setEndTime(capture.getEndTime());
         this.transactionLimit = capture.getTransactionLimit();
         this.statementsToRemove = capture.getFilterStatements();
         this.usersToRemove = capture.getFilterUsers();
@@ -30,31 +34,25 @@ public class CaptureFilter extends LogFilter {
                 line.matches("(?i)Time.*Id.*Command.*Argument");
     }
     // Checks to see whether the statement falls within the capture's start time and end time.
-    private boolean isWithinTimeInterval(Statement statement, Date startTime, Date endTime)
+    private boolean isWithinTimeInterval(Statement statement)
     {
         // if the date and time are empty then just accept the statement and return
         if (statement.getDate().equals("------") && statement.getTime().equals("--:--:--")) {
             return true;
         }
-        String pattern = "yymmdd hh:mm:ss";
-        try
+        String pattern = "yyMMdd HH:mm:ss";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+        LocalDateTime statementLocalDateTime = LocalDateTime.parse(statement.getDate() + " " + statement.getTime(), formatter);
+
+        // is the statement later than the start time
+        if (statementLocalDateTime.isAfter(startTime))
         {
-            SimpleDateFormat sdf = new SimpleDateFormat(pattern);
-            Date statementDate = sdf.parse(statement.getDate() + " " + statement.getTime());
-            // is the statement later than the start time
-            if (statementDate.compareTo(startTime) > 0)
+            if (endTime != null)
             {
-                if (endTime != null)
-                {
-                    // is the statement before the end time
-                    return (statementDate.compareTo(endTime) < 0);
-                }
-                return true;
+                // is the statement before the end time
+                return statementLocalDateTime.isBefore(endTime);
             }
-        }
-        catch (ParseException pe)
-        {
-            pe.printStackTrace();
+            return true;
         }
         return false;
     }
@@ -170,7 +168,7 @@ public class CaptureFilter extends LogFilter {
             {
                 continue;
             }
-            if (!(isWithinTimeInterval(statement, startTime, endTime)))
+            if (!(isWithinTimeInterval(statement)))
             {
                 continue;
             }
@@ -205,7 +203,14 @@ public class CaptureFilter extends LogFilter {
 
     public void setEndTime(Date endTime)
     {
-        this.endTime = endTime;
+        this.endTime = endTime != null ? LocalDateTime.ofInstant(endTime.toInstant(),
+                ZoneId.of("UTC")).truncatedTo(ChronoUnit.SECONDS) : null;
+    }
+
+    public void setStartTime(Date startTime)
+    {
+        this.startTime = startTime != null ? LocalDateTime.ofInstant(startTime.toInstant(),
+                ZoneId.of("UTC")).truncatedTo(ChronoUnit.SECONDS) : null;
     }
 
     public void setTransactionLimit(int limit) {
@@ -216,6 +221,10 @@ public class CaptureFilter extends LogFilter {
     public void update(Session capture)
     {
         setEndTime(capture.getEndTime());
+        if (LocalDateTime.now().isBefore(startTime))
+        {
+            setStartTime(capture.getStartTime());
+        }
         setTransactionLimit(capture.getTransactionLimit());
     }
 }

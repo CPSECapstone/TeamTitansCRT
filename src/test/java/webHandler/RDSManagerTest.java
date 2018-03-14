@@ -5,8 +5,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.InputStream;
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public class RDSManagerTest {
 

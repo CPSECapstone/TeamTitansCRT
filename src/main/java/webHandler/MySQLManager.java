@@ -1,7 +1,5 @@
 package webHandler;
 
-import webHandler.DatabaseManager;
-
 public class MySQLManager extends DatabaseManager {
 
     public MySQLManager(String dbURL, String database, String username, String password)

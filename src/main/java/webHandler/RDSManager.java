@@ -7,15 +7,16 @@ import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import com.amazonaws.regions.Regions;
-import com.amazonaws.services.rds.AmazonRDSClientBuilder;
 import com.amazonaws.services.rds.AmazonRDS;
+import com.amazonaws.services.rds.AmazonRDSClientBuilder;
+import com.amazonaws.services.rds.model.DBLogFileNotFoundException;
 import com.amazonaws.services.rds.model.DownloadDBLogFilePortionRequest;
 import com.amazonaws.services.rds.model.DownloadDBLogFilePortionResult;
-import com.amazonaws.services.rds.model.DBLogFileNotFoundException;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileReader;
 import java.util.List;
 import java.util.stream.Collectors;
 

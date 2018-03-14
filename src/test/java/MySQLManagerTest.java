@@ -2,16 +2,7 @@ import org.junit.Test;
 import webHandler.DatabaseManager;
 import webHandler.MySQLManager;
 
-import static org.junit.Assert.*;
-
-/*public class CrtControllerTest {
-    @Test
-    public void index() throws Exception {
-        CrtController crtCon = new CrtController();
-        assertEquals("Welcome to MyCRT!", crtCon.index());
-    }
-
-}*/
+import static org.junit.Assert.assertTrue;
 
 public class MySQLManagerTest {
     @Test

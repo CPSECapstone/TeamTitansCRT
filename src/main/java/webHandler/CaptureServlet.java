@@ -1,13 +1,14 @@
 package webHandler;
 
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
 
 @RestController
 public class CaptureServlet {
@@ -21,7 +22,7 @@ public class CaptureServlet {
         if (capture.getStartTime() == null) {
             capture.setStartTime(new Date());
         }
-
+        
         LogController logController = new CaptureLogController(capture);
         TimerManager timerManager = new TimerManager(capture.getId(), capture.getStartTime(), capture.getEndTime());
 
