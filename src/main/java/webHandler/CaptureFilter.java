@@ -130,7 +130,6 @@ public class CaptureFilter extends LogFilter {
             currentStatement.add(0, previousTime);
             currentStatement.add(0, previousDate);
         }
-        System.out.println(currentStatement.toString());
         Statement statement = null;
         try
         {
@@ -141,7 +140,7 @@ public class CaptureFilter extends LogFilter {
         }
         catch (NumberFormatException ne)
         {
-            ne.printStackTrace();
+            //ne.printStackTrace();
             statement = null;
         }
 
