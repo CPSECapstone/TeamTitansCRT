@@ -24,11 +24,12 @@ public class CaptureServlet {
         }
         
         LogController logController = new CaptureLogController(capture);
-        TimerManager timerManager = new TimerManager(capture.getId(), capture.getStartTime(), capture.getEndTime());
+        CaptureTimerManager captureTimerManager = new CaptureTimerManager(capture.getId(), capture.getStartTime(),
+                capture.getEndTime());
 
         CaptureController.addCapture(capture);
         CaptureController.addLogController(logController, capture.getId());
-        CaptureController.addTimer(timerManager, capture.getId());
+        CaptureController.addTimer(captureTimerManager, capture.getId());
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

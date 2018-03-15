@@ -1,5 +1,7 @@
 package webHandler;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -18,7 +20,8 @@ public class ReplayLogController extends LogController {
 
     public void processData(Session session, int type) {
         Replay replay = (Replay) session;
-        String logData = getLogData(replay.getS3(), replay.getLogFileName());
+        Capture associatedCapture = DBUtil.getInstance().loadCapture(replay.getCaptureId());
+        String logData = getLogData(associatedCapture.getS3(), replay.getCaptureLogFileName());
 
         List<Statement> filteredStatementList = filterLogData(logData);
 
@@ -35,7 +38,26 @@ public class ReplayLogController extends LogController {
 
     }
 
+    private void makeStopRequest(Replay replay)
+    {
+        if (isRunning(replay.getStatus()))
+        {
+            ReplayServlet servlet = new ReplayServlet();
+            servlet.stopReplay(replay);
+        }
+    }
+
+    private boolean isRunning(String status)
+    {
+        return status.equals("Running");
+    }
+
     private void replayFastMode(Replay replay, List<Statement> statements) {
+        if (statements.size() == 0)
+        {
+            makeStopRequest(replay);
+            return;
+        }
         MySQLManager manager = new MySQLManager(replay.getDBUrl(),
                 replay.getDatabase(),
                 replay.getDBUsername(),
@@ -44,6 +66,10 @@ public class ReplayLogController extends LogController {
         try
         {
             for (Statement statement : statements) {
+                if (!replay.getStatus().equals("Running"))
+                {
+                    break;
+                }
                 if (!statement.getCommand().equals("Connect")) {
                     manager.query(statement.getQuery());
                 }
@@ -54,27 +80,55 @@ public class ReplayLogController extends LogController {
         {
             manager.closeConnection();
         }
+        makeStopRequest(replay);
+    }
 
-        ReplayServlet servlet = new ReplayServlet();
-        servlet.stopReplay(replay);
-
+    private Date parseToDate(String dateString, String timeString)
+    {
+        String pattern = "yyMMdd HH:mm:ss";
+        SimpleDateFormat formatter = new SimpleDateFormat(pattern);
+        Date date = null;
+        try
+        {
+            date = formatter.parse(dateString + " " + timeString);
+        }
+        catch (ParseException pe)
+        {
+            pe.printStackTrace();
+        }
+        return date;
     }
 
     // TODO: Fix time sensitive replay using SimpleDateFormat (look at CaptureFilter isWithinTimeInterval function)
     private void replayTimeSensitive(Replay replay, List<Statement> statements) {
+        if (statements.size() == 0)
+        {
+            makeStopRequest(replay);
+            return;
+        }
         MySQLManager manager = new MySQLManager(replay.getDBUrl(),
                 replay.getDatabase(),
                 replay.getDBUsername(),
                 replay.getDBPassword());
 
-        long lastTime = Long.parseLong(statements.get(0).getTime());
-        long currTime;
+        Date lastTime = parseToDate(statements.get(0).getDate(), statements.get(0).getTime());
+        Date currTime;
         try
         {
             for (Statement statement : statements) {
-                currTime = Long.parseLong(statement.getTime());
+                if (!replay.getStatus().equals("Running"))
+                {
+                    break;
+                }
+                currTime = parseToDate(statement.getDate(), statement.getTime());
 
-                long toWait = currTime - lastTime;
+                if (lastTime == null || currTime == null)
+                {
+                    lastTime = currTime;
+                    continue;
+                }
+
+                long toWait = currTime.getTime() - lastTime.getTime();
 
                 try {
                     Thread.sleep(toWait);
@@ -94,9 +148,7 @@ public class ReplayLogController extends LogController {
         {
             manager.closeConnection();
         }
-        replay.setEndTime(new Date());
-        ReplayServlet servlet = new ReplayServlet();
-        servlet.stopReplay(replay);
+        makeStopRequest(replay);
     }
 
     public void uploadAllFiles(Session session)

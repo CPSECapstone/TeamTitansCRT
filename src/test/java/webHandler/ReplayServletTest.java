@@ -20,17 +20,19 @@ public class ReplayServletTest {
     // This will replay an already captured workload in the S3 bucket onto the database
     @Test
     public void testReplayStart() throws Exception {
-        Replay replay = new Replay("MyCaptureTestKyle33", "testRDS", "teamtitans-test-mycrt");
+        Capture capture = new Capture("MyCaptureTestKyle33", "testRds", "teamtitans-test-mycrt");
+        DBUtil.getInstance().saveCapture(capture);
+        Replay replay = new Replay("ReplayServletTest_TestReplayStart", "testRDS", "teamtitans-test-mycrt",
+                "Fast Mode", "MyCaptureTestKyle33");
         replay.setDatabaseInfo(new DatabaseInfo("testdb.cgtpml3lsh3i.us-west-1.rds.amazonaws.com:3306",
                 "testdb", "admin", "TeamTitans!"));
-
-        HttpStatus actual = replayServlet.startReplay(replay, "Fast Mode").getStatusCode();
+        HttpStatus actual = replayServlet.startReplay(replay).getStatusCode();
         assertEquals(HttpStatus.OK,actual);
     }
 
     @Test
     public void testReplayStop() throws Exception {
-        Replay replay = new Replay("id", "testRDS", "testS3");
+        Replay replay = new Replay("id", "testRDS", "testS3", "Fast Mode", "");
         replay.setDatabaseInfo(new DatabaseInfo("", "", "", ""));
         ReplayController.addReplay(replay);
         HttpStatus status = replayServlet.stopReplay(replay).getStatusCode();

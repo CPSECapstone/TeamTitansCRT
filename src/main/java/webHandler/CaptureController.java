@@ -8,7 +8,7 @@ public class CaptureController {
 
     private final static Map<String, Capture> captures = new ConcurrentHashMap<>();
     private final static Map<String, LogController> logControllers = new ConcurrentHashMap<>();
-    private final static Map<String, TimerManager> timers = new ConcurrentHashMap<>();
+    private final static Map<String, CaptureTimerManager> timers = new ConcurrentHashMap<>();
 
     private static void updateCapture(Capture updatedCapture) {
         Capture capture = getCapture(updatedCapture.getId());
@@ -39,8 +39,8 @@ public class CaptureController {
     }
 
     private static void updateTimerController(Capture capture) {
-        TimerManager timerManager = getTimer(capture.getId());
-        timerManager.updateTimeManager(capture.getStartTime(), capture.getEndTime());
+        CaptureTimerManager captureTimerManager = getTimer(capture.getId());
+        captureTimerManager.updateTimeManager(capture.getStartTime(), capture.getEndTime());
     }
 
     public static void updateAll(Capture capture)
@@ -74,20 +74,13 @@ public class CaptureController {
 
     public static void endCaptureResources(String id)
     {
-        LogController logController = getLogController(id);
-        TimerManager timerManager = getTimer(id);
-        Capture capture = getCapture(id);
-
-        if (logController != null && capture != null)
+        LogController logController = logControllers.remove(id);
+        CaptureTimerManager captureTimerManager = timers.remove(id);
+        Capture capture = captures.remove(id);
+        if (captureTimerManager != null)
         {
-            logControllers.remove(id);
+            captureTimerManager.end();
         }
-        if (timerManager != null)
-        {
-            timerManager.end();
-            timers.remove(id);
-        }
-        // captures.remove(id);
     }
 
     public static void endCapture(String id)
@@ -102,6 +95,15 @@ public class CaptureController {
         DBUtil.getInstance().saveCapture(capture);
     }
 
+    public static void startCapture(String id)
+    {
+        if (captures.containsKey(id))
+        {
+            Capture capture = captures.get(id);
+            capture.setStatus("Running");
+        }
+    }
+
     public static void stopCapture(String id)
     {
         CaptureServlet servlet = new CaptureServlet();
@@ -110,11 +112,11 @@ public class CaptureController {
     }
 
 
-    public static void addTimer(TimerManager timer, String id) {
+    public static void addTimer(CaptureTimerManager timer, String id) {
         timers.put(id, timer);
     }
 
-    private static TimerManager getTimer(String id) {
+    private static CaptureTimerManager getTimer(String id) {
         if (doesTimersTableContain(id)) {
             return timers.get(id);
         }

@@ -12,7 +12,9 @@ public class Replay implements Session {
     private String rds;
     private String s3;
     private String status;
-    private String logFileName;
+    private String captureLogFileName;
+    private String captureId;
+    private String replayType;
 
     private Date startTime;
     private Date endTime;
@@ -24,24 +26,28 @@ public class Replay implements Session {
 
     }
 
-    public Replay(String id, String rds, String s3) {
+    public Replay(String id, String rds, String s3, String replayType, String captureId) {
         this.id = id;
         this.rds = rds;
         this.s3 = s3;
-        this.logFileName = id + "-Workload.log";
+        this.captureId = captureId;
+        this.captureLogFileName = this.captureId + "-Workload.log";
         this.startTime = new Date();
         this.endTime = null;
-        this.status = "Running";
+        this.replayType = replayType;
+        updateStatus();
     }
 
-    public Replay(String id, String rds, String s3, Date startTime, Date endTime) {
+    public Replay(String id, String rds, String s3, String replayType, String captureId, Date startTime) {
         this.id = id;
         this.rds = rds;
         this.s3 = s3;
-        this.logFileName = id + "-Workload.log";
+        this.captureId = captureId;
+        this.captureLogFileName = this.captureId + "-Workload.log";
         this.startTime = startTime;
-        this.endTime = endTime;
-        this.status = "Running";
+        this.endTime = null;
+        this.replayType = replayType;
+        updateStatus();
     }
 
     public void updateStatus() {
@@ -132,6 +138,26 @@ public class Replay implements Session {
         this.filterUsers = filterUsers;
     }
 
+    public String getCaptureId()
+    {
+        return this.captureId;
+    }
+
+    public void setCaptureId(String captureId)
+    {
+        this.captureId = captureId;
+    }
+
+    public String getReplayType()
+    {
+        return this.replayType;
+    }
+
+    public void setReplayType(String replayType)
+    {
+        this.replayType = replayType;
+    }
+
     public String getDBUrl() {
         return this.databaseInfo.getDbUrl();
     }
@@ -152,8 +178,8 @@ public class Replay implements Session {
         this.databaseInfo = info;
     }
 
-    public String getLogFileName() {
-        return logFileName;
+    public String getCaptureLogFileName() {
+        return captureLogFileName;
     }
 
     public int getTransactionLimit()
