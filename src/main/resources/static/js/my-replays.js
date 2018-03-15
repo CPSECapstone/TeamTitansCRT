@@ -1,4 +1,7 @@
 $(function() {
+    var captureSelector = "captureSelector";
+    var typeSelector = "typeSelector";
+
     var idSelector = "idSelector";
     var rdsSelector = "rdsSelector";
     var s3Selector = "s3Selector";
@@ -9,55 +12,64 @@ $(function() {
     var filterStatementsSelector = "filterStatementsSelector";
     var filterUsersSelector = "filterUsersSelector";
 
-    var startBtnSelector = "btnCaptureStart";
+    var usernameSelector = "usernameSelector";
+    var passwordSelector = "passwordSelector";
+
+    var startBtnSelector = "btnReplayStart";
 
     $("div.content-placeholder").replaceWith(`
     <div class="container">
         <div class="row">
             <div class="col-lg-6 col-lg-offset-3">
-                <h4 class="text-center">My Captures</h4>
+                <h4 class="text-center">My Replays</h4>
                 <p class="text-center">Add page description</p>
             </div>
         </div>
         <div class="row">
             <div class="col-lg-6 start-capture-form border-on-right">
-                <p class=""><strong>Start a Capture</strong></p>
+                <p class=""><strong>Start a Replay</strong></p>
                 <hr />
-                ${insertLoadingSpinner("startCaptureLoadingIcon")}
+                ${insertLoadingSpinner("startReplayLoadingIcon")}
+                <div class="${captureSelector}"></div>
                 <div class="${rdsSelector}"></div>
                 <div class="${s3Selector}"></div>
-                ${createTextInput("Capture ID:", idSelector)}
+                ${createTextInput("Replay RDS Username:", usernameSelector)}
+                ${createTextInput("Replay RDS Password:", passwordSelector)}
+                ${createTextInput("Replay ID:", idSelector)}
 
                 <div class="block">
                     <a data-toggle="collapse" href="#advanced">Advanced <span class="caret"></span></a>
                 </div>                
 
                 <div id="advanced" class="collapse">
+                    <div class="${typeSelector}"></div>
                     <label class="input-label">Start Time:
                         <input id="" class="${startTimeSelector} form-control" type="datetime-local" value="">
                     </label>
                     <label class="input-label">End Time:
                         <input id="" class="${endTimeSelector} form-control" type="datetime-local" value="">
                     </label>
-                    ${createTextInput("Max Capture Size (mB):", fileSizeLimitSelector)}
+                    ${createTextInput("Max Replay Size (mB):", fileSizeLimitSelector)}
                     ${createTextInput("Max Number of Transactions:", transactionLimitSelector)}
                     ${createTextInput("Database Commands to Ignore (comma delimited):", filterStatementsSelector)}
                     ${createTextInput("Database Users to Ignore (comma delimited):", filterUsersSelector)}
                 </div>
-                <a href="javascript:void(0)" id="" class="${startBtnSelector} btn btn-default">Start Capture</a>
+                <a href="javascript:void(0)" id="" class="${startBtnSelector} btn btn-default">Start Replay</a>
             </div>
             <div class="col-lg-6">
-                <p class=""><strong>Manage Captures</strong></p>
+                <p class=""><strong>Manage Replays</strong></p>
                 <hr />
-                ${insertLoadingSpinner("manageCapturesLoadingIcon")}
-                <ul id="CaptureList" class="list-group"></ul>
+                ${insertLoadingSpinner("manageReplaysLoadingIcon")}
+                <ul id="ReplayList" class="list-group"></ul>
             </div>
         </div>
     </div>
     `);
-    updateCaptureList();
-    // testCaptureList();
+    updateReplayList();
+    // testReplayList();
 
+    populateCapturesDropdown(captureSelector);
+    populateTypeDropdown(typeSelector);
     populateRDSDropdown(rdsSelector);
     populateS3Dropdown(s3Selector);
     $(`.${startBtnSelector}`).on("click", function() {
@@ -73,7 +85,13 @@ $(function() {
 
         // Only start capture if rds and s3 selected
         if ($(`.${rdsSelector}`).val() != '' && $(`.${s3Selector}`).val() != '') {
-            var capture = {
+            var replay = {
+                databaseInfo: {
+                    dbUrl: "testdb.cgtpml3lsh3i.us-west-1.rds.amazonaws.com:3306",
+                    database: "testdb",
+                    username: "admin",
+                    password: "TeamTitans!"
+                },
                 id: $(`.${idSelector}`).val(),
                 rds: $(`.${rdsSelector}`).val(),
                 s3: $(`.${s3Selector}`).val(),
@@ -84,13 +102,17 @@ $(function() {
                 filterStatements: $(`.${filterStatementsSelector}`).val().split(',').map(x => x.trim()),
                 filterUsers: $(`.${filterUsersSelector}`).val().split(',').map(x => x.trim())
             };
+            replay = {
+                replay,
+                replayType: "Fast Mode"
+            };
 
-            startCapture(capture);
+            startReplay(replay);
         }
     });
 });
 
-function testCaptureList() {
+function testReplayList() {
     var data = [
         {
             id: "Test1",
@@ -109,7 +131,7 @@ function testCaptureList() {
             status: "Finished"
         }
     ]
-    addAllToCaptureList(data);
+    addAllToReplayList(data);
 }
 
 function insertLoadingSpinner(selector) {
@@ -123,51 +145,51 @@ function insertLoadingSpinner(selector) {
 /**
  * Top level function for creating list of capture cards
  */
-function updateCaptureList() {
+function updateReplayList() {
     $.ajax({
-        url: "/resource/captures",
+        url: "/resources/replays",
         type: "GET",
         beforeSend: function() {
-            $(".manageCapturesLoadingIcon").show();
+            $(".manageReplaysLoadingIcon").show();
         },
         success: function(data) {
             console.log(data);
             if (data.length > 0) {
                 setTimeout(function()
                 {
-                    $(".manageCapturesLoadingIcon").hide();
-                    addAllToCaptureList(data);
+                    $(".manageReplaysLoadingIcon").hide();
+                    addAllToReplayList(data);
                 },
                 500);
             }
             else {
-                $(".manageCapturesLoadingIcon").hide();
-                $("#CaptureList").append(`<p>You have no capture history</p>`);
+                $(".manageReplaysLoadingIcon").hide();
+                $("#ReplayList").append(`<p>You have no replay history</p>`);
             }
         },
         error: function(err) {
             console.log(err);
-            $(".manageCapturesLoadingIcon").hide();
+            $(".manageReplaysLoadingIcon").hide();
         }
     });
 }
 
-function addAllToCaptureList(data) {
-    // clears contents of the CaptureList
-    $('#CaptureList').empty();
-    data.map(addToCaptureList).join('')
+function addAllToReplayList(data) {
+    // clears contents of the ReplayList
+    $('#ReplayList').empty();
+    data.map(addToReplayList).join('')
 }
 
 /**
  * Takes a capture, adds it to the list of capture cards, and creates the save binding
  * @param {Capture}
  */
-function addToCaptureList(capture) {
-    $("#CaptureList").append(createEditCaptureModal(capture));
+function addToReplayList(replay) {
+    $("#ReplayList").append(createEditReplayModal(replay));
 
-    var id = capture["id"];
+    var id = replay["id"];
     $(`#${id}-save`).on("click", function() {
-        updateCapture(id);
+        updateReplay(id);
     });
 }
 
@@ -176,15 +198,15 @@ function addToCaptureList(capture) {
  * @param  {Capture}
  * @return {string}
  */
-function createEditCaptureModal(capture) {
-    var id = capture["id"];
-    var status = capture["status"];
+function createEditReplayModal(replay) {
+    var id = replay["id"];
+    var status = replay["status"];
     
     // to be fixed with user set timezone
-    var startTime = new Date(capture["startTime"]);
+    var startTime = new Date(replay["startTime"]);
     startTime.setHours(startTime.getHours() - 7); // daylight savings lol
     startTime = startTime.toISOString().replace("Z", "");
-    var endTime = capture["endTime"];
+    var endTime = replay["endTime"];
     if (endTime != null) {
         endTime = new Date(endTime);
         endTime.setHours(endTime.getHours() - 7); // daylight savings lol
@@ -194,10 +216,10 @@ function createEditCaptureModal(capture) {
         endTime = "";
     }
 
-    var fileSizeLimit = capture["fileSizeLimit"];
-    var transactionLimit = capture["transactionLimit"];
+    var fileSizeLimit = replay["fileSizeLimit"];
+    var transactionLimit = replay["transactionLimit"];
     return `
-    ${createCaptureListItem(id, status, `${id}-modal`)}
+    ${createReplayListItem(id, status, `${id}-modal`)}
     <div class="modal fade" id="${id}-modal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -211,7 +233,7 @@ function createEditCaptureModal(capture) {
                     <label class="input-label">End Time:
                         <input id="" class="txtEndTime form-control" type="datetime-local" value="${endTime}">
                     </label>
-                    ${createTextInputValue("Max Capture Size (mB):", "txtMaxSize", fileSizeLimit)}
+                    ${createTextInputValue("Max Replay Size (mB):", "txtMaxSize", fileSizeLimit)}
                     ${createTextInputValue("Max Number of Transactions:", "txtMaxTrans", transactionLimit)}
                 </div>
                 <div class="modal-footer">
@@ -229,7 +251,7 @@ function createEditCaptureModal(capture) {
  * @param  {string}
  */
 // TODO fix the match between these selectors and the ones above on lines 172-178
-function updateCapture(id) {
+function updateReplay(id) {
     var startTime = null;
     if ($(`#${id}-modal .txtStartTime`).val()) {
         startTime = new Date(String($(`#${id}-modal .txtStartTime`).val()));
@@ -249,7 +271,7 @@ function updateCapture(id) {
     };
     
     $.ajax({
-        url: "/capture/update",
+        url: "/",
         type: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -257,7 +279,7 @@ function updateCapture(id) {
         data: JSON.stringify(body),
         success: function() {
             console.log(id + " success")
-            updateCaptureList();
+            updateReplayList();
         },
         error: function(err) {
             $("#lblStatus").html("Startup failure.");
@@ -266,7 +288,7 @@ function updateCapture(id) {
     });
 }
 
-function createCaptureListItem(id, status, selector) {
+function createReplayListItem(id, status, selector) {
     return `
     <li id="item-${id}" class="list-group-item">
         ${createIcon(status)}${id}
@@ -295,42 +317,43 @@ function createIcon(status) {
  * Starts a capture using the given Capture object
  * @param  {Capture} The Capture object to be started
  */
-function startCapture(capture) {
+function startReplay(replay) {
+    console.log(replay);
     $.ajax({
-        url: "/capture/start",
+        url: "/replay/start",
         type: "POST",
         headers: {
             "Content-Type": "application/json",
         },
-        data: JSON.stringify(capture),
+        data: JSON.stringify(replay),
         success: function() {
-            $("#exampleModal").html(createStartCaptureModal("Successful"));
+            $("#exampleModal").html(createStartReplayModal("Successful"));
             $('#exampleModal').on('hidden.bs.modal', function () {
-                updateCaptureList();
+                updateReplayList();
             });
             $("#exampleModal").modal("show");
         },
         error: function(err) {
-            $("#exampleModal").html(createStartCaptureModal("Failure"));
+            $("#exampleModal").html(createStartReplayModal("Failure"));
             $("#exampleModal").modal("show");
 
-            console.log("Error starting capture");
+            console.log("Error starting relpay");
             console.log(err);
         }
     });
 }
 
-function createStartCaptureModal(result) {
+function createStartReplayModal(result) {
     return `
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Capture ${result}</h5>
+                <h5 class="modal-title">Replay ${result}</h5>
             </div>
             <div class="modal-body">
                 ${result === "Successful" ? 
-                    "<p>Your capture is in progress. Go to Dashboard to see the current status.</p>" :
-                    "<p>Your capture failed to start. Verify all fields are correct.</p>"}
+                    "<p>Your replay is in progress. Go to Dashboard to see the current status.</p>" :
+                    "<p>Your replay failed to start. Verify all fields are correct.</p>"}
                 
             </div>
             <div class="modal-footer">
@@ -339,6 +362,10 @@ function createStartCaptureModal(result) {
             </div>
         </div>
     </div>`;
+}
+
+function populateTypeDropdown(selector) {
+    $(`div.${selector}`).replaceWith(createDropdown("Select Replay Mode", selector, ["Fast Mode", "Time Sensitive"]));
 }
 
 /**
@@ -350,16 +377,41 @@ function populateRDSDropdown(selector) {
         url: "/resource/rds",
         type: "GET",
         beforeSend: function() {
-            $(".startCaptureLoadingIcon").show();
+            $(".startReplayLoadingIcon").show();
         },
         complete: function() {
-            $(".startCaptureLoadingIcon").hide();
+            $(".startReplayLoadingIcon").hide();
         },
         success: function(data) {
             $(`div.${selector}`).replaceWith(createDropdown("Select RDS Endpoint", selector, data));
         },
         error: function(err) {
             console.log("Error populating rds dropdown")
+            console.log(err);
+        }
+    });
+}
+
+/**
+ * Populate rds dropdown
+ * @param {string} selector
+ */
+function populateCapturesDropdown(selector) {
+    $.ajax({
+        url: "/resource/captures/finished",
+        type: "GET",
+        beforeSend: function() {
+            $(".startReplayLoadingIcon").show();
+        },
+        complete: function() {
+            $(".startReplayLoadingIcon").hide();
+        },
+        success: function(data) {
+            console.log(data);
+            $(`div.${selector}`).replaceWith(createDropdown("Select Capture to Replay", selector, data.map(x => x.id)));
+        },
+        error: function(err) {
+            console.log("Error populating capture dropdown")
             console.log(err);
         }
     });
