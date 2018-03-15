@@ -14,6 +14,8 @@ public class ReplayServlet {
         {
             replay.setStartTime(new Date());
         }
+        System.out.println(replay.getStartTime());
+        System.out.println(replay.getId());
 
         ReplayController.addReplay(replay);
         LogController logController = new ReplayLogController(replay);

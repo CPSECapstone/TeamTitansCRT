@@ -11,8 +11,8 @@ import java.util.List;
 
 public abstract class LogController
 {
-    protected final String PerformanceTag = "-Performance.log";
-    protected final String WorkloadTag = "-Workload.log";
+    public static final String PerformanceTag = "-Performance.log";
+    public static final String WorkloadTag = "-Workload.log";
 
     protected LogFilter logFilter;
 

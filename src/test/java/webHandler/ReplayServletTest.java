@@ -21,6 +21,7 @@ public class ReplayServletTest {
     @Test
     public void testReplayStart() throws Exception {
         Capture capture = new Capture("MyCaptureTestKyle33", "testRds", "teamtitans-test-mycrt");
+        capture.setStatus("Finished");
         DBUtil.getInstance().saveCapture(capture);
         Replay replay = new Replay("ReplayServletTest_TestReplayStart", "testRDS", "teamtitans-test-mycrt",
                 "Fast Mode", "MyCaptureTestKyle33");

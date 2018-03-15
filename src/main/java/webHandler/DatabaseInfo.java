@@ -7,6 +7,10 @@ public class DatabaseInfo {
     private String username;
     private String password;
 
+    public DatabaseInfo() {
+        
+    }
+
     public DatabaseInfo(String dbUrl, String database, String username, String password) {
         this.dbUrl = dbUrl;
         this.database = database;
@@ -30,4 +34,19 @@ public class DatabaseInfo {
         return this.password;
     }
 
+    public void setDbUrl(String dbUrl) {
+        this.dbUrl = dbUrl;
+    }
+
+    public void setDatabase(String database) {
+        this.database = database;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }

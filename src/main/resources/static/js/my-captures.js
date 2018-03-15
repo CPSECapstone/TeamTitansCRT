@@ -182,12 +182,14 @@ function createEditCaptureModal(capture) {
     
     // to be fixed with user set timezone
     var startTime = new Date(capture["startTime"]);
-    startTime.setHours(startTime.getHours() - 7); // daylight savings lol
+    // startTime.setHours(startTime.getHours() - 7); // daylight savings lol
+    startTime.setHours(startTime.getHours());
     startTime = startTime.toISOString().replace("Z", "");
     var endTime = capture["endTime"];
     if (endTime != null) {
         endTime = new Date(endTime);
-        endTime.setHours(endTime.getHours() - 7); // daylight savings lol
+        // endTime.setHours(endTime.getHours() - 7); // daylight savings lol
+        endTime.setHours(endTime.getHours());
         endTime = endTime.toISOString().replace("Z", "");
     }
     else {

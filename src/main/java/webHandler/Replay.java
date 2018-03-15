@@ -31,7 +31,7 @@ public class Replay implements Session {
         this.rds = rds;
         this.s3 = s3;
         this.captureId = captureId;
-        this.captureLogFileName = this.captureId + "-Workload.log";
+        this.captureLogFileName = this.captureId + LogController.WorkloadTag;
         this.startTime = new Date();
         this.endTime = null;
         this.replayType = replayType;
@@ -43,7 +43,7 @@ public class Replay implements Session {
         this.rds = rds;
         this.s3 = s3;
         this.captureId = captureId;
-        this.captureLogFileName = this.captureId + "-Workload.log";
+        this.captureLogFileName = this.captureId + LogController.WorkloadTag;
         this.startTime = startTime;
         this.endTime = null;
         this.replayType = replayType;
@@ -146,6 +146,7 @@ public class Replay implements Session {
     public void setCaptureId(String captureId)
     {
         this.captureId = captureId;
+        this.captureLogFileName = this.captureId + LogController.WorkloadTag;
     }
 
     public String getReplayType()

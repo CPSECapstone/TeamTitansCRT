@@ -33,9 +33,8 @@ $(function() {
                 <div class="${captureSelector}"></div>
                 <div class="${rdsSelector}"></div>
                 <div class="${s3Selector}"></div>
-                ${createTextInput("Replay RDS Username:", usernameSelector)}
-                ${createTextInput("Replay RDS Password:", passwordSelector)}
-                ${createTextInput("Replay ID:", idSelector)}
+                ${createTextInputValue("Replay RDS Username:", usernameSelector, "admin")}
+                ${createTextInputValue("Replay RDS Password:", passwordSelector, "TeamTitans!")}
 
                 <div class="block">
                     <a data-toggle="collapse" href="#advanced">Advanced <span class="caret"></span></a>
@@ -85,14 +84,15 @@ $(function() {
 
         // Only start capture if rds and s3 selected
         if ($(`.${rdsSelector}`).val() != '' && $(`.${s3Selector}`).val() != '') {
-            var replay = {
+            var replayInner = {
                 databaseInfo: {
                     dbUrl: "testdb.cgtpml3lsh3i.us-west-1.rds.amazonaws.com:3306",
                     database: "testdb",
                     username: "admin",
                     password: "TeamTitans!"
                 },
-                id: $(`.${idSelector}`).val(),
+                captureId: $(`.${captureSelector}`).val(),
+                id: "TestReplay",
                 rds: $(`.${rdsSelector}`).val(),
                 s3: $(`.${s3Selector}`).val(),
                 startTime: startTime,
@@ -100,14 +100,30 @@ $(function() {
                 fileSizeLimit: $(`.${fileSizeLimitSelector}`).val(),
                 transactionLimit: $(`.${transactionLimitSelector}`).val(),
                 filterStatements: $(`.${filterStatementsSelector}`).val().split(',').map(x => x.trim()),
-                filterUsers: $(`.${filterUsersSelector}`).val().split(',').map(x => x.trim())
-            };
-            replay = {
-                replay,
+                filterUsers: $(`.${filterUsersSelector}`).val().split(',').map(x => x.trim()),
                 replayType: "Fast Mode"
             };
 
-            startReplay(replay);
+            // var replayInner = {
+            //     databaseInfo: {
+            //         dbUrl: "testdb.cgtpml3lsh3i.us-west-1.rds.amazonaws.com:3306",
+            //         database: "testdb",
+            //         username: "admin",
+            //         password: "TeamTitans!"
+            //     },
+            //     captureId: "MyCaptureTestKyle33",
+            //     id: "TestReplay",
+            //     rds: $(`.${rdsSelector}`).val(),
+            //     s3: $(`.${s3Selector}`).val(),
+            //     startTime: startTime,
+            //     endTime: endTime,
+            //     fileSizeLimit: $(`.${fileSizeLimitSelector}`).val(),
+            //     transactionLimit: $(`.${transactionLimitSelector}`).val(),
+            //     filterStatements: $(`.${filterStatementsSelector}`).val().split(',').map(x => x.trim()),
+            //     filterUsers: $(`.${filterUsersSelector}`).val().split(',').map(x => x.trim()),
+            //     replayType: "Fast Mode"
+            // };
+            startReplay(replayInner);
         }
     });
 });
@@ -147,7 +163,7 @@ function insertLoadingSpinner(selector) {
  */
 function updateReplayList() {
     $.ajax({
-        url: "/resources/replays",
+        url: "/resource/replays",
         type: "GET",
         beforeSend: function() {
             $(".manageReplaysLoadingIcon").show();
