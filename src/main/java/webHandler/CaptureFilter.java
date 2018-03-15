@@ -130,10 +130,21 @@ public class CaptureFilter extends LogFilter {
             currentStatement.add(0, previousTime);
             currentStatement.add(0, previousDate);
         }
-        Statement statement = new Statement(currentStatement.get(0).trim(),
-                adhereToTimeLayout(currentStatement.get(1).trim()),
-                Integer.parseInt(currentStatement.get(2)), currentStatement.get(3).trim(),
-                String.join(" ", currentStatement.subList(4, currentStatement.size())).trim());
+        System.out.println(currentStatement.toString());
+        Statement statement = null;
+        try
+        {
+            statement = new Statement(currentStatement.get(0).trim(),
+                    adhereToTimeLayout(currentStatement.get(1).trim()),
+                    Integer.parseInt(currentStatement.get(2)), currentStatement.get(3).trim(),
+                    String.join(" ", currentStatement.subList(4, currentStatement.size())).trim());
+        }
+        catch (NumberFormatException ne)
+        {
+            ne.printStackTrace();
+            statement = null;
+        }
+
         return statement;
     }
 
@@ -164,6 +175,10 @@ public class CaptureFilter extends LogFilter {
             }
             // create a statement representation of the line
             Statement statement = createStatement(stmt);
+            if (statement == null)
+            {
+                continue;
+            }
             if (isQuitCommand(statement))
             {
                 continue;
