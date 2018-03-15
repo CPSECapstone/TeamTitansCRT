@@ -168,6 +168,10 @@ $(function() {
 
 // Populate capture table with available captures
 $(function() {
+
+    var selected = sessionStorage.getItem("defaultCapture");
+    sessionStorage.removeItem("defaultCapture");
+
     $.ajax({
         url: "/resource/captures",
         type: "GET",
@@ -189,9 +193,10 @@ $(function() {
                 var endTime = log['endTime'] == null ? 'N/A'  : new Date(log['endTime']);
 
                 var disabled = log['status'] == 'Failed' || log['status'] == 'Queued' ? 'disabled' : '';
+                var checked = log['id'] == selected ? 'checked' : ''
 
                 table += '<tr>' +
-                    '<td><label><input class="rowCheckbox" type="checkbox" value="' + log['id'] + '"' + disabled + '></label></td>' +
+                    '<td><label><input class="rowCheckbox" type="checkbox" value="' + log['id'] + '"' + disabled + ' ' + checked + '></label></td>' +
                     '<td>' + log['id'] + '</td>' +
                     '<td>' + log['rds'] + '</td>' +
                     '<td>' + log['s3'] + '</td>' +
@@ -201,6 +206,10 @@ $(function() {
                     '</tr>';
             }
             $('#performanceTable').html(table);
+
+            if (selected != null) {
+                $("#btnGetMetrics").trigger( "click" );
+            }
         },
         error: function(err) {
             console.log(err);

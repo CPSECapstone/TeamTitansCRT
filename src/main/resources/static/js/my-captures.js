@@ -169,6 +169,10 @@ function addToCaptureList(capture) {
     $(`#${id}-save`).on("click", function() {
         updateCapture(id);
     });
+
+    $(`#${id}-analyze`).on("click", function() {
+        openAnalysis(id);
+    });
 }
 
 /**
@@ -216,7 +220,8 @@ function createEditCaptureModal(capture) {
                 </div>
                 <div class="modal-footer">
                     ${status == "Finished" ? 
-                        `<a class="btn btn-secondary" data-dismiss="modal">Close</a>` : 
+                        `<a href="analyze" id="${id}-analyze" class="btn btn-default">Analyze</a>
+                        <a class="btn btn-secondary" data-dismiss="modal">Close</a>` :
                         `<a id="${id}-save" class="btn btn-primary" data-dismiss="modal">Save</a>`}
                 </div>
             </div>
@@ -411,4 +416,8 @@ function createDropdown(label, id, options) {
 
 function createOption(option) {
     return `<option value="${option}">${option}</option>`;
+}
+
+function openAnalysis(id) {
+    sessionStorage.setItem("defaultCapture", id);
 }
