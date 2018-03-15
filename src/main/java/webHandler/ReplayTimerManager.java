@@ -21,21 +21,30 @@ public class ReplayTimerManager
 
     private void startStartTimer()
     {
-        if (startTime.before(new Date()))
-        {
-            ReplayController.startReplay(replayId);
-            return;
-        }
         if (startTimer == null)
         {
             startTimer = new Timer();
         }
-        startTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                ReplayController.startReplay(replayId);
-            }
-        }, startTime);
+        if (startTime.before(new Date()))
+        {
+            startTimer.schedule(new TimerTask()
+            {
+                @Override
+                public void run() {
+                    ReplayController.startReplay(replayId);
+                }
+            }, new Date());
+        }
+        else
+        {
+            startTimer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    ReplayController.startReplay(replayId);
+                }
+            }, startTime);
+        }
+
 
     }
 

@@ -13,13 +13,15 @@ public class ReplayController {
     public static void addReplay(Replay replay)
     {
         replays.put(replay.getId(), replay);
+        DBUtil.getInstance().saveReplay(replay);
     }
 
     public static void removeReplay(String id)
     {
         if (replays.containsKey(id))
         {
-            replays.remove(id);
+            Replay replay = replays.remove(id);
+            DBUtil.getInstance().saveReplay(replay);
         }
     }
 
@@ -47,6 +49,8 @@ public class ReplayController {
         {
             LogController logController = logControllers.get(id);
             Replay replay = replays.get(id);
+            replay.setStatus("Running");
+            DBUtil.getInstance().saveReplay(replay);
             int type = replay.getReplayType().equals("Fast Mode") ? ReplayLogController.FAST_MODE :
                     ReplayLogController.TIME_SENSITIVE;
             logController.processData(replay, type);
