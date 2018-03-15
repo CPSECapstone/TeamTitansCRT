@@ -141,14 +141,15 @@ public class DBUtil {
         {
             String sql = "CREATE TABLE IF NOT EXISTS replays(\n"
                     + " dbId INTEGER PRIMARY KEY AUTOINCREMENT,\n"
-                    + " capture_id TEXT UNIQUE,\n"
+                    + " captureId INTEGER UNIQUE,\n"
                     + " id TEXT,\n"
                     + " rds TEXT,\n"
                     + " s3 TEXT,\n"
                     + " startTime TEXT,\n"
                     + " endTime TEXT,\n"
                     + " status TEXT,\n"
-                    + " FOREIGN KEY(capture_id) REFERENCES captures(id)\n"
+                    + " type TEXT,\n"
+                    + " FOREIGN KEY(captureId) REFERENCES captures(dbId)\n"
                     + ");";
 
             //Connection conn = DriverManager.getConnection("jdbc:sqlite:" + databaseFile);
@@ -424,8 +425,8 @@ public class DBUtil {
     public boolean saveReplay(Replay replay)
     {
         //inserts values, if value is there then it's replaced
-        String sql = "INSERT OR REPLACE INTO replays(id, rds, s3, startTime, endTime, status) " +
-                "VALUES (?,?,?,?,?,?)";
+        String sql = "INSERT OR REPLACE INTO replays(captureId, id, rds, s3, startTime, endTime, status, type) " +
+                "VALUES (?,?,?,?,?,?,?,?)";
 
         try
         {
@@ -433,12 +434,14 @@ public class DBUtil {
             Timestamp endTime = replay.getEndTime() != null ? new Timestamp(replay.getEndTime().getTime()) : null;
 
             PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, replay.getId());
-            pstmt.setString(2, replay.getRds());
-            pstmt.setString(3, replay.getS3());
-            pstmt.setTimestamp(4, startTime);
-            pstmt.setTimestamp(5, endTime);
-            pstmt.setString(6, replay.getStatus());
+            pstmt.setInt(1, getCaptureID(replay.getCaptureId()));
+            pstmt.setString(2, replay.getId());
+            pstmt.setString(3, replay.getRds());
+            pstmt.setString(4, replay.getS3());
+            pstmt.setTimestamp(5, startTime);
+            pstmt.setTimestamp(6, endTime);
+            pstmt.setString(7, replay.getStatus());
+            pstmt.setString(8, replay.getReplayType());
             pstmt.executeUpdate();
 
             pstmt.close();
@@ -483,12 +486,14 @@ public class DBUtil {
                 return null;
             }
 
-            replay.setId(rs.getString(2));
-            replay.setRds(rs.getString(3));
-            replay.setS3(rs.getString(4));
-            replay.setStartTime(rs.getDate(5));
-            replay.setEndTime(rs.getDate(6));
-            replay.setStatus(rs.getString(7));
+            replay.setCaptureId(getCaptureName(rs.getInt(2)));
+            replay.setId(rs.getString(3));
+            replay.setRds(rs.getString(4));
+            replay.setS3(rs.getString(5));
+            replay.setStartTime(rs.getDate(6));
+            replay.setEndTime(rs.getDate(7));
+            replay.setStatus(rs.getString(8));
+            replay.setReplayType(rs.getString(9));
 
             return replay;
         }
@@ -514,12 +519,14 @@ public class DBUtil {
 
             while (rs.next()) {
                 Replay replay = new Replay();
-                replay.setId(rs.getString(2));
-                replay.setRds(rs.getString(3));
-                replay.setS3(rs.getString(4));
-                replay.setStartTime(rs.getDate(5));
-                replay.setEndTime(rs.getDate(6));
-                replay.setStatus(rs.getString(7));
+                replay.setCaptureId(getCaptureName(rs.getInt(2)));
+                replay.setId(rs.getString(3));
+                replay.setRds(rs.getString(4));
+                replay.setS3(rs.getString(5));
+                replay.setStartTime(rs.getDate(6));
+                replay.setEndTime(rs.getDate(7));
+                replay.setStatus(rs.getString(8));
+                replay.setReplayType(rs.getString(9));
 
                 replays.add(replay);
             }
@@ -553,17 +560,61 @@ public class DBUtil {
 
             while (rs.next()) {
                 Replay replay = new Replay();
-                replay.setId(rs.getString(2));
-                replay.setRds(rs.getString(3));
-                replay.setS3(rs.getString(4));
-                replay.setStartTime(rs.getDate(5));
-                replay.setEndTime(rs.getDate(6));
-                replay.setStatus(rs.getString(7));
+                replay.setCaptureId(getCaptureName(rs.getInt(2)));
+                replay.setId(rs.getString(3));
+                replay.setRds(rs.getString(4));
+                replay.setS3(rs.getString(5));
+                replay.setStartTime(rs.getDate(6));
+                replay.setEndTime(rs.getDate(7));
+                replay.setStatus(rs.getString(8));
+                replay.setReplayType(rs.getString(9));
 
                 replays.add(replay);
             }
 
             return replays;
+        }
+
+        catch (SQLException e)
+        {
+            System.err.println(e.getMessage());
+            return null;
+        }
+    }
+
+    public int getCaptureID(String captureName) {
+        try
+        {
+            ResultSet rs;
+
+            String sql = "SELECT dbId FROM captures WHERE id = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, captureName);
+            pstmt.execute();
+            rs = pstmt.getResultSet();
+
+            return rs.getInt(1);
+        }
+
+        catch (SQLException e)
+        {
+            System.err.println(e.getMessage());
+            return -1;
+        }
+    }
+
+    public String getCaptureName(int captureId) {
+        try
+        {
+            ResultSet rs;
+
+            String sql = "SELECT id FROM captures WHERE dbId = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, captureId);
+            pstmt.execute();
+            rs = pstmt.getResultSet();
+
+            return rs.getString(1);
         }
 
         catch (SQLException e)
