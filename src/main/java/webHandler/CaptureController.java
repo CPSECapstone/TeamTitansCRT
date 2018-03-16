@@ -43,6 +43,9 @@ public class CaptureController {
         captureTimerManager.updateTimeManager(capture.getStartTime(), capture.getEndTime());
     }
 
+    /*
+        Is called from CaptureServlet
+     */
     public static void updateAll(Capture capture)
     {
         updateCapture(capture);
@@ -50,6 +53,9 @@ public class CaptureController {
         updateTimerController(capture);
     }
 
+    /*
+        Is called from capture CaptureLogController
+     */
     public static void updateCaptureFileSize(String id, long fileSize) {
         if (captures.containsKey(id)) {
             Capture capture = captures.get(id);
@@ -61,6 +67,10 @@ public class CaptureController {
         }
     }
 
+
+    /*
+        Is called from CaptureLogController
+     */
     public static void updateCaptureTransactionCount(String id, int count) {
         if (captures.containsKey(id)) {
             Capture capture = captures.get(id);
