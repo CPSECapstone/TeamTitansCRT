@@ -35,7 +35,7 @@ public class ReplayServletTest {
     public void testReplayStop() throws Exception {
         Replay replay = new Replay("id", "testRDS", "testS3", "Fast Mode", "");
         replay.setDatabaseInfo(new DatabaseInfo("", "", "", ""));
-        ReplayController.addReplay(replay);
+        replayServlet.startReplay(replay);
         HttpStatus status = replayServlet.stopReplay(replay).getStatusCode();
         assertEquals(HttpStatus.OK,status);
     }
