@@ -91,6 +91,7 @@ public class AnalysisServlet {
     public ResponseEntity<List<Double>> calculateAverages(@RequestBody MetricRequest request){
         List<Double> averages = new ArrayList<Double>();
 
+        //Iterate through list of metrics.
         for(String metric : request.getMetrics()) {
             averages.add(calculateAverage(request.getRDS(), request.getStartTime(), request.getEndTime(), metric));
         }
@@ -112,6 +113,7 @@ public class AnalysisServlet {
         List<Datapoint> dataPoints = result.getDatapoints();
         Double averageSum = 0.0;
 
+        //When incorrect information is given or if start and end times are too close the dataPoint list is empty.
         if(dataPoints.isEmpty()){
             return averageSum;
         }

@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -20,7 +21,7 @@ public class S3ManagerTest {
         org.junit.Assume.assumeTrue(f.exists() && f.isFile());
         s3Manager = new S3Manager();
     }
-    /*
+
     @Test
     public void uploadFile() throws Exception {
         File file = new File("test-Workload.log");
@@ -32,7 +33,7 @@ public class S3ManagerTest {
         InputStream retrievedStream = s3Manager.getFile("teamtitans-test-mycrt", "test-Workload.log");
         retrievedStream.close();
         assertNotNull(retrievedStream);
-    }*/
+    }
 
     @Test
     public void getFile() throws Exception {
@@ -45,7 +46,9 @@ public class S3ManagerTest {
     public void downloadFileLocally() throws IOException {
         s3Manager.downloadFileLocally("teamtitans-test-mycrt", "test-Workload.log", "test-file.log");
         File f = new File("test-file.log");
-        assertTrue(f.exists() && !f.isDirectory());
+        boolean foundFile = f.exists() && !f.isDirectory();
+        f.delete();
+        assertTrue(foundFile);
     }
 
     @After

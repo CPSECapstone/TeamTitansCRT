@@ -72,7 +72,9 @@ public class AnalysisServletTest {
     public void calculateAverages() throws Exception {
         File f = new File(".privateKeys");
         org.junit.Assume.assumeTrue(f.exists() && f.isFile());
+        //Measures from 2 hours before now.
         Date start = new Date(System.currentTimeMillis()-1000*60*60*2);
+        //Ends measurements at 2 hours in the future. This actually just gets adjusted to the current time.
         Date end = new Date(System.currentTimeMillis()+1000*60*60*2);
         AnalysisServlet servlet = new AnalysisServlet();
         MetricRequest request = new MetricRequest("testdb", start, end, "CPUUtilization", "WriteThroughput");
