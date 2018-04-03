@@ -1,8 +1,9 @@
 package webHandler;
 
-import org.junit.Before;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -44,7 +45,10 @@ public class S3ManagerTest {
     @Test
     public void downloadFileLocally() throws IOException {
         s3Manager.downloadFileLocally("teamtitans-test-mycrt", "test-Workload.log", "test-file.log");
-        assertTrue(true);
+        File f = new File("test-file.log");
+        boolean foundFile = f.exists() && !f.isDirectory();
+        f.delete();
+        assertTrue(foundFile);
     }
 
     @After

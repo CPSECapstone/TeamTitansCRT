@@ -1,61 +1,56 @@
 package webHandler;
 
+import com.amazonaws.services.cloudwatch.model.Datapoint;
 import com.amazonaws.services.cloudwatch.model.GetMetricStatisticsResult;
 import com.amazonaws.util.IOUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.http.ResponseEntity;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Date;
-
-import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
-import com.amazonaws.services.cloudwatch.AmazonCloudWatchClientBuilder;
-import com.amazonaws.services.cloudwatch.model.*;
-
-import java.util.*;
+import java.util.List;
 /**
  * Servlet to handle all analysis calls.
  */
 @RestController
 public class AnalysisServlet {
 
-    //TODO: Update to only take capture ID when persistent capture data is added.
     /**
      * Method to handle post requests to /analysis.
      * @param response HttpServletResponse to stream metric data to.
-     * @param capture Capture containing the id and s3 where metric data is stored.
-     * @throws IOException Throws an IOException if unable to copy stream to response.
+     * @param captureId Capture containing the id.
      */
     @RequestMapping(value = "/analysis", method = RequestMethod.POST)
-    public void getMetrics(HttpServletResponse response, @RequestBody Capture capture) throws IOException {
+    public void getMetrics(HttpServletResponse response, @RequestBody Capture captureId) {
 
         InputStream stream;
+        Capture capture = DBUtil.getInstance().loadCapture(captureId.getId());
+
+        if (capture == null) {
+            writeError(response, "Error: No capture found with given id:" + captureId.getId());
+            return;
+        }
 
         // Get metric stream
         if (capture.getStatus().equals("Running")) { // Obtain from CloudWatch if capture is currently running
-            CloudWatchManager cloudManager = new CloudWatchManager();
-            String metrics = cloudManager.getAllMetricStatisticsAsJson(capture.getRds(), capture.getStartTime(), new Date());
+            String metrics = LogController.getMetricsFromCloudWatch(capture.getRds(), capture.getStartTime(), new Date());
             stream = new ByteArrayInputStream(metrics.getBytes(StandardCharsets.UTF_8));
-        } else { // Obtain from S3 if capture has already finished
-            S3Manager s3Manager = new S3Manager();
-            stream = s3Manager.getFile(capture.getS3(), capture.getId() + "-Performance.log");
-        }
-
-        //TODO: Replace else statement with commented block when persistent capture data is added.
-        /*else if (capture.getStatus().equals("Finished")) { // Obtain from S3 if capture has already finished
-            S3Manager s3Manager = new S3Manager();
-            stream = s3Manager.getFile(capture.getS3(), capture.getId() + "-Performance.log");
+        } else if (capture.getStatus().equals("Finished")) { // Obtain from S3 if capture has already finished
+            String metrics = LogController.getMetricsFromS3(capture.getS3(), capture.getId() + "-Performance.log");
+            stream = new ByteArrayInputStream(metrics.getBytes(StandardCharsets.UTF_8));
         } else {
+            writeError(response, "Error: Capture is not 'Running' or 'Finished'");
             return;
-        }*/
+        }
 
         setResponseOutputStream(response, stream, capture.getId());
     }
@@ -65,12 +60,11 @@ public class AnalysisServlet {
      * @param response HttpServletResponse to copy stream to.
      * @param stream Stream to copy to response.
      * @param id Stream file id.
-     * @throws IOException Thrown if error is unable to be written to response.
      */
-    public void setResponseOutputStream(HttpServletResponse response, InputStream stream, String id) throws IOException {
+    public void setResponseOutputStream(HttpServletResponse response, InputStream stream, String id) {
         // Return error if performance log not found
         if (stream == null) {
-            response.sendError(HttpStatus.BAD_REQUEST.value(), "Error: No capture performance log found in specified s3 bucket");
+            writeError(response, "Error: No capture performance log found in specified s3 bucket");
             return;
         }
 
@@ -79,7 +73,7 @@ public class AnalysisServlet {
             IOUtils.copy(stream, response.getOutputStream());
             response.flushBuffer();
         } catch (Exception e) {
-            response.sendError(HttpStatus.BAD_REQUEST.value(), "Error: Unable to copy metric stream to response.");
+            writeError(response, "Error: Unable to copy metric stream to response.");
             return;
         }
 
@@ -89,33 +83,37 @@ public class AnalysisServlet {
     }
     
     /**
-     * @param request MetricRequest contains String id, Date start, Date end, String... metrics
-     * @return A list of averages
+     * Calculates the average of metrics for a time span.
+     * @param  request MetricRequest contains String rds, Date start, Date end, String... metrics
+     * @return         Averages of metrics.
      */
     @RequestMapping(value = "/cloudwatch/average", method = RequestMethod.POST)
     public ResponseEntity<List<Double>> calculateAverages(@RequestBody MetricRequest request){
         List<Double> averages = new ArrayList<Double>();
 
+        //Iterate through list of metrics.
         for(String metric : request.getMetrics()) {
-            averages.add(calculateAverage(request.getID(), request.getStartTime(), request.getEndTime(), metric));
+            averages.add(calculateAverage(request.getRDS(), request.getStartTime(), request.getEndTime(), metric));
         }
 
         return new ResponseEntity<List<Double>>(averages, HttpStatus.OK);
     }
 
     /**
-     * @param id      The database to get data from
-     * @param start     The (capture's) start time
-     * @param end       The end time. For current time use (new Date(System.currentTimeMillis()))
-     * @param metric   Metric name to request ex. "CPUUtilization"
-     * @return          The average through the timespan as a Double
+     * Calculate the average of a metric for a time span.
+     * @param  rds    Database to get data from.
+     * @param  start  Capture's Start time.
+     * @param  end    Capture's end time. For current time use (new Date(System.currentTimeMillis())).
+     * @param  metric Metric name to request ex. "CPUUtilization".
+     * @return        Average of a single metric.
      */
-    public Double calculateAverage(String id, Date start, Date end, String metric) {
+    public Double calculateAverage(String rds, Date start, Date end, String metric) {
         CloudWatchManager cloudManager = new CloudWatchManager();
-        GetMetricStatisticsResult result = cloudManager.getMetricStatistics(id, start, end, metric);
+        GetMetricStatisticsResult result = cloudManager.getMetricStatistics(rds, start, end, metric);
         List<Datapoint> dataPoints = result.getDatapoints();
         Double averageSum = 0.0;
 
+        //When incorrect information is given or if start and end times are too close the dataPoint list is empty.
         if(dataPoints.isEmpty()){
             return averageSum;
         }
@@ -124,5 +122,18 @@ public class AnalysisServlet {
             averageSum += point.getAverage();
         }
         return averageSum/dataPoints.size();
+    }
+
+    /**
+     * Method which attempts to write error to response.
+     * @param response Response to write to
+     * @param message Error message
+     */
+    private void writeError(HttpServletResponse response, String message) {
+        try {
+            response.sendError(HttpStatus.BAD_REQUEST.value(), message);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

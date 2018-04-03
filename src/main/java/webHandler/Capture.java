@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class Capture {
+public class Capture implements Session {
     private final int NO_LIMIT = 0;
 
     private String id;
@@ -17,13 +17,12 @@ public class Capture {
     private int fileSizeLimit = NO_LIMIT;
     private int transactionLimit = NO_LIMIT;
 
-    private int dbFileSize = 0;
-    private int numDBTransactions = 0;
+    private long dbFileSize = 0;
+    private int transactionCount = 0;
 
     private List<String> filterStatements;
     private List<String> filterUsers;
 
-    private LogController logController;
 
     public Capture() {
 
@@ -35,7 +34,7 @@ public class Capture {
         this.s3 = s3;
         this.startTime = new Date();
         this.endTime = null;
-        this.status = "Running";
+        updateStatus();
     }
 
     public Capture(String id, String rds, String s3, int fileSizeLimit, int transactionLimit) {
@@ -46,7 +45,7 @@ public class Capture {
         this.endTime = null;
         this.fileSizeLimit = fileSizeLimit;
         this.transactionLimit = transactionLimit;
-        this.status = "Running";
+        updateStatus();
     }
 
     public Capture(String id, String rds, String s3, Date startTime, Date endTime) {
@@ -55,7 +54,7 @@ public class Capture {
         this.s3 = s3;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.status = "Running";
+        updateStatus();
     }
 
     public Capture(String id, String rds, String s3, Date startTime, Date endTime, int fileSizeLimit, int transactionLimit) {
@@ -66,15 +65,20 @@ public class Capture {
         this.endTime = endTime;
         this.fileSizeLimit = fileSizeLimit;
         this.transactionLimit = transactionLimit;
-        this.status = "Running";
+        updateStatus();
     }
 
     public void updateStatus() {
         Date currTime = new Date();
+
+        if("Failed".equals(status)) {
+            return;
+        }
+
         if (startTime != null && currTime.compareTo(startTime) >= 0) {
             if ((endTime != null && currTime.compareTo(endTime) >= 0)
                     || (fileSizeLimit != NO_LIMIT && dbFileSize > fileSizeLimit)
-                    || (transactionLimit != NO_LIMIT && numDBTransactions > transactionLimit)) {
+                    || (transactionLimit != NO_LIMIT && transactionCount > transactionLimit)) {
                 this.status = "Finished";
             } else {
                 this.status = "Running";
@@ -84,20 +88,18 @@ public class Capture {
         }
     }
 
-    public void startCaptureLogs() {
-        if (logController == null) {
-            this.logController = new LogController(this);
-            this.logController.run();
-        }
+    public boolean hasReachedFileSizeLimit() {
+
+        return this.fileSizeLimit == NO_LIMIT ? false : this.dbFileSize >= this.fileSizeLimit;
     }
 
-    public void endCaptureLogs() {
-        this.logController.end();
+    public boolean hasReachedTransactonLimit() {
+        return this.transactionLimit == NO_LIMIT ? false : this.transactionCount >= this.transactionLimit;
     }
 
     public String getId() { return id; }
 
-    public void setId(String id) { this.id = id; }
+    public void setId(String name) { this.id = name; }
 
     public String getRds() {
         return rds;
@@ -150,13 +152,13 @@ public class Capture {
 
     public void setTransactionLimit(int size) {this.transactionLimit = size; }
 
-    public int getDbFileSize() { return this.dbFileSize; }
+    public long getDbFileSize() { return this.dbFileSize; }
 
-    public void setDbFileSize(int size) {this.dbFileSize = size; }
+    public void setDbFileSize(long size) {this.dbFileSize = size; }
 
-    public int getNumDBTransactions() {return this.numDBTransactions; }
+    public int getTransactionCount() {return this.transactionCount; }
 
-    public void setNumDBTransactions(int num) {this.numDBTransactions = num; }
+    public void setTransactionCount(int num) {this.transactionCount = num; }
 
     public boolean hasTransactionLimit() {return this.getTransactionLimit() > NO_LIMIT; }
 
@@ -166,7 +168,7 @@ public class Capture {
     {
         if (this.filterStatements == null)
         {
-            return new ArrayList<String>();
+            this.filterStatements = new ArrayList<String>();
         }
         return this.filterStatements;
     }
@@ -180,7 +182,7 @@ public class Capture {
     {
         if (this.filterUsers == null)
         {
-            return new ArrayList<String>();
+            this.filterUsers = new ArrayList<String>();
         }
         return this.filterUsers;
     }

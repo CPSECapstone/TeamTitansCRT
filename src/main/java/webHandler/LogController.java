@@ -2,116 +2,65 @@ package webHandler;
 
 import com.amazonaws.services.s3.model.ObjectMetadata;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
 
-public class LogController {
+public abstract class LogController
+{
+    public static final String PerformanceTag = "-Performance.log";
+    public static final String WorkloadTag = "-Workload.log";
 
-    private final int UPDATE_PERIOD_HOUR = 1000 * 60 * 60;
-    private final String GeneralLogFileName = "general/mysql-general.log";
+    protected LogFilter logFilter;
 
-    private Capture capture;
+    public abstract String getLogData(String resourceName, String fileName);
 
-    private RDSManager rdsManager;
-    private S3Manager s3Manager;
-    private LogParser logParser;
-
-    private boolean isRunning = false;
-    private boolean isFirstWrite = true;
-
-    private String fileName;
-
-    public LogController(Capture capture) {
-        this.capture = capture;
-
-        rdsManager = new RDSManager();
-        s3Manager = new S3Manager();
-        logParser = new LogParser();
-
-        fileName = capture.getId() + "-Workload.log";
+    public static String getMetricsFromS3(String s3Bucket, String fileName)
+    {
+        S3Manager s3Manager = new S3Manager();
+        return s3Manager.getFileAsString(s3Bucket, fileName);
     }
 
-    public void run() {
-        if (isRunning) {
-            return;
-        }
-
-        isRunning = true;
-
-        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        int currMinute = calendar.get(Calendar.MINUTE);
-        int delay = UPDATE_PERIOD_HOUR - (1000 * 60 * currMinute);
-
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                int hour = calendar.get(Calendar.HOUR_OF_DAY);
-
-                if (isRunning) {
-                    logData(GeneralLogFileName + "." + hour);
-                } else {
-                    cancel();
-                }
-                calendar.add(Calendar.HOUR, 1);
-            }
-        }, delay, UPDATE_PERIOD_HOUR);
+    public List<Statement> filterLogData(String logData)
+    {
+        return logFilter.filterLogData(logData);
     }
 
-    public void end() {
-        this.isRunning = false;
-        logData(GeneralLogFileName);
-        uploadToS3();
+    public abstract void processData(Session session, int type);
+
+    public abstract void updateSessionController();
+
+    public void updateLogFilter(Session session) {
+        logFilter.update(session);
     }
 
-    private void logData(String logFile) {
-        String logData = rdsManager.downloadLog(capture.getRds(), logFile);
+    public abstract void uploadAllFiles(Session session);
 
-        if (logData ==  null) {
-            return;
-        }
-
-        String parsedLogData = logParser.parseLogData(logData, capture.getFilterStatements(),
-                capture.getFilterUsers(), capture.getStartTime(), capture.getEndTime());
-        InputStream stream = null;
-        try {
-            stream = new ByteArrayInputStream(parsedLogData.getBytes(StandardCharsets.UTF_8.name()));
-        } catch (UnsupportedEncodingException enc) {
-            enc.printStackTrace();
-        }
-
-        if (stream != null) {
-            writeToFile(parsedLogData);
-        }
+    public static String getMetricsFromCloudWatch(String rds, Date startTime, Date endTime)
+    {
+        CloudWatchManager cloudManager = new CloudWatchManager();
+        return cloudManager.getAllMetricStatisticsAsJson(rds, startTime, endTime);
     }
 
-    private void writeToFile(String logData) {
-        BufferedWriter out = null;
-
-        if (!isRunning) {
-            logData += "\n]";
-        } else if (isFirstWrite) {
-            logData = "[\n" + logData;
-            isFirstWrite = false;
-        }
-
-        try {
-            FileWriter fileWriter = new FileWriter(this.fileName, true);
-            out = new BufferedWriter(fileWriter);
-            out.write(logData);
-            out.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public void uploadMetrics(Session session)
+    {
+        String stats = getMetricsFromCloudWatch(session.getRds(), session.getStartTime(), session.getEndTime());
+        InputStream statStream = new ByteArrayInputStream(stats.getBytes(StandardCharsets.UTF_8));
+        uploadInputStream(session.getS3(), session.getId() + PerformanceTag, statStream);
     }
 
-    private void uploadToS3() {
-        try {
-            File file = new File(this.fileName);
-            s3Manager.uploadFile(capture.getS3(), fileName, new FileInputStream(file), new ObjectMetadata());
-            file.delete();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public void uploadInputStream(String s3, String fileName, InputStream stream)
+    {
+        S3Manager s3Manager = new S3Manager();
+        s3Manager.uploadFile(s3, fileName, stream, new ObjectMetadata());
+    }
+
+    public void uploadFile(String s3, String fileName, File file)
+    {
+        S3Manager s3Manager = new S3Manager();
+        s3Manager.uploadFile(s3, fileName, file);
     }
 }
