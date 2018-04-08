@@ -173,6 +173,12 @@ function addToCaptureList(capture) {
     $(`#${id}-analyze`).on("click", function() {
         openAnalysis(id);
     });
+
+    // disables fields on finished or failed captures
+    var status = capture["status"]
+    if (status == 'Finished' || status == 'Failed') {
+        $(`#${id}-modal input`).attr("readonly", true);
+    }
 }
 
 /**
