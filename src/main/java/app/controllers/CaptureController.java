@@ -211,4 +211,11 @@ public class CaptureController {
             logController.uploadAllFiles(capture);
         }
     }
+
+    public static boolean deleteCapture(Capture capture) {
+        captures.remove(capture.getId());
+        logControllers.remove(capture.getId());
+        timers.remove(capture.getId());
+        return true;
+    }
 }
