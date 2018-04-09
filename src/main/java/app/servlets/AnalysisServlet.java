@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
@@ -86,7 +87,7 @@ public class AnalysisServlet {
         response.addHeader("Content-disposition", "attachment;filename=" + id + "-Performance.log");
         response.setContentType("txt/plain");
     }
-    
+
     /**
      * Calculates the average of metrics for a time span.
      * @param  request MetricRequest contains String rds, Date start, Date end, String... metrics
@@ -105,24 +106,38 @@ public class AnalysisServlet {
     }
 
     /**
-     * Calculate the average of a metric for a time span.
+     * Calculate the average of a metric for a time span. Long timespans are split into intervals to by pass the datapoint limit.
      * @param  rds    Database to get data from.
      * @param  start  Capture's Start time.
      * @param  end    Capture's end time. For current time use (new Date(System.currentTimeMillis())).
      * @param  metric Metric name to request ex. "CPUUtilization".
      * @return        Average of a single metric.
      */
-    public Double calculateAverage(String rds, Date start, Date end, String metric) {
-        CloudWatchManager cloudManager = new CloudWatchManager();
-        GetMetricStatisticsResult result = cloudManager.getMetricStatistics(rds, start, end, metric);
-        List<Datapoint> dataPoints = result.getDatapoints();
+    public double calculateAverage(String rds, Date start, Date end, String metric){
+        CloudWatchManager cloudWatchManager = new CloudWatchManager();
+        List<Datapoint> dataPoints = new ArrayList<>();
+        //10 hour intervals
+        long hour = 3600 * 1000 * 10;
         Double averageSum = 0.0;
+        Date current = start;
+        Date next;
 
-        //When incorrect information is given or if start and end times are too close the dataPoint list is empty.
+        while(current.before(end)){
+
+            next = new Date(current.getTime() + hour);
+
+            if(end.getTime() - current.getTime() < hour) {
+                next = end;
+            }
+
+            //append datapoints from the current interval
+            dataPoints.addAll(cloudWatchManager.getMetricStatistics(rds, current, next, metric).getDatapoints());
+            current = next;
+        }
+
         if(dataPoints.isEmpty()){
             return averageSum;
         }
-
         for(Datapoint point: dataPoints) {
             averageSum += point.getAverage();
         }
