@@ -39,8 +39,8 @@ $(function() {
                     <label class="input-label">End Time:
                         <input id="" class="${endTimeSelector} form-control" type="datetime-local" value="">
                     </label>
-                    ${createTextInput("Max Capture Size (mB):", fileSizeLimitSelector)}
-                    ${createTextInput("Max Number of Transactions:", transactionLimitSelector)}
+                    ${createNumericInput("Max Capture Size (mB):", fileSizeLimitSelector)}
+                    ${createNumericInput("Max Number of Transactions:", transactionLimitSelector)}
                     ${createTextInput("Database Commands to Ignore (comma delimited):", filterStatementsSelector)}
                     ${createTextInput("Database Users to Ignore (comma delimited):", filterUsersSelector)}
                 </div>
@@ -217,8 +217,8 @@ function createEditCaptureModal(capture) {
                     <label class="input-label">End Time:
                         <input id="" class="txtEndTime form-control" type="datetime-local" value="${endTime}">
                     </label>
-                    ${createTextInputValue("Max Capture Size (mB):", "txtMaxSize", fileSizeLimit)}
-                    ${createTextInputValue("Max Number of Transactions:", "txtMaxTrans", transactionLimit)}
+                    ${createNumericInputValue("Max Capture Size (mB):", "txtMaxSize", fileSizeLimit)}
+                    ${createNumericInputValue("Max Number of Transactions:", "txtMaxTrans", transactionLimit)}
                 </div>
                 <div class="modal-footer">
                     ${status == "Finished" ? 
@@ -391,11 +391,7 @@ function populateS3Dropdown(selector) {
 }
 
 function createTextInput(label, id) {
-    return `
-    <div class="form-group">
-        <label class="input-label">${label}</label>
-        <input id="" class="${id} form-control" type="text" value="">
-    </div>`;
+    return createTextInputValue(label, id, "");
 }
 
 function createTextInputValue(label, id, value) {
@@ -403,6 +399,18 @@ function createTextInputValue(label, id, value) {
     <div class="form-group">
         <label class="input-label">${label}</label>
         <input id="" class="${id} form-control" type="text" value="${value}">
+    </div>`;
+}
+
+function createNumericInput(label, id) {
+    return createNumericInputValue(label, id, "");
+}
+
+function createNumericInputValue(label, id, value) {
+    return `
+    <div class="form-group">
+        <label class="input-label">${label}</label>
+        <input id="" class="${id} form-control" type="number" min="1" max="${1e5}" value="${value}">
     </div>`;
 }
 
