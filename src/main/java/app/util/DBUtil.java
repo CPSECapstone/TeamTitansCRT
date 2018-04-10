@@ -625,5 +625,43 @@ public class DBUtil {
             return null;
         }
     }
+
+    public boolean deleteCapture (String id)
+    {
+        try
+        {
+            String sql = "DELETE FROM captures WHERE id = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, id);
+            pstmt.execute();
+
+            return true;
+        }
+
+        catch (SQLException e)
+        {
+            System.err.println(e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean deleteReplay (String id)
+    {
+        try
+        {
+            String sql = "DELETE FROM replays WHERE id = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, id);
+            pstmt.execute();
+
+            return true;
+        }
+
+        catch (SQLException e)
+        {
+            System.err.println(e.getMessage());
+            return false;
+        }
+    }
 }
 
