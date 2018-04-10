@@ -91,7 +91,7 @@ function updateStatus() {
 
 function captureDashboard(data) {
     return `
-    <table class="table" width="100%">
+    <table class="table table-hover" width="100%">
         <thead class="thead-dark">
             <tr class="">
                 <th scope="col"> </th> 
@@ -137,19 +137,39 @@ function createTableRow(capture) {
 function createRow(capture) {
     var id = capture["id"];
     var status = capture["status"];
-    var startTime = capture["startTime"];
-    var endTime = capture["endTime"];
-    console.log(`ID: ${id}\tStatus: ${status}`);
-
+    
+    var startTimeMilli = capture["startTime"];
+    var startTime = new Date(startTimeMilli);
+    
+    var endTimeMilli = capture["endTime"];
+    var endTime = "Not Specified";
+    var temp = new Date(endTimeMilli);
+    
+    if (endTimeMilli) {
+        endTime = temp.customFormat("#MM#/#DD#/#YYYY# #hh#:#mm#:#ss# #AMPM#")
+    }
+    
     return `
     <tr data-toggle="collapse" data-target="#accordion${id}" class="clickable">
         <td width="(100/12)%">${createIcon(status)}</td>
         <td width="(100/4)%">${id}</td>
         <td width="(100/6)%">${status}</td>
-        <td width="(100/6)%">${formatTime(startTime, "MM/dd/yyyy HH:mm:ss")}</td>
-        <td width="(100/6)%">${formatTime(endTime, "MM/dd/yyyy HH:mm:ss")}</td>
+        <td width="(100/6)%">${startTime.customFormat("#MM#/#DD#/#YYYY# #hh#:#mm#:#ss# #AMPM#")}</td>
+        <td width="(100/6)%">${endTime}</td>
         <td width="(100/6)%">${createButton(id, status)}</td>
     </tr>`;
+    /*
+    <tr>
+        <td colspan="2">
+            <div id="accordion${id} class="collapse">
+                <ul class="stats-list">
+                    <li>CPU Utilization (percent): 0</li>
+                    <li>Free Storage Space Available (bytes): 0 </li>
+                    <li>Write Throughput (bytes/sec): 0 </li>
+                </ul>
+            </div>
+        </td>
+    </tr>`*/;
 }
 
 function createIcon(status) {
@@ -203,33 +223,22 @@ function stopCapture(id) {
 }
 
 /* Formarts the time from milliseconds to month day year hour minutes seconds. */
-function formatTime(time, format) {
-    if (time === null) {
-        return 'Not Specified';
-    }
-
-    var t = new Date(time);
-    var tf = function (i) { return (i < 10 ? '0' : '') + i };
-    return format.replace(/yyyy|MM|dd|HH|mm|ss/g, function (a) {
-        switch (a) {
-            case 'yyyy': //year
-                return tf(t.getFullYear());
-                break;
-            case 'MM': //month
-                return tf(t.getMonth() + 1);
-                break;
-            case 'mm': //minutes
-                return tf(t.getMinutes());
-                break;
-            case 'dd': //day
-                return tf(t.getDate());
-                break;
-            case 'HH': //hour
-                return tf(t.getHours());
-                break;
-            case 'ss': //seconds
-                return tf(t.getSeconds());
-                break;
-        }
-    })
-}
+Date.prototype.customFormat = function(formatString){
+  var YYYY,YY,MMMM,MMM,MM,M,DDDD,DDD,DD,D,hhhh,hhh,hh,h,mm,m,ss,s,ampm,AMPM,dMod,th;
+  YY = ((YYYY=this.getFullYear())+"").slice(-2);
+  MM = (M=this.getMonth()+1)<10?('0'+M):M;
+  MMM = (MMMM=["January","February","March","April","May","June","July","August","September","October","November","December"][M-1]).substring(0,3);
+  DD = (D=this.getDate())<10?('0'+D):D;
+  DDD = (DDDD=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][this.getDay()]).substring(0,3);
+  th=(D>=10&&D<=20)?'th':((dMod=D%10)==1)?'st':(dMod==2)?'nd':(dMod==3)?'rd':'th';
+  formatString = formatString.replace("#YYYY#",YYYY).replace("#YY#",YY).replace("#MMMM#",MMMM).replace("#MMM#",MMM).replace("#MM#",MM).replace("#M#",M).replace("#DDDD#",DDDD).replace("#DDD#",DDD).replace("#DD#",DD).replace("#D#",D).replace("#th#",th);
+  h=(hhh=this.getHours());
+  if (h==0) h=24;
+  if (h>12) h-=12;
+  hh = h<10?('0'+h):h;
+  hhhh = hhh<10?('0'+hhh):hhh;
+  AMPM=(ampm=hhh<12?'am':'pm').toUpperCase();
+  mm=(m=this.getMinutes())<10?('0'+m):m;
+  ss=(s=this.getSeconds())<10?('0'+s):s;
+  return formatString.replace("#hhhh#",hhhh).replace("#hhh#",hhh).replace("#hh#",hh).replace("#h#",h).replace("#mm#",mm).replace("#m#",m).replace("#ss#",ss).replace("#s#",s).replace("#ampm#",ampm).replace("#AMPM#",AMPM);
+};
