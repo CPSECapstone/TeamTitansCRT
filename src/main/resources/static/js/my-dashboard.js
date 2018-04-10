@@ -139,14 +139,19 @@ function createRow(capture) {
     var status = capture["status"];
     
     var startTimeMilli = capture["startTime"];
-    var startTime = new Date(startTimeMilli);
+    var startTime = "Not Specified";
+    var tempStartTime = new Date(startTimeMilli);
+    
+    if (startTimeMilli) {
+        startTime = tempStartTime.customFormat("#MM#/#DD#/#YYYY# #hh#:#mm#:#ss# #AMPM#")
+    }
     
     var endTimeMilli = capture["endTime"];
     var endTime = "Not Specified";
-    var temp = new Date(endTimeMilli);
+    var tempEndTime = new Date(endTimeMilli);
     
     if (endTimeMilli) {
-        endTime = temp.customFormat("#MM#/#DD#/#YYYY# #hh#:#mm#:#ss# #AMPM#")
+        endTime = tempEndTime.customFormat("#MM#/#DD#/#YYYY# #hh#:#mm#:#ss# #AMPM#")
     }
     
     return `
@@ -154,7 +159,7 @@ function createRow(capture) {
         <td width="(100/12)%">${createIcon(status)}</td>
         <td width="(100/4)%">${id}</td>
         <td width="(100/6)%">${status}</td>
-        <td width="(100/6)%">${startTime.customFormat("#MM#/#DD#/#YYYY# #hh#:#mm#:#ss# #AMPM#")}</td>
+        <td width="(100/6)%">${startTime}</td>
         <td width="(100/6)%">${endTime}</td>
         <td width="(100/6)%">${createButton(id, status)}</td>
     </tr>`;
