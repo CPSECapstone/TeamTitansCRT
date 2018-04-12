@@ -16,6 +16,11 @@ public class ReplayServlet {
     
     @RequestMapping(value = "/replay/start", method = RequestMethod.POST)
     public ResponseEntity<String> startReplay(@RequestBody Replay replay) {
+
+        if (ReplayController.isReplayIdDuplicate(replay)) {
+            return new ResponseEntity<>("Error: Duplicate Replay ID", HttpStatus.BAD_REQUEST);
+        }
+
         if (replay.getStartTime() == null)
         {
             replay.setStartTime(new Date());

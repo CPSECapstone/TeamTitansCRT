@@ -211,4 +211,8 @@ public class CaptureController {
             logController.uploadAllFiles(capture);
         }
     }
+
+    public static boolean isCaptureIdDuplicate(Capture capture) {
+        return DBUtil.getInstance().checkCaptureNameDuplication(capture.getId());
+    }
 }
