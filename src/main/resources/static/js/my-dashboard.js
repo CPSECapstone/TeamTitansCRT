@@ -119,19 +119,6 @@ function createTableRow(capture) {
         stopCapture(id);
         updateStatus();
     });
-    /*
-    <tr>
-        <td colspan="3">
-            <div id="accordion${id} class="collapse">
-                <ul class="stats-list">
-                    <li>CPU Utilization (percent): ${data[0]}</li>
-                    <li>Free Storage Space Available (bytes): ${data[1]} </li>
-                    <li>Write Throughput (bytes/sec): ${data[2]} </li>
-                </ul>
-            </div>
-        </td>
-    </tr>`;
-    */
 }
 
 function createRow(capture) {
@@ -162,11 +149,10 @@ function createRow(capture) {
         <td width="(100/6)%">${startTime}</td>
         <td width="(100/6)%">${endTime}</td>
         <td width="(100/6)%">${createButton(id, status)}</td>
-    </tr>`;
-    /*
+    </tr>
     <tr>
-        <td colspan="2">
-            <div id="accordion${id} class="collapse">
+        <td colspan="6">
+            <div id="accordion${id}" class="collapse">
                 <ul class="stats-list">
                     <li>CPU Utilization (percent): 0</li>
                     <li>Free Storage Space Available (bytes): 0 </li>
@@ -174,7 +160,7 @@ function createRow(capture) {
                 </ul>
             </div>
         </td>
-    </tr>`*/;
+    </tr>`;
 }
 
 function createIcon(status) {
