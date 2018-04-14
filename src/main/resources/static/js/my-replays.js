@@ -343,14 +343,14 @@ function startReplay(replay) {
         },
         data: JSON.stringify(replay),
         success: function() {
-            $("#exampleModal").html(createStartReplayModal("Successful"));
+            $("#exampleModal").html(createStartReplayModal("Successful", "Your replay is in progress. Go to Dashboard to see the current status."));
             $('#exampleModal').on('hidden.bs.modal', function () {
                 updateReplayList();
             });
             $("#exampleModal").modal("show");
         },
         error: function(err) {
-            $("#exampleModal").html(createStartReplayModal("Failure"));
+            $("#exampleModal").html(createStartReplayModal("Failure", err.responseText ? err.responseText : "Your replay failed to start. Verify all fields are correct."));
             $("#exampleModal").modal("show");
 
             console.log("Error starting relpay");
@@ -359,7 +359,7 @@ function startReplay(replay) {
     });
 }
 
-function createStartReplayModal(result) {
+function createStartReplayModal(result, message) {
     return `
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -367,10 +367,7 @@ function createStartReplayModal(result) {
                 <h5 class="modal-title">Replay ${result}</h5>
             </div>
             <div class="modal-body">
-                ${result === "Successful" ? 
-                    "<p>Your replay is in progress. Go to Dashboard to see the current status.</p>" :
-                    "<p>Your replay failed to start. Verify all fields are correct.</p>"}
-                
+                <p>${message}</p>
             </div>
             <div class="modal-footer">
                 <a href="dashboard" class="btn btn-default">Dashboard</a>
