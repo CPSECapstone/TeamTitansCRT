@@ -10,13 +10,20 @@ import java.util.ArrayList;
 public class DBUtil {
 
     private static DBUtil instance = null;
-    private Connection conn;
+    private static Connection conn;
+    private static String databaseFile = "captureReplay.db";
 
     public static DBUtil getInstance()
     {
         if (instance == null) {
-            instance = new DBUtil("captureReplay.db");
+            instance = new DBUtil(databaseFile);
         }
+
+        try{
+            if (conn.isClosed()) {
+                conn = connectSqlite(databaseFile);
+            }
+        } catch (SQLException e) { }
 
         return instance;
     }
@@ -87,7 +94,7 @@ public class DBUtil {
         return conn;
     }
 
-    public void closeConnection() throws SQLException
+    public void closeConnection()
     {
         try
         {
@@ -101,6 +108,18 @@ public class DBUtil {
         {
             System.err.println(e.getMessage());
         }
+    }
+
+    public void setDatabaseFile(String file) {
+        databaseFile = file;
+        instance.closeConnection();
+        instance = new DBUtil(databaseFile);
+    }
+
+    public void setDatabaseFileDefault() {
+        databaseFile = "captureReplay.db";
+        instance.closeConnection();
+        instance = new DBUtil(databaseFile);
     }
 
     private void createNewCaptureTable(String databaseFile)
