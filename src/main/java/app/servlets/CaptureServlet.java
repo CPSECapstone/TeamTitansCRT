@@ -24,10 +24,14 @@ public class CaptureServlet {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
+        if (CaptureController.isCaptureIdDuplicate(capture)) {
+            return new ResponseEntity<>("Error: Duplicate Capture ID", HttpStatus.BAD_REQUEST);
+        }
+
         if (capture.getStartTime() == null) {
             capture.setStartTime(new Date());
         }
-        
+
         LogController logController = new CaptureLogController(capture);
         CaptureTimerManager captureTimerManager = new CaptureTimerManager(capture.getId(), capture.getStartTime(),
                 capture.getEndTime());

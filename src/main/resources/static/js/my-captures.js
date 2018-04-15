@@ -93,7 +93,7 @@ $(function() {
 function testCaptureList() {
     var data = [
         {
-            id: "Test1",
+            id: "Running",
             startTime: 1520871274784,
             endTime: null,
             fileSizeLimit: 420,
@@ -101,12 +101,28 @@ function testCaptureList() {
             status: "Running"
         },
         {
-            id: "Test2",
+            id: "Queued",
+            startTime: 1520871274784,
+            endTime: null,
+            fileSizeLimit: 420,
+            transactionLimit: 840,
+            status: "Queued"
+        },
+        {
+            id: "Finished",
+            startTime: 1520871274784,
+            endTime: null,
+            fileSizeLimit: 420,
+            transactionLimit: 840,
+            status: "Finished"
+        },
+        {
+            id: "Failed",
             startTime: 1520871274784,
             endTime: 1520881274784,
             fileSizeLimit: 420,
             transactionLimit: 840,
-            status: "Finished"
+            status: "Failed"
         }
     ]
     addAllToCaptureList(data);
@@ -173,6 +189,15 @@ function addToCaptureList(capture) {
     $(`#${id}-analyze`).on("click", function() {
         openAnalysis(id);
     });
+
+    // disables fields on finished or failed captures
+    var status = capture["status"]
+    if (status == 'Finished' || status == 'Failed') {
+        $(`#${id}-modal input`).attr("readonly", true);
+    }
+    else {
+        $(`#${id}-modal input`).attr("readonly", false);
+    }
 }
 
 /**
@@ -202,6 +227,17 @@ function createEditCaptureModal(capture) {
 
     var fileSizeLimit = capture["fileSizeLimit"];
     var transactionLimit = capture["transactionLimit"];
+
+    var footer = '';
+    if (status == "Queued" || status == "Running") {
+        footer += `<a id="${id}-save" class="btn btn-primary" data-dismiss="modal">Save</a>`;
+    }
+    else if (status == "Finished") {
+        footer += `<a href="analyze" id="${id}-analyze" class="btn btn-default">Analyze</a>`
+    }
+    footer += `<a class="btn btn-secondary" data-dismiss="modal">Close</a>`;
+                        
+
     return `
     ${createCaptureListItem(id, status, `${id}-modal`)}
     <div class="modal fade" id="${id}-modal" tabindex="-1" role="dialog">
@@ -221,10 +257,7 @@ function createEditCaptureModal(capture) {
                     ${createNumericInputValue("Max Number of Transactions:", "txtMaxTrans", transactionLimit)}
                 </div>
                 <div class="modal-footer">
-                    ${status == "Finished" ? 
-                        `<a href="analyze" id="${id}-analyze" class="btn btn-default">Analyze</a>
-                        <a class="btn btn-secondary" data-dismiss="modal">Close</a>` :
-                        `<a id="${id}-save" class="btn btn-primary" data-dismiss="modal">Save</a>`}
+                    ${footer}
                 </div>
             </div>
         </div>
@@ -278,7 +311,7 @@ function createCaptureListItem(id, status, selector) {
     <li id="item-${id}" class="list-group-item">
         ${createIcon(status)}${id}
         <a data-toggle="modal" data-target="#${selector}" href="javascript:void(0)" class="pull-right">
-        ${status == "Finished" ? "View" : "Edit"}
+        ${status == 'Finished' || status == 'Failed' ? 'View' : 'Edit'}
         </a>
     </li>`;
 }
@@ -311,14 +344,14 @@ function startCapture(capture) {
         },
         data: JSON.stringify(capture),
         success: function() {
-            $("#exampleModal").html(createStartCaptureModal("Successful"));
+            $("#exampleModal").html(createStartCaptureModal("Successful", "Your capture is in progress. Go to Dashboard to see the current status."));
             $('#exampleModal').on('hidden.bs.modal', function () {
                 updateCaptureList();
             });
             $("#exampleModal").modal("show");
         },
         error: function(err) {
-            $("#exampleModal").html(createStartCaptureModal("Failure"));
+            $("#exampleModal").html(createStartCaptureModal("Failure", err.responseText ? err.responseText : "Your capture failed to start. Verify all fields are correct."));
             $("#exampleModal").modal("show");
 
             console.log("Error starting capture");
@@ -327,7 +360,7 @@ function startCapture(capture) {
     });
 }
 
-function createStartCaptureModal(result) {
+function createStartCaptureModal(result, message) {
     return `
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -335,10 +368,7 @@ function createStartCaptureModal(result) {
                 <h5 class="modal-title">Capture ${result}</h5>
             </div>
             <div class="modal-body">
-                ${result === "Successful" ? 
-                    "<p>Your capture is in progress. Go to Dashboard to see the current status.</p>" :
-                    "<p>Your capture failed to start. Verify all fields are correct.</p>"}
-                
+                <p>${message}</p>
             </div>
             <div class="modal-footer">
                 <a href="dashboard" class="btn btn-default">Dashboard</a>

@@ -225,12 +225,12 @@ public class DBUtil {
     }
 
     public boolean checkCaptureNameDuplication(String name) {
-        String sql = "SELECT TOP 1 captures.id FROM captures WHERE captures.id = ?";
+        String sql = "SELECT id FROM captures WHERE id = ?";
         return checkNameDuplication(sql, name);
     }
 
     public boolean checkReplayNameDuplication(String name) {
-        String sql = "SELECT TOP 1 replays.id FROM replays WHERE replays.id = ?";
+        String sql = "SELECT id FROM replays WHERE id = ?";
         return checkNameDuplication(sql, name);
     }
 
@@ -241,7 +241,7 @@ public class DBUtil {
 
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, name);
-            pstmt.executeUpdate();
+            pstmt.execute();
 
             rs = pstmt.getResultSet();
 
