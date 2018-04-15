@@ -112,16 +112,8 @@ function fillTable(data) {
     data.map(createTableRow);
 }
 
-function createTableRow(capture) {
-    $("tbody.capture-table").append(createRow(capture));
-    var id = capture["id"];
-    $(`a#stopButton${id}`).on("click", function() {
-        stopCapture(id);
-        updateStatus();
-    });
-}
 
-function createRow(capture) {
+function createTableRow(capture) {
     var id = capture["id"];
     var status = capture["status"];
     
@@ -141,26 +133,53 @@ function createRow(capture) {
         endTime = tempEndTime.customFormat("#MM#/#DD#/#YYYY# #hh#:#mm#:#ss# #AMPM#")
     }
     
-    return `
-    <tr data-toggle="collapse" data-target="#accordion${id}" class="clickable">
-        <td width="(100/12)%">${createIcon(status)}</td>
-        <td width="(100/4)%">${id}</td>
-        <td width="(100/6)%">${status}</td>
-        <td width="(100/6)%">${startTime}</td>
-        <td width="(100/6)%">${endTime}</td>
-        <td width="(100/6)%">${createButton(id, status)}</td>
-    </tr>
-    <tr>
-        <td colspan="6">
-            <div id="accordion${id}" class="collapse">
-                <ul class="stats-list">
-                    <li>CPU Utilization (percent): 0</li>
-                    <li>Free Storage Space Available (bytes): 0 </li>
-                    <li>Write Throughput (bytes/sec): 0 </li>
-                </ul>
-            </div>
-        </td>
-    </tr>`;
+    $("tbody.capture-table").append(createRow(id, status, startTimeMilli, startTime, endTimeMilli, endTime));
+    var id = capture["id"];
+    $(`a#stopButton${id}`).on("click", function() {
+        stopCapture(id);
+        updateStatus();
+    });
+}
+
+function createRow(id, status, startTimeMilli, startTime, endTimeMilli, endTime) {
+     var body = {
+        id: id,
+        startTime: startTimeMilli,
+        endTime: endTimeMilli,
+        metrics: ["CPUUtilization", "FreeStorageSpace", "WriteThroughput"]
+    };
+    
+    $.ajax({
+         url: "/cloudwatch/average",
+        type: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: JSON.stringify(body),
+        success: function(data) {
+            return `
+            <tr data-toggle="collapse" data-target="#accordion${id}" class="clickable">
+                <td width="(100/12)%">${createIcon(status)}</td>
+                <td width="(100/4)%">${id}</td>
+                <td width="(100/6)%">${status}</td>
+                <td width="(100/6)%">${startTime}</td>
+                <td width="(100/6)%">${endTime}</td>
+                <td width="(100/6)%">${createButton(id, status)}</td>
+            </tr>
+            <tr>
+                <td colspan="6">
+                    <div id="accordion${id}" class="collapse">
+                        <ul class="stats-list">
+                            <li>CPU Utilization (percent): 0</li>
+                            <li>Free Storage Space Available (bytes): 0 </li>
+                            <li>Write Throughput (bytes/sec): 0 </li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>`;
+            },
+        error: function(err) {
+            console.log(err);
+        }
+    });
 }
 
 function createIcon(status) {
