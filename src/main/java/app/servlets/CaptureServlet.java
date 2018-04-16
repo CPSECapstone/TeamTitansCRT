@@ -3,6 +3,7 @@ package app.servlets;
 import app.controllers.CaptureController;
 import app.controllers.CaptureLogController;
 import app.managers.CaptureTimerManager;
+import app.util.ErrorsUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,11 +26,23 @@ public class CaptureServlet {
         }
 
         if (CaptureController.isCaptureIdDuplicate(capture)) {
-            return new ResponseEntity<>("Error: Duplicate Capture ID", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ErrorsUtil.DuplicateCaptureIDError(), HttpStatus.BAD_REQUEST);
         }
 
         if (capture.getStartTime() == null) {
             capture.setStartTime(new Date());
+        }
+
+        if (capture.getStartTime().before(new Date())) {
+            return new ResponseEntity<>(ErrorsUtil.StartTimeBeforeCurrentTimeError(), HttpStatus.BAD_REQUEST);
+        }
+
+        if (capture.getEndTime() != null && capture.getEndTime().before(capture.getStartTime())) {
+            return new ResponseEntity<>(ErrorsUtil.EndTimeBeforeStartTimeError(), HttpStatus.BAD_REQUEST);
+        }
+
+        if (capture.getFileSizeLimit() < 0 || capture.getTransactionLimit() < 0) {
+            return new ResponseEntity<>(ErrorsUtil.NegativeNumbersError(), HttpStatus.BAD_REQUEST);
         }
 
         LogController logController = new CaptureLogController(capture);
