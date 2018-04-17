@@ -5,10 +5,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 
 import static org.junit.Assert.*;
 
@@ -50,6 +47,24 @@ public class S3ManagerTest {
         boolean foundFile = f.exists() && !f.isDirectory();
         f.delete();
         assertTrue(foundFile);
+    }
+
+    @Test
+    public void deleteFile() throws Exception {
+        File file = new File("test-Workload.log");
+        org.junit.Assume.assumeTrue(file.exists() && file.isFile());
+        InputStream inputStream = new FileInputStream(file);
+        s3Manager.uploadFile("teamtitans-test-mycrt", "test-Workload.log", inputStream, null);
+        inputStream.close();
+
+        InputStream retrievedStream = s3Manager.getFile("teamtitans-test-mycrt", "test-Workload.log");
+        retrievedStream.close();
+        assertNotNull(retrievedStream);
+
+        s3Manager.deleteFile("teamtitans-test-mycrt", "test-Workload.log");
+        retrievedStream = s3Manager.getFile("teamtitans-test-mycrt", "test-Workload.log");
+        retrievedStream.close();
+        assertNull(retrievedStream);
     }
 
     @After

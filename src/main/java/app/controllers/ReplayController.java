@@ -86,4 +86,12 @@ public class ReplayController {
         return replays.get(id);
     }
 
+    public static boolean deleteReplay(Replay replay) {
+        replays.remove(replay.getId());
+        logControllers.remove(replay.getId());
+        timers.remove(replay.getId());
+        DBUtil.getInstance().deleteReplay(replay.getId());
+        return true;
+    }
+
 }
