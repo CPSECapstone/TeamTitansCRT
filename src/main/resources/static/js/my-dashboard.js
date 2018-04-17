@@ -143,7 +143,7 @@ function createTableRow(capture) {
 
 function createRow(id, status, startTimeMilli, startTime, endTimeMilli, endTime) {
      var body = {
-        id: id,
+        id: "testdb",
         startTime: startTimeMilli,
         endTime: endTimeMilli,
         metrics: ["CPUUtilization", "FreeStorageSpace", "WriteThroughput"]

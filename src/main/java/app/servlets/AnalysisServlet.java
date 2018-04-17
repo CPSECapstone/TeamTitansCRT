@@ -121,7 +121,7 @@ public class AnalysisServlet {
         Double averageSum = 0.0;
         Date current = start;
         Date next;
-
+        
         while(current.before(end)){
 
             next = new Date(current.getTime() + hour);

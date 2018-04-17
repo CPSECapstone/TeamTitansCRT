@@ -82,9 +82,9 @@ public class CaptureController {
             Capture capture = captures.get(id);
             capture.setTransactionCount(count);
             capture.updateStatus();
-            if (capture.hasReachedTransactonLimit() && !capture.getStatus().equals("Finished")) {
-                stopCapture(id);
-            }
+            if (capture.hasReachedTransactionLimit() && !capture.getStatus().equals("Finished")) {
+                 stopCapture(id);
+             }
         }
     }
 

@@ -43,8 +43,8 @@ public class Capture implements Session {
         this.s3 = s3;
         this.startTime = new Date();
         this.endTime = null;
-        this.fileSizeLimit = fileSizeLimit;
-        this.transactionLimit = transactionLimit;
+        setFileSizeLimit(fileSizeLimit);
+        setTransactionLimit(transactionLimit);
         updateStatus();
     }
 
