@@ -42,6 +42,9 @@ function injectSidebar() {
                 <a href="settings">Settings</a>
             </li>
         </ul>
+        <ul id="feedback_sidebar_button" class="nav nav-sidebar">
+            <li><a href="#">Give Feedback</a></li>
+        </ul>
     </nav>`);
 }
 
