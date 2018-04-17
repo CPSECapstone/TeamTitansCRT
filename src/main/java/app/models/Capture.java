@@ -93,7 +93,7 @@ public class Capture implements Session {
         return this.fileSizeLimit == NO_LIMIT ? false : this.dbFileSize >= this.fileSizeLimit;
     }
 
-    public boolean hasReachedTransactonLimit() {
+    public boolean hasReachedTransactionLimit() {
         return this.transactionLimit == NO_LIMIT ? false : this.transactionCount >= this.transactionLimit;
     }
 
