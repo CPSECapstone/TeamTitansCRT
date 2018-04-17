@@ -84,4 +84,18 @@ public class AnalysisServletTest {
         ResponseEntity<List<Double>> averages = servlet.calculateAverages(request);
         assertTrue(!averages.getBody().isEmpty());
     }
+
+    @Test
+    public void calculateAveragesNullEndTime() throws Exception {
+        File f = new File(".privateKeys");
+        org.junit.Assume.assumeTrue(f.exists() && f.isFile());
+        //Measures from 2 hours before now.
+        Date start = new Date(System.currentTimeMillis()-1000*3600*2);
+        //Ends measurements at 2 hours in the future. This actually just gets adjusted to the current time.
+        Date end = null;
+        AnalysisServlet servlet = new AnalysisServlet();
+        MetricRequest request = new MetricRequest("testdb", start, end, "CPUUtilization", "WriteThroughput");
+        ResponseEntity<List<Double>> averages = servlet.calculateAverages(request);
+        assertTrue(!averages.getBody().isEmpty());
+    }
 }
