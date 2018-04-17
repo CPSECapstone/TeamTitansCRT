@@ -344,14 +344,14 @@ function startCapture(capture) {
         },
         data: JSON.stringify(capture),
         success: function() {
-            $("#exampleModal").html(createStartCaptureModal("Successful"));
+            $("#exampleModal").html(createStartCaptureModal("Successful", "Your capture is in progress. Go to Dashboard to see the current status."));
             $('#exampleModal').on('hidden.bs.modal', function () {
                 updateCaptureList();
             });
             $("#exampleModal").modal("show");
         },
         error: function(err) {
-            $("#exampleModal").html(createStartCaptureModal("Failure"));
+            $("#exampleModal").html(createStartCaptureModal("Failure", err.responseText ? err.responseText : "Your capture failed to start. Verify all fields are correct."));
             $("#exampleModal").modal("show");
 
             console.log("Error starting capture");
@@ -360,7 +360,7 @@ function startCapture(capture) {
     });
 }
 
-function createStartCaptureModal(result) {
+function createStartCaptureModal(result, message) {
     return `
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -368,10 +368,7 @@ function createStartCaptureModal(result) {
                 <h5 class="modal-title">Capture ${result}</h5>
             </div>
             <div class="modal-body">
-                ${result === "Successful" ? 
-                    "<p>Your capture is in progress. Go to Dashboard to see the current status.</p>" :
-                    "<p>Your capture failed to start. Verify all fields are correct.</p>"}
-                
+                <p>${message}</p>
             </div>
             <div class="modal-footer">
                 <a href="dashboard" class="btn btn-default">Dashboard</a>

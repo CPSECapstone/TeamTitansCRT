@@ -81,6 +81,9 @@ public class ReplayController {
             timerManager.end();
         }
     }
+    public static boolean isReplayIdDuplicate(Replay replay) {
+        return DBUtil.getInstance().checkReplayNameDuplication(replay.getId());
+    }
 
     public static Replay getReplay(String id) {
         return replays.get(id);

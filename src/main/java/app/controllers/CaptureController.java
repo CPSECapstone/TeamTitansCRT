@@ -84,7 +84,7 @@ public class CaptureController {
             capture.updateStatus();
             if (capture.hasReachedTransactionLimit() && !capture.getStatus().equals("Finished")) {
                  stopCapture(id);
-             }
+            }
         }
     }
 
@@ -210,5 +210,9 @@ public class CaptureController {
             LogController logController = logControllers.get(capture.getId());
             logController.uploadAllFiles(capture);
         }
+    }
+
+    public static boolean isCaptureIdDuplicate(Capture capture) {
+        return DBUtil.getInstance().checkCaptureNameDuplication(capture.getId());
     }
 }
