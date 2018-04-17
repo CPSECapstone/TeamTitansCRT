@@ -14,10 +14,10 @@ public class Capture implements Session {
     private Date endTime;
     private String status;
 
-    private int fileSizeLimit = NO_LIMIT;
+    private int fileSizeLimit = NO_LIMIT; // in KB
     private int transactionLimit = NO_LIMIT;
 
-    private long dbFileSize = 0;
+    private long dbFileSize = 0; // in bytes
     private int transactionCount = 0;
 
     private List<String> filterStatements;
@@ -77,7 +77,7 @@ public class Capture implements Session {
 
         if (startTime != null && currTime.compareTo(startTime) >= 0) {
             if ((endTime != null && currTime.compareTo(endTime) >= 0)
-                    || (fileSizeLimit != NO_LIMIT && dbFileSize > fileSizeLimit)
+                    || (fileSizeLimit != NO_LIMIT && (dbFileSize / 1000) > fileSizeLimit)
                     || (transactionLimit != NO_LIMIT && transactionCount > transactionLimit)) {
                 this.status = "Finished";
             } else {
@@ -90,7 +90,7 @@ public class Capture implements Session {
 
     public boolean hasReachedFileSizeLimit() {
 
-        return this.fileSizeLimit == NO_LIMIT ? false : this.dbFileSize >= this.fileSizeLimit;
+        return this.fileSizeLimit == NO_LIMIT ? false : (this.dbFileSize / 1000) >= this.fileSizeLimit;
     }
 
     public boolean hasReachedTransactonLimit() {

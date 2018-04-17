@@ -188,8 +188,8 @@ public class CaptureFilter extends LogFilter {
 
             // if the file size limit has been reached
             int statementLength = statement.toString().length();
-            fileSize += statementLength;
-            if (fileSizeLimit > 0 && (fileSize > fileSizeLimit))
+            fileSize += statementLength + 2; // +2 to account for ",\n"
+            if (fileSizeLimit > 0 && ((fileSize / 1000) >= fileSizeLimit))
             {
                 break;
             }
