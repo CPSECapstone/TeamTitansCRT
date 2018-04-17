@@ -97,6 +97,10 @@ public class AnalysisServlet {
     public ResponseEntity<List<Double>> calculateAverages(@RequestBody MetricRequest request){
         List<Double> averages = new ArrayList<Double>();
 
+        if(request.getEndTime() == null) {
+            request.setEndTime(new Date(System.currentTimeMillis()));
+        }
+
         //Iterate through list of metrics.
         for(String metric : request.getMetrics()) {
             averages.add(calculateAverage(request.getRDS(), request.getStartTime(), request.getEndTime(), metric));
