@@ -116,7 +116,7 @@ function fillTable(data) {
 function createTableRow(capture) {
     var id = capture["id"];
     var status = capture["status"];
-    
+    var rds = capture["rds"];
     var startTimeMilli = capture["startTime"];
     var startTime = "Not Specified";
     var tempStartTime = new Date(startTimeMilli);
@@ -133,7 +133,7 @@ function createTableRow(capture) {
         endTime = tempEndTime.customFormat("#MM#/#DD#/#YYYY# #hh#:#mm#:#ss# #AMPM#")
     }
     
-    $("tbody.capture-table").append(createRow(id, status, startTimeMilli, startTime, endTimeMilli, endTime));
+    createRow(id, rds,  status, startTimeMilli, startTime, endTimeMilli, endTime);
     var id = capture["id"];
     $(`a#stopButton${id}`).on("click", function() {
         stopCapture(id);
@@ -141,9 +141,9 @@ function createTableRow(capture) {
     });
 }
 
-function createRow(id, status, startTimeMilli, startTime, endTimeMilli, endTime) {
+function createRow(id, rds, status, startTimeMilli, startTime, endTimeMilli, endTime) {
      var body = {
-        id: "testdb",
+        rds: rds,
         startTime: startTimeMilli,
         endTime: endTimeMilli,
         metrics: ["CPUUtilization", "FreeStorageSpace", "WriteThroughput"]
@@ -155,7 +155,7 @@ function createRow(id, status, startTimeMilli, startTime, endTimeMilli, endTime)
         headers: { "Content-Type": "application/json" },
         data: JSON.stringify(body),
         success: function(data) {
-            return `
+            $("tbody.capture-table").append(`
             <tr data-toggle="collapse" data-target="#accordion${id}" class="clickable">
                 <td width="(100/12)%">${createIcon(status)}</td>
                 <td width="(100/4)%">${id}</td>
@@ -164,17 +164,22 @@ function createRow(id, status, startTimeMilli, startTime, endTimeMilli, endTime)
                 <td width="(100/6)%">${endTime}</td>
                 <td width="(100/6)%">${createButton(id, status)}</td>
             </tr>
-            <tr>
+            <tr class="collapse" id="accordion${id}">
                 <td colspan="6">
-                    <div id="accordion${id}" class="collapse">
+                    <div>
                         <ul class="stats-list">
-                            <li>CPU Utilization (percent): 0</li>
-                            <li>Free Storage Space Available (bytes): 0 </li>
-                            <li>Write Throughput (bytes/sec): 0 </li>
+                            <li>CPU Utilization (percent): ${data[0]}</li>
+                            <li>Free Storage Space Available (bytes): ${data[1]}</li>
+                            <li>Write Throughput (bytes/sec): ${data[2]}</li>
                         </ul>
                     </div>
                 </td>
-            </tr>`;
+            </tr>`);
+                
+            $(`#stopButton${id}`).on("click", function() {
+                stopCapture(id);
+                updateStatus();
+            });
             },
         error: function(err) {
             console.log(err);
