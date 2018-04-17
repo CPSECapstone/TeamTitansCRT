@@ -91,6 +91,7 @@ public class ReplayController {
         logControllers.remove(replay.getId());
         timers.remove(replay.getId());
         DBUtil.getInstance().deleteReplay(replay.getId());
+
         return true;
     }
 
