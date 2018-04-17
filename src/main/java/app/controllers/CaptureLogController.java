@@ -24,10 +24,14 @@ public class CaptureLogController extends LogController
     private String localFileName;
     private String sessionID;
 
+    private final int FILESIZEBUFFER = 50;
+    private long fileSizeLimit;
+
     public CaptureLogController(Capture capture)
     {
         this.logFilter = new CaptureFilter((Session) capture);
         this.sessionID = capture.getId();
+        this.fileSizeLimit = capture.getFileSizeLimit();
         this.localFileName = this.sessionID + WorkloadTag;
     }
 
@@ -62,10 +66,11 @@ public class CaptureLogController extends LogController
         List<Statement> filteredStatementList = filterLogData(logData);
         List<String> filteredLogDataList = filteredStatementList.stream().
                 map(stmt -> stmt.toString()).collect(Collectors.toList());
-        String filteredLogData = String.join(",\n", filteredLogDataList);
-        if (filteredLogData != null)
+        //String filteredLogData = String.join(",\n", filteredLogDataList);
+        if (!filteredLogDataList.isEmpty())
         {
-            writeToFile(filteredLogData, isFinalWrite);
+            writeToFile(filteredLogDataList, isFinalWrite);
+            //writeToFile(filteredLogData, isFinalWrite);
             if (type == HOURLY)
             {
                 updateSessionController();
@@ -79,6 +84,53 @@ public class CaptureLogController extends LogController
         return calendar.get(Calendar.HOUR_OF_DAY);
     }
 
+    private void writeToFile(List<String> filteredLogData, boolean isFinalWrite)
+    {
+        BufferedWriter out = null;
+
+        File tempFile = getFile();
+        boolean isFirstWrite = getFile() == null;
+
+        try
+        {
+            FileWriter fileWriter = new FileWriter(this.localFileName,true);
+            out = new BufferedWriter(fileWriter);
+            if (isFirstWrite)
+            {
+                out.write("[\n");
+            }
+            long fileSize = tempFile.length() + FILESIZEBUFFER;
+
+            for (int i = 0; i < filteredLogData.size(); i++)
+            {
+                String statement = filteredLogData.get(i);
+                long tempFileSize = fileSize + statement.length() + 2; // +1 accounts for ",\n"
+
+                if (fileSizeLimit > 0 && tempFileSize >= fileSizeLimit)
+                {
+                    out.write("\n]");
+                    updateSessionController();
+                    CaptureController.stopCapture(sessionID);
+                    break;
+                }
+                out.write(statement);
+                if (i != filteredLogData.size() - 1)
+                {
+                    out.write(",\n");
+                }
+            }
+            if (isFinalWrite)
+            {
+                out.write("\n]");
+            }
+            out.close();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+/*
     private void writeToFile(String logData, boolean isFinalWrite)
     {
         BufferedWriter out = null;
@@ -94,6 +146,8 @@ public class CaptureLogController extends LogController
             logData = logData + "\n]";
         }
 
+
+
         try
         {
             FileWriter fileWriter = new FileWriter(this.localFileName, true);
@@ -108,7 +162,7 @@ public class CaptureLogController extends LogController
             e.printStackTrace();
         }
     }
-
+*/
     public File getFile()
     {
         File file = new File(this.localFileName);

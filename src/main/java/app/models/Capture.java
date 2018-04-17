@@ -17,7 +17,7 @@ public class Capture implements Session {
     private int fileSizeLimit = NO_LIMIT; // in KB
     private int transactionLimit = NO_LIMIT;
 
-    private long dbFileSize = 0; // in bytes
+    private long dbFileSize = 50; // in Bytes (buffer of 50)
     private int transactionCount = 0;
 
     private List<String> filterStatements;

@@ -19,8 +19,6 @@ public class CaptureFilter extends LogFilter {
     private LocalDateTime startTime; // the start time of the capture
     private LocalDateTime endTime; // the end time of the capture
     private int transactionLimit;
-    private int fileSizeLimit;
-    private long fileSize = 50; // the current fileSize (Buffer of 50)
     private String captureID;
 
     public CaptureFilter(Session capture)
@@ -30,7 +28,6 @@ public class CaptureFilter extends LogFilter {
         setEndTime(capture.getEndTime());
         this.transactionLimit = capture.getTransactionLimit();
         this.statementsToRemove = capture.getFilterStatements();
-        this.fileSizeLimit = ((Capture) capture).getFileSizeLimit();
         this.usersToRemove = capture.getFilterUsers();
     }
     // filters out the header of every log file
@@ -185,15 +182,6 @@ public class CaptureFilter extends LogFilter {
             {
                 continue;
             }
-
-            // if the file size limit has been reached
-            int statementLength = statement.toString().length();
-            fileSize += statementLength + 2; // +2 to account for ",\n"
-            if (fileSizeLimit > 0 && ((fileSize / 1000) >= fileSizeLimit))
-            {
-                break;
-            }
-
             if (isQuitCommand(statement))
             {
                 continue;
@@ -220,8 +208,6 @@ public class CaptureFilter extends LogFilter {
                 continue;
             }*/
 
-
-
             // if the statement is not a connect
             if (!(isConnectCommand(statement.getCommand())))
             {
@@ -231,7 +217,6 @@ public class CaptureFilter extends LogFilter {
             // if the statement passed all filters then add
             filteredLogStatements.add(statement);
         }
-
         return filteredLogStatements;
     }
 
