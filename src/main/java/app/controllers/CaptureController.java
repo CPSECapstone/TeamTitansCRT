@@ -1,6 +1,7 @@
 package app.controllers;
 
 import app.managers.CaptureTimerManager;
+import app.managers.S3Manager;
 import app.models.Capture;
 import app.models.Session;
 import app.servlets.CaptureServlet;
@@ -216,6 +217,10 @@ public class CaptureController {
         captures.remove(capture.getId());
         logControllers.remove(capture.getId());
         timers.remove(capture.getId());
+        DBUtil.getInstance().deleteCapture(capture.getId());
+        S3Manager s3Manager = new S3Manager();
+        s3Manager.deleteFile(capture.getS3(), capture.getId() + "-Workload.log");
+        s3Manager.deleteFile(capture.getS3(), capture.getId() + "-Performance.log");
         return true;
     }
 }
