@@ -9,16 +9,12 @@ import java.util.ArrayList;
 
 public class DBUtil {
 
-    private static DBUtil instance = null;
-    private static Connection conn;
     private static String databaseFile = "captureReplay.db";
+    private static DBUtil instance = new DBUtil(databaseFile);
+    private static Connection conn;
 
     public static DBUtil getInstance()
     {
-        if (instance == null) {
-            instance = new DBUtil(databaseFile);
-        }
-
         try{
             if (conn.isClosed()) {
                 conn = connectSqlite(databaseFile);
@@ -522,6 +518,47 @@ public class DBUtil {
         catch (SQLException e)
         {
             System.err.println(e.getMessage());
+            return null;
+        }
+    }
+
+    public Replay loadReplaysOfCaptureID(String id)
+    {
+        try
+        {
+            Replay replay = new Replay();
+            ResultSet rs;
+
+            String sql = "SELECT * FROM replays WHERE captureId = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, getCaptureID(id));
+            pstmt.execute();
+
+            rs = pstmt.getResultSet();
+
+            if (!rs.next()) {
+                rs.close();
+                pstmt.close();
+                return null;
+            }
+
+            replay.setCaptureId(getCaptureName(rs.getInt(2)));
+            replay.setId(rs.getString(3));
+            replay.setRds(rs.getString(4));
+            replay.setS3(rs.getString(5));
+            replay.setStartTime(rs.getDate(6));
+            replay.setEndTime(rs.getDate(7));
+            replay.setStatus(rs.getString(8));
+            replay.setReplayType(rs.getString(9));
+
+            return replay;
+        }
+
+        catch (SQLException e)
+        {
+            System.out.println("1");
+            System.err.println(e.getMessage());
+            System.out.println("2");
             return null;
         }
     }
