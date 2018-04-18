@@ -293,6 +293,7 @@ $('body').on('change', '.captureCheckbox', function() {
             $(this).parent('tr').show();
         } else {
             $(this).parent('tr').hide();
+            $(this).parent('tr').find('.replayCheckbox').prop('checked', false);
         }
     });
 });
