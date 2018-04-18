@@ -9,17 +9,29 @@ $(function() {
 
         var requests = []; // Stores all ajax requests
 
-        var checkedCaptures = $('.rowCheckbox:checkbox:checked');
+        var checkedCaptures = $('.captureCheckbox:checkbox:checked');
+        var checkedReplays = $('.replayCheckbox:checkbox:checked');
+
 
         // Makes ajax request for each specified capture
         for (var i = 0; i < checkedCaptures.length; i++) {
             var body = {
-                id: checkedCaptures[i].value
+                id: checkedCaptures[i].value,
+                type: "Capture"
             };
             requests.push(requestMetrics(body));
         }
 
-        if (checkedCaptures.length > 0) {
+        // Makes ajax request for each specified replay
+        for (var i = 0; i < checkedReplays.length; i++) {
+            var body = {
+                id: checkedReplays[i].value,
+                type: "Replay"
+            };
+            requests.push(requestMetrics(body));
+        }
+
+        if (checkedCaptures.length > 0 || checkedReplays.length > 0) {
             // Draw the graph after all ajax calls complete
             $.when.apply(this, requests).done(function() {
                 if (!jQuery.isEmptyObject(metricData)) {
@@ -193,7 +205,7 @@ $(function() {
                 }
 
                 table += '<tr>' +
-                    '<td><label><input class="rowCheckbox" type="checkbox" value="' + log['id'] + '"' + disabled + ' ' + checked + '></label></td>' +
+                    '<td><label><input class="captureCheckbox" type="checkbox" value="' + log['id'] + '"' + disabled + ' ' + checked + '></label></td>' +
                     '<td>' + log['id'] + '</td>' +
                     '<td>' + log['rds'] + '</td>' +
                     '<td>' + log['s3'] + '</td>' +
@@ -202,7 +214,7 @@ $(function() {
                     '<td>' + endTime + '</td>' +
                     '</tr>';
             }
-            $('#performanceTable').html(table);
+            $('#captureTable').html(table);
 
             if (selected != null) {
                 $("#btnGetMetrics").trigger( "click" );
@@ -210,6 +222,77 @@ $(function() {
         },
         error: function(err) {
             console.log(err);
+        }
+    });
+});
+
+// Populate replay table with available replays
+$(function() {
+
+    var selected = sessionStorage.getItem("defaultReplay");
+    sessionStorage.removeItem("defaultReplay");
+
+    $.ajax({
+        url: "/resource/replays",
+        type: "GET",
+        success: function(data) {
+            var table = '<table class="table table-striped table-hover"><col width="40">'
+            table += '<tr>' +
+                '<th></th>' +
+                '<th>ID</th>' +
+                '<th>CaptureID</th>' +
+                '<th>RDS</th>' +
+                '<th>S3</th>' +
+                '<th>Status</th>' +
+                '<th>Type</th>' +
+                '<th>Start</th>' +
+                '<th>End</th>' +
+                '</tr>';
+
+            for (var i = 0; i < data.length; i++) {
+                var log = data[i];
+                var startTime = log['startTime'] == null ? 'N/A'  : new Date(log['startTime']);
+                var endTime = log['endTime'] == null ? 'N/A'  : new Date(log['endTime']);
+
+                var disabled = log['status'] == 'Failed' || log['status'] == 'Queued' ? 'disabled' : '';
+                var checked = log['id'] == selected ? 'checked' : ''
+
+                if (disabled) {
+                    continue;
+                }
+
+                table += '<tr>' +
+                    '<td><label><input class="replayCheckbox" type="checkbox" value="' + log['id'] + '"' + disabled + ' ' + checked + '></label></td>' +
+                    '<td>' + log['id'] + '</td>' +
+                    '<td>' + log['captureId'] + '</td>' +
+                    '<td>' + log['rds'] + '</td>' +
+                    '<td>' + log['s3'] + '</td>' +
+                    '<td>' + log['status'] + '</td>' +
+                    '<td>' + log['replayType'] + '</td>' +
+                    '<td>' + startTime + '</td>' +
+                    '<td>' + endTime + '</td>' +
+                    '</tr>';
+            }
+            $('#replayTable').html(table);
+
+            if (selected != null) {
+                $("#btnGetMetrics").trigger( "click" );
+            }
+        },
+        error: function(err) {
+            console.log(err);
+        }
+    });
+});
+
+$('body').on('change', '.captureCheckbox', function() {
+    var checkedCaptures = $('.captureCheckbox:checkbox:checked').map(function () {return this.value;});
+
+    $("#replayTable tr td:nth-child(3)").each(function() {
+        if(jQuery.inArray($(this).text(), checkedCaptures) !== -1 || checkedCaptures.length == 0) {
+            $(this).parent('tr').show();
+        } else {
+            $(this).parent('tr').hide();
         }
     });
 });

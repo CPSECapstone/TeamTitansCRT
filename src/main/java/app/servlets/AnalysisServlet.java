@@ -1,11 +1,11 @@
 package app.servlets;
 
+import app.models.Session;
 import com.amazonaws.services.cloudwatch.model.Datapoint;
 import com.amazonaws.services.cloudwatch.model.GetMetricStatisticsResult;
 import com.amazonaws.util.IOUtils;
 import app.controllers.LogController;
 import app.managers.CloudWatchManager;
-import app.models.Capture;
 import app.models.MetricRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 /**
  * Servlet to handle all analysis calls.
@@ -32,32 +33,37 @@ public class AnalysisServlet {
     /**
      * Method to handle post requests to /analysis.
      * @param response HttpServletResponse to stream metric data to.
-     * @param captureId Capture containing the id.
+     * @param idType Capture containing the id.
      */
     @RequestMapping(value = "/analysis", method = RequestMethod.POST)
-    public void getMetrics(HttpServletResponse response, @RequestBody Capture captureId) {
+    public void getMetrics(HttpServletResponse response, @RequestBody HashMap<String, String> idType) {
 
         InputStream stream;
-        Capture capture = DBUtil.getInstance().loadCapture(captureId.getId());
+        Session session = null;
+        if (idType.get("type").equals("Capture")) {
+            session = DBUtil.getInstance().loadCapture(idType.get("id"));
+        } else if (idType.get("type").equals("Replay")) {
+            session = DBUtil.getInstance().loadReplay(idType.get("id"));
+        }
 
-        if (capture == null) {
-            writeError(response, "Error: No capture found with given id:" + captureId.getId());
+        if (session == null) {
+            writeError(response, "Error: No capture found with given id:" + session.getId());
             return;
         }
 
         // Get metric stream
-        if (capture.getStatus().equals("Running")) { // Obtain from CloudWatch if capture is currently running
-            String metrics = LogController.getMetricsFromCloudWatch(capture.getRds(), capture.getStartTime(), new Date());
+        if (session.getStatus().equals("Running")) { // Obtain from CloudWatch if capture is currently running
+            String metrics = LogController.getMetricsFromCloudWatch(session.getRds(), session.getStartTime(), new Date());
             stream = new ByteArrayInputStream(metrics.getBytes(StandardCharsets.UTF_8));
-        } else if (capture.getStatus().equals("Finished")) { // Obtain from S3 if capture has already finished
-            String metrics = LogController.getMetricsFromS3(capture.getS3(), capture.getId() + "-Performance.log");
+        } else if (session.getStatus().equals("Finished")) { // Obtain from S3 if capture has already finished
+            String metrics = LogController.getMetricsFromS3(session.getS3(), session.getId() + "-Performance.log");
             stream = new ByteArrayInputStream(metrics.getBytes(StandardCharsets.UTF_8));
         } else {
             writeError(response, "Error: Capture is not 'Running' or 'Finished'");
             return;
         }
 
-        setResponseOutputStream(response, stream, capture.getId());
+        setResponseOutputStream(response, stream, session.getId());
     }
 
     /**
