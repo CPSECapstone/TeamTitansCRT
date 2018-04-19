@@ -219,6 +219,7 @@ function stopCapture(id) {
         success: function() {
             $("#lblStatus").html("Stopped Successfully.");
             updateStatus();
+           // table.ajax.reload();
         },
         error: function(err) {
             console.log(err);
