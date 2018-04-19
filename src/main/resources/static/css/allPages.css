@@ -474,6 +474,7 @@ body {
 .crt-brand:hover {
   font-weight: 500;
   text-decoration: underline;
+  -webkit-text-decoration-color: var(--secondary);
   text-decoration-color: var(--secondary);
 }
 
