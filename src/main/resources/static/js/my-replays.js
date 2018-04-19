@@ -12,6 +12,7 @@ $(function() {
     var filterStatementsSelector = "filterStatementsSelector";
     var filterUsersSelector = "filterUsersSelector";
 
+    var replayNameSelector = "replayNameSelector";
     var usernameSelector = "usernameSelector";
     var passwordSelector = "passwordSelector";
 
@@ -33,8 +34,10 @@ $(function() {
                 <div class="${captureSelector}"></div>
                 <div class="${rdsSelector}"></div>
                 <div class="${s3Selector}"></div>
+
+                ${createTextInput("Replay Name:", replayNameSelector)}
                 ${createTextInputValue("Replay RDS Username:", usernameSelector, "admin")}
-                ${createTextInputValue("Replay RDS Password:", passwordSelector, "TeamTitans!")}
+                ${createPasswordInputValue("Replay RDS Password:", passwordSelector, "TeamTitans!")}
 
                 <div class="block">
                     <a data-toggle="collapse" href="#advanced">Advanced <span class="caret"></span></a>
@@ -83,16 +86,16 @@ $(function() {
         }
 
         // Only start capture if rds and s3 selected
-        if ($(`.${rdsSelector}`).val() != '' && $(`.${s3Selector}`).val() != '') {
+        if ($(`.${captureSelector}`).val() != null && $(`.${rdsSelector}`).val() != '' && $(`.${s3Selector}`).val() != '') {
             var replayInner = {
                 databaseInfo: {
-                    dbUrl: "testdb.cgtpml3lsh3i.us-west-1.rds.amazonaws.com:3306",
-                    database: "testdb",
-                    username: "admin",
-                    password: "TeamTitans!"
+                    //dbUrl: "testdb.cgtpml3lsh3i.us-west-1.rds.amazonaws.com:3306",
+                    database: $(`.${rdsSelector}`).val(),
+                    username: $(`.${usernameSelector}`).val(),
+                    password: $(`.${passwordSelector}`).val()
                 },
                 captureId: $(`.${captureSelector}`).val(),
-                id: "TestReplay",
+                id: $(`.${replayNameSelector}`).val(),
                 rds: $(`.${rdsSelector}`).val(),
                 s3: $(`.${s3Selector}`).val(),
                 startTime: startTime,
@@ -101,7 +104,7 @@ $(function() {
                 transactionLimit: $(`.${transactionLimitSelector}`).val(),
                 filterStatements: $(`.${filterStatementsSelector}`).val().split(',').map(x => x.trim()),
                 filterUsers: $(`.${filterUsersSelector}`).val().split(',').map(x => x.trim()),
-                replayType: "Fast Mode"
+                replayType: $(`.${typeSelector}`).val()
             };
 
             // var replayInner = {
@@ -461,6 +464,14 @@ function createTextInputValue(label, id, value) {
     <div class="form-group">
         <label class="input-label">${label}</label>
         <input id="" class="${id} form-control" type="text" value="${value}">
+    </div>`;
+}
+
+function createPasswordInputValue(label, id, value) {
+    return `
+    <div class="form-group">
+        <label class="input-label">${label}</label>
+        <input id="" class="${id} form-control" type="password" value="${value}">
     </div>`;
 }
 

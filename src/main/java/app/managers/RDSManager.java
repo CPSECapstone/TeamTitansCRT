@@ -9,9 +9,7 @@ import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.rds.AmazonRDS;
 import com.amazonaws.services.rds.AmazonRDSClientBuilder;
-import com.amazonaws.services.rds.model.DBLogFileNotFoundException;
-import com.amazonaws.services.rds.model.DownloadDBLogFilePortionRequest;
-import com.amazonaws.services.rds.model.DownloadDBLogFilePortionResult;
+import com.amazonaws.services.rds.model.*;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -78,5 +76,18 @@ public class RDSManager extends AmazonWebServiceResult{
         return rdsClient.describeDBInstances().getDBInstances().stream()
                 .map(x->x.getDBInstanceIdentifier())
                 .collect(Collectors.toList());
+    }
+
+    public String getRDSInstanceUrl(String id) {
+        DescribeDBInstancesRequest request = new DescribeDBInstancesRequest().withDBInstanceIdentifier(id);
+
+        List<DBInstance> instanceList = rdsClient.describeDBInstances(request).getDBInstances();
+
+        if (instanceList.isEmpty()) {
+            return null;
+        }
+
+        DBInstance instance = instanceList.get(0);
+        return instance.getEndpoint().getAddress() + ":" + instance.getEndpoint().getPort();
     }
 }

@@ -106,12 +106,15 @@ public class S3Manager {
     {
         InputStream dataStream = null;
         BufferedReader buffer = null;
+        String fileAsString = "";
         try {
             System.out.println("Downloading an object");
             S3Object s3Object = s3Client.getObject(new GetObjectRequest(
                     bucketName, fileName));
             dataStream = s3Object.getObjectContent();
             buffer = new BufferedReader(new InputStreamReader(dataStream));
+
+            fileAsString = buffer.lines().collect(Collectors.joining("\n"));
 
         } catch (AmazonServiceException ase) {
             System.out.println("Caught an AmazonServiceException");
@@ -124,7 +127,7 @@ public class S3Manager {
             System.out.println("Caught an AmazonClientException");
             System.out.println("Error Message: " + ace.getMessage());
         }
-        return buffer.lines().collect(Collectors.joining("\n"));
+        return fileAsString;
     }
 
     public List<String> getS3Buckets() {
