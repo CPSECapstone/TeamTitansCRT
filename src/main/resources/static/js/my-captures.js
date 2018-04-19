@@ -71,8 +71,9 @@ $(function() {
             endTime = new Date(String($(`.${endTimeSelector}`).val()));
         }
 
-        // Only start capture if rds and s3 selected
-        if ($(`.${rdsSelector}`).val() != '' && $(`.${s3Selector}`).val() != '') {
+        var today = new Date()
+        // Only start capture if rds and s3 selected, and capture name isn't null
+        if ($(`.${rdsSelector}`).val() != '' && $(`.${s3Selector}`).val() != '' && $(`.${idSelector}`).val() != '') {
             var capture = {
                 id: $(`.${idSelector}`).val(),
                 rds: $(`.${rdsSelector}`).val(),
