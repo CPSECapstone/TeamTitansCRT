@@ -180,6 +180,10 @@ function createRow(id, rds, status, startTimeMilli, startTime, endTimeMilli, end
                 stopCapture(id);
                 updateStatus();
             });
+            
+            $(`#${id}-analyze`).on("click", function() {
+                openAnalysis(id);
+            });
             },
         error: function(err) {
             console.log(err);
@@ -207,7 +211,7 @@ function createButton(id, status) {
         return `<a href="javascript:void(0)" id="stopButton${id}" class="defaultLinkColor">Stop Capture</a>`;
     }
     else if (status == "Finished") {
-        return `<a href="analyze" class="defaultLinkColor">Analyze</a>`;
+        return `<a href="analyze" id="${id}-analyze" class="defaultLinkColor">Analyze</a>`;
     }
 }
 
@@ -229,6 +233,7 @@ function stopCapture(id) {
         success: function() {
             $("#lblStatus").html("Stopped Successfully.");
             updateStatus();
+           // table.ajax.reload();
         },
         error: function(err) {
             console.log(err);
@@ -257,3 +262,7 @@ Date.prototype.customFormat = function(formatString){
   ss=(s=this.getSeconds())<10?('0'+s):s;
   return formatString.replace("#hhhh#",hhhh).replace("#hhh#",hhh).replace("#hh#",hh).replace("#h#",h).replace("#mm#",mm).replace("#m#",m).replace("#ss#",ss).replace("#s#",s).replace("#ampm#",ampm).replace("#AMPM#",AMPM);
 };
+
+function openAnalysis(id) {
+    sessionStorage.setItem("defaultCapture", id);
+}
