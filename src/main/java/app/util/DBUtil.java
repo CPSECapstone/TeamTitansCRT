@@ -158,8 +158,8 @@ public class DBUtil {
         {
             String sql = "CREATE TABLE IF NOT EXISTS replays(\n"
                     + " dbId INTEGER PRIMARY KEY AUTOINCREMENT,\n"
-                    + " captureId INTEGER UNIQUE,\n"
-                    + " id TEXT,\n"
+                    + " captureId INTEGER,\n"
+                    + " id TEXT UNIQUE,\n"
                     + " rds TEXT,\n"
                     + " s3 TEXT,\n"
                     + " startTime TEXT,\n"
