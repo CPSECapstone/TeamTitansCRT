@@ -23,7 +23,7 @@ $(function() {
         <div class="row">
             <div class="col-lg-6 col-lg-offset-3">
                 <h4 class="text-center">My Replays</h4>
-                <p class="text-center">Add page description</p>
+                <p class="text-center">Start and manage workload replays</p>
             </div>
         </div>
         <div class="row">

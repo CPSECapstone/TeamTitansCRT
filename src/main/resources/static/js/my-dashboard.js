@@ -51,7 +51,7 @@ function insertLoadingSpinner(selector) {
 
 function emptyDashboard() {
     return `
-    <p class="text-center">You have no captures or replays! Let's get started!</p>
+    <p class="text-center">You have no captures or replays currently running! Let's get started!</p>
     <div class="text-center">
         <a href="capture" class="btn btn-default">Start new capture</a>
     </div>`;
