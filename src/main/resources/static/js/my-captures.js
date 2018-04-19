@@ -39,7 +39,7 @@ $(function() {
                     <label class="input-label">End Time:
                         <input id="" class="${endTimeSelector} form-control" type="datetime-local" value="">
                     </label>
-                    ${createNumericInput("Max Capture Size (mB):", fileSizeLimitSelector)}
+                    ${createNumericInput("Max Capture Size (KB):", fileSizeLimitSelector)}
                     ${createNumericInput("Max Number of Transactions:", transactionLimitSelector)}
                     ${createTextInput("Database Commands to Ignore (comma delimited):", filterStatementsSelector)}
                     ${createTextInput("Database Users to Ignore (comma delimited):", filterUsersSelector)}
@@ -253,7 +253,7 @@ function createEditCaptureModal(capture) {
                     <label class="input-label">End Time:
                         <input id="" class="txtEndTime form-control" type="datetime-local" value="${endTime}">
                     </label>
-                    ${createNumericInputValue("Max Capture Size (mB):", "txtMaxSize", fileSizeLimit)}
+                    ${createNumericInputValue("Max Capture Size (KB):", "txtMaxSize", fileSizeLimit)}
                     ${createNumericInputValue("Max Number of Transactions:", "txtMaxTrans", transactionLimit)}
                 </div>
                 <div class="modal-footer">
