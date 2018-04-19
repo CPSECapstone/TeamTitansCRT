@@ -1,5 +1,6 @@
 package app.util;
 
+import app.models.Capture;
 import app.models.Session;
 import app.models.Statement;
 
@@ -206,15 +207,16 @@ public class CaptureFilter extends LogFilter {
             {
                 continue;
             }*/
+
             // if the statement is not a connect
             if (!(isConnectCommand(statement.getCommand())))
             {
                 transactionCount++;
             }
+
             // if the statement passed all filters then add
             filteredLogStatements.add(statement);
         }
-
         return filteredLogStatements;
     }
 
