@@ -72,7 +72,8 @@ $(function() {
         }
 
         // Only start capture if rds and s3 selected
-        if ($(`.${rdsSelector}`).val() != '' && $(`.${s3Selector}`).val() != '') {
+        if ($(`.${rdsSelector}`).val() != '' && $(`.${s3Selector}`).val() != '' && $(`.${idSelector}`).val() != '') {
+            if ( (startTime < endTime) && (startTime >= Date.now()) ){
             var capture = {
                 id: $(`.${idSelector}`).val(),
                 rds: $(`.${rdsSelector}`).val(),
@@ -86,7 +87,7 @@ $(function() {
             };
 
             startCapture(capture);
-        }
+        }}
     });
 });
 
