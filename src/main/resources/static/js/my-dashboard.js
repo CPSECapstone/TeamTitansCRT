@@ -112,32 +112,11 @@ function fillTable(data) {
     data.map(createTableRow);
 }
 
-function createTableRow(capture) {
-    $("tbody.capture-table").append(createRow(capture));
-    var id = capture["id"];
-    $(`a#stopButton${id}`).on("click", function() {
-        stopCapture(id);
-        updateStatus();
-    });
-    /*
-    <tr>
-        <td colspan="3">
-            <div id="accordion${id} class="collapse">
-                <ul class="stats-list">
-                    <li>CPU Utilization (percent): ${data[0]}</li>
-                    <li>Free Storage Space Available (bytes): ${data[1]} </li>
-                    <li>Write Throughput (bytes/sec): ${data[2]} </li>
-                </ul>
-            </div>
-        </td>
-    </tr>`;
-    */
-}
 
-function createRow(capture) {
+function createTableRow(capture) {
     var id = capture["id"];
     var status = capture["status"];
-    
+    var rds = capture["rds"];
     var startTimeMilli = capture["startTime"];
     var startTime = "Not Specified";
     var tempStartTime = new Date(startTimeMilli);
@@ -154,27 +133,58 @@ function createRow(capture) {
         endTime = tempEndTime.customFormat("#MM#/#DD#/#YYYY# #hh#:#mm#:#ss# #AMPM#")
     }
     
-    return `
-    <tr data-toggle="collapse" data-target="#accordion${id}" class="clickable">
-        <td width="(100/12)%">${createIcon(status)}</td>
-        <td width="(100/4)%">${id}</td>
-        <td width="(100/6)%">${status}</td>
-        <td width="(100/6)%">${startTime}</td>
-        <td width="(100/6)%">${endTime}</td>
-        <td width="(100/6)%">${createButton(id, status)}</td>
-    </tr>`;
-    /*
-    <tr>
-        <td colspan="2">
-            <div id="accordion${id} class="collapse">
-                <ul class="stats-list">
-                    <li>CPU Utilization (percent): 0</li>
-                    <li>Free Storage Space Available (bytes): 0 </li>
-                    <li>Write Throughput (bytes/sec): 0 </li>
-                </ul>
-            </div>
-        </td>
-    </tr>`*/;
+    createRow(id, rds,  status, startTimeMilli, startTime, endTimeMilli, endTime);
+    var id = capture["id"];
+    $(`a#stopButton${id}`).on("click", function() {
+        stopCapture(id);
+        updateStatus();
+    });
+}
+
+function createRow(id, rds, status, startTimeMilli, startTime, endTimeMilli, endTime) {
+     var body = {
+        rds: rds,
+        startTime: startTimeMilli,
+        endTime: endTimeMilli,
+        metrics: ["CPUUtilization", "FreeStorageSpace", "WriteThroughput"]
+    };
+    
+    $.ajax({
+         url: "/cloudwatch/average",
+        type: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: JSON.stringify(body),
+        success: function(data) {
+            $("tbody.capture-table").append(`
+            <tr data-toggle="collapse" data-target="#accordion${id}" class="clickable">
+                <td width="(100/12)%">${createIcon(status)}</td>
+                <td width="(100/4)%">${id}</td>
+                <td width="(100/6)%">${status}</td>
+                <td width="(100/6)%">${startTime}</td>
+                <td width="(100/6)%">${endTime}</td>
+                <td width="(100/6)%">${createButton(id, status)}</td>
+            </tr>
+            <tr class="collapse" id="accordion${id}">
+                <td colspan="6">
+                    <div>
+                        <ul class="stats-list">
+                            <li>CPU Utilization (percent): ${data[0]}</li>
+                            <li>Free Storage Space Available (bytes): ${data[1]}</li>
+                            <li>Write Throughput (bytes/sec): ${data[2]}</li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>`);
+                
+            $(`#stopButton${id}`).on("click", function() {
+                stopCapture(id);
+                updateStatus();
+            });
+            },
+        error: function(err) {
+            console.log(err);
+        }
+    });
 }
 
 function createIcon(status) {

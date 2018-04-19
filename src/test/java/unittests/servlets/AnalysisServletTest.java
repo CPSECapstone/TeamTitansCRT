@@ -1,6 +1,7 @@
 package unittests.servlets;
 
 import app.models.MetricRequest;
+import org.apache.http.client.utils.DateUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static junit.framework.TestCase.assertTrue;
 import static org.mockito.Mockito.*;
@@ -69,20 +71,31 @@ public class AnalysisServletTest {
         verify(mockResponse, never()).flushBuffer();
     }
 
-
     @Test
     public void calculateAverages() throws Exception {
         File f = new File(".privateKeys");
         org.junit.Assume.assumeTrue(f.exists() && f.isFile());
         //Measures from 2 hours before now.
-        Date start = new Date(System.currentTimeMillis()-1000*60*60*2);
+        Date start = new Date(System.currentTimeMillis()-1000*3600*2);
         //Ends measurements at 2 hours in the future. This actually just gets adjusted to the current time.
-        Date end = new Date(System.currentTimeMillis()+1000*60*60*2);
+        Date end = new Date(System.currentTimeMillis()+1000*3600*2);
         AnalysisServlet servlet = new AnalysisServlet();
         MetricRequest request = new MetricRequest("testdb", start, end, "CPUUtilization", "WriteThroughput");
         ResponseEntity<List<Double>> averages = servlet.calculateAverages(request);
         assertTrue(!averages.getBody().isEmpty());
     }
 
-
+    @Test
+    public void calculateAveragesNullEndTime() throws Exception {
+        File f = new File(".privateKeys");
+        org.junit.Assume.assumeTrue(f.exists() && f.isFile());
+        //Measures from 2 hours before now.
+        Date start = new Date(System.currentTimeMillis()-1000*3600*2);
+        //Ends measurements at 2 hours in the future. This actually just gets adjusted to the current time.
+        Date end = null;
+        AnalysisServlet servlet = new AnalysisServlet();
+        MetricRequest request = new MetricRequest("testdb", start, end, "CPUUtilization", "WriteThroughput");
+        ResponseEntity<List<Double>> averages = servlet.calculateAverages(request);
+        assertTrue(!averages.getBody().isEmpty());
+    }
 }
