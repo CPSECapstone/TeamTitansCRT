@@ -1,5 +1,7 @@
 package app.models;
 
+import app.managers.RDSManager;
+
 public class DatabaseInfo {
 
     private String dbUrl;
@@ -40,6 +42,11 @@ public class DatabaseInfo {
 
     public void setDatabase(String database) {
         this.database = database;
+
+        if (getDbUrl() == null) {
+            RDSManager rdsManager = new RDSManager();
+            setDbUrl(rdsManager.getRDSInstanceUrl(database));
+        }
     }
 
     public void setUsername(String username) {
