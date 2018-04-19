@@ -21,11 +21,12 @@ public class CaptureLogController extends LogController
 
     public static final String GeneralLogFileName = "general/mysql-general.log";
 
-    private String localFileName;
+    private String localFileName = "";
     private String sessionID;
 
     private final int FILESIZEBUFFER = 50;
     private long fileSizeLimit;
+    private boolean limitFlag = false;
 
     public CaptureLogController(Capture capture)
     {
@@ -88,7 +89,6 @@ public class CaptureLogController extends LogController
     {
         BufferedWriter out = null;
 
-        File tempFile = getFile();
         boolean isFirstWrite = getFile() == null;
 
         try
@@ -99,29 +99,37 @@ public class CaptureLogController extends LogController
             {
                 out.write("[\n");
             }
+            File tempFile = getFile();
             long fileSize = tempFile.length() + FILESIZEBUFFER;
 
             for (int i = 0; i < filteredLogData.size(); i++)
             {
                 String statement = filteredLogData.get(i);
                 long tempFileSize = fileSize + statement.length() + 2; // +1 accounts for ",\n"
-
-                if (fileSizeLimit > 0 && tempFileSize >= fileSizeLimit)
+                if (fileSizeLimit > 0 && (tempFileSize / 1000.0) >= fileSizeLimit)
                 {
+                    isFinalWrite = true;
+                    limitFlag = true;
                     out.write("\n]");
-                    updateSessionController();
+                    out.flush();
+                    updateSessionController(true);
                     CaptureController.stopCapture(sessionID);
                     break;
                 }
-                out.write(statement);
-                if (i != filteredLogData.size() - 1)
+                else if (i != 0)
                 {
                     out.write(",\n");
+                    fileSize += 2;
                 }
+                out.write(statement);
+                fileSize += statement.length();
+                out.flush();
             }
-            if (isFinalWrite)
+            if (isFinalWrite && !limitFlag)
             {
                 out.write("\n]");
+                out.flush();
+                CaptureController.stopCapture(sessionID);
             }
             out.close();
         }
@@ -174,22 +182,56 @@ public class CaptureLogController extends LogController
         new File(localFileName).delete();
     }
 
-    @Override
-    public void updateSessionController() {
-        // TODO: Look into needing this
+    private void updateSessionController(boolean overrideFlag)
+    {
         File file = getFile();
         if (file != null)
         {
-            CaptureController.updateCaptureFileSize(sessionID, file.length());
+            if (overrideFlag)
+            {
+                CaptureController.updateCaptureFileSize(sessionID, fileSizeLimit * 1001);
+            }
+            else
+            {
+                CaptureController.updateCaptureFileSize(sessionID, file.length());
+            }
         }
         CaptureController.updateCaptureTransactionCount(sessionID, logFilter.getTransactionCount());
+    }
+
+
+    @Override
+    public void updateSessionController() {
+        // TODO: Look into needing this
+       updateSessionController(false);
     }
 
     @Override
     public void uploadAllFiles(Session capture)
     {
         uploadMetrics(capture);
+        if (getFile() == null)
+        {
+            createDummyFile();
+        }
         uploadFile(capture.getS3(), localFileName, getFile());
         deleteFile();
+    }
+
+    private void createDummyFile()
+    {
+        BufferedWriter out = null;
+        try
+        {
+            FileWriter fileWriter = new FileWriter(this.localFileName,true);
+            out = new BufferedWriter(fileWriter);
+            out.write("[\n\n]");
+            out.close();
+            fileWriter.close();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 }

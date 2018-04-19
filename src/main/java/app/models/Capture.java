@@ -77,7 +77,7 @@ public class Capture implements Session {
 
         if (startTime != null && currTime.compareTo(startTime) >= 0) {
             if ((endTime != null && currTime.compareTo(endTime) >= 0)
-                    || (fileSizeLimit != NO_LIMIT && (dbFileSize / 1000) > fileSizeLimit)
+                    || (fileSizeLimit != NO_LIMIT && (dbFileSize / 1000.0) > fileSizeLimit)
                     || (transactionLimit != NO_LIMIT && transactionCount > transactionLimit)) {
                 this.status = "Finished";
             } else {
@@ -89,8 +89,7 @@ public class Capture implements Session {
     }
 
     public boolean hasReachedFileSizeLimit() {
-
-        return this.fileSizeLimit == NO_LIMIT ? false : (this.dbFileSize / 1000) >= this.fileSizeLimit;
+        return this.fileSizeLimit == NO_LIMIT ? false : (this.dbFileSize / 1000.0) >= this.fileSizeLimit;
     }
 
     public boolean hasReachedTransactonLimit() {
