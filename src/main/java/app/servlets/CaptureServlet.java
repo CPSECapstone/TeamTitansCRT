@@ -95,4 +95,15 @@ public class CaptureServlet {
     public ResponseEntity<Collection<Capture>> captureStatus() {
         return new ResponseEntity<>(CaptureController.getAllCaptureValues(), HttpStatus.OK);
     }
+
+    @RequestMapping(value = "/capture/delete", method = RequestMethod.GET)
+    public ResponseEntity<String> captureDelete(Capture capture) {
+        if (capture.getId() == null || capture.getS3() == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        CaptureController.deleteCapture(capture);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

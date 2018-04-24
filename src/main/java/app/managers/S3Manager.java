@@ -8,10 +8,7 @@ import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.*;
 import com.amazonaws.util.IOUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -150,5 +147,9 @@ public class S3Manager {
         IOUtils.copy(inStream,outStream);
         inStream.close();
         outStream.close();
+    }
+
+    public void deleteFile(String bucketName, String fileName) {
+        s3Client.deleteObject(new DeleteObjectRequest(bucketName, fileName));
     }
 }
