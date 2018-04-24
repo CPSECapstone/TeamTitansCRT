@@ -212,6 +212,15 @@
     box-shadow: none;
 }
 
+#feedback_sidebar_button {
+    color: white;
+    position: absolute;
+    width: 100%;
+    display: inline-block;
+    bottom: 0;
+    font-family: 'Roboto', sans-serif;
+}
+
 /*-------------------------------*/
 /*       Hamburger-Cross         */
 /*-------------------------------*/
@@ -474,6 +483,7 @@ body {
 .crt-brand:hover {
   font-weight: 500;
   text-decoration: underline;
+  -webkit-text-decoration-color: var(--secondary);
   text-decoration-color: var(--secondary);
 }
 

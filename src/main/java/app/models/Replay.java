@@ -162,19 +162,17 @@ public class Replay implements Session {
     }
 
     public String getDBUrl() {
-        return this.databaseInfo.getDbUrl();
+        return databaseInfo == null ? null : this.databaseInfo.getDbUrl();
     }
 
-    public String getDatabase() {
-        return this.databaseInfo.getDatabase();
-    }
+    public String getDatabase() { return databaseInfo == null ? null : this.databaseInfo.getDatabase(); }
 
     public String getDBUsername() {
-        return this.databaseInfo.getUsername();
+        return databaseInfo == null ? null : this.databaseInfo.getUsername();
     }
 
     public String getDBPassword() {
-        return this.databaseInfo.getPassword();
+        return databaseInfo == null ? null : this.databaseInfo.getPassword();
     }
 
     public void setDatabaseInfo(DatabaseInfo info) {

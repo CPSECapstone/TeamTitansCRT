@@ -9,14 +9,17 @@ import java.util.ArrayList;
 
 public class DBUtil {
 
-    private static DBUtil instance = null;
-    private Connection conn;
+    private static String databaseFile = "captureReplay.db";
+    private static DBUtil instance = new DBUtil(databaseFile);
+    private static Connection conn;
 
     public static DBUtil getInstance()
     {
-        if (instance == null) {
-            instance = new DBUtil("captureReplay.db");
-        }
+        try{
+            if (conn.isClosed()) {
+                conn = connectSqlite(databaseFile);
+            }
+        } catch (SQLException e) { }
 
         return instance;
     }
@@ -87,7 +90,7 @@ public class DBUtil {
         return conn;
     }
 
-    public void closeConnection() throws SQLException
+    public void closeConnection()
     {
         try
         {
@@ -101,6 +104,18 @@ public class DBUtil {
         {
             System.err.println(e.getMessage());
         }
+    }
+
+    public void setDatabaseFile(String file) {
+        databaseFile = file;
+        instance.closeConnection();
+        instance = new DBUtil(databaseFile);
+    }
+
+    public void setDatabaseFileDefault() {
+        databaseFile = "captureReplay.db";
+        instance.closeConnection();
+        instance = new DBUtil(databaseFile);
     }
 
     private void createNewCaptureTable(String databaseFile)
@@ -143,8 +158,8 @@ public class DBUtil {
         {
             String sql = "CREATE TABLE IF NOT EXISTS replays(\n"
                     + " dbId INTEGER PRIMARY KEY AUTOINCREMENT,\n"
-                    + " captureId INTEGER UNIQUE,\n"
-                    + " id TEXT,\n"
+                    + " captureId INTEGER,\n"
+                    + " id TEXT UNIQUE,\n"
                     + " rds TEXT,\n"
                     + " s3 TEXT,\n"
                     + " startTime TEXT,\n"
@@ -225,12 +240,12 @@ public class DBUtil {
     }
 
     public boolean checkCaptureNameDuplication(String name) {
-        String sql = "SELECT TOP 1 captures.id FROM captures WHERE captures.id = ?";
+        String sql = "SELECT id FROM captures WHERE id = ?";
         return checkNameDuplication(sql, name);
     }
 
     public boolean checkReplayNameDuplication(String name) {
-        String sql = "SELECT TOP 1 replays.id FROM replays WHERE replays.id = ?";
+        String sql = "SELECT id FROM replays WHERE id = ?";
         return checkNameDuplication(sql, name);
     }
 
@@ -241,7 +256,7 @@ public class DBUtil {
 
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, name);
-            pstmt.executeUpdate();
+            pstmt.execute();
 
             rs = pstmt.getResultSet();
 
@@ -503,6 +518,47 @@ public class DBUtil {
         catch (SQLException e)
         {
             System.err.println(e.getMessage());
+            return null;
+        }
+    }
+
+    public Replay loadReplaysOfCaptureID(String id)
+    {
+        try
+        {
+            Replay replay = new Replay();
+            ResultSet rs;
+
+            String sql = "SELECT * FROM replays WHERE captureId = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, getCaptureID(id));
+            pstmt.execute();
+
+            rs = pstmt.getResultSet();
+
+            if (!rs.next()) {
+                rs.close();
+                pstmt.close();
+                return null;
+            }
+
+            replay.setCaptureId(getCaptureName(rs.getInt(2)));
+            replay.setId(rs.getString(3));
+            replay.setRds(rs.getString(4));
+            replay.setS3(rs.getString(5));
+            replay.setStartTime(rs.getDate(6));
+            replay.setEndTime(rs.getDate(7));
+            replay.setStatus(rs.getString(8));
+            replay.setReplayType(rs.getString(9));
+
+            return replay;
+        }
+
+        catch (SQLException e)
+        {
+            System.out.println("1");
+            System.err.println(e.getMessage());
+            System.out.println("2");
             return null;
         }
     }

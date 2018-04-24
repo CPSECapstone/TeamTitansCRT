@@ -62,6 +62,12 @@ public class ReplayLogController extends LogController {
     }
 
     private void replayFastMode(Replay replay, List<Statement> statements) {
+        try {
+            Thread.sleep(180000);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         if (statements.size() == 0)
         {
             makeStopRequest(replay);

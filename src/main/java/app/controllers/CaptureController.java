@@ -68,9 +68,6 @@ public class CaptureController {
             Capture capture = captures.get(id);
             capture.setDbFileSize(fileSize);
             capture.updateStatus();
-            if (capture.hasReachedFileSizeLimit() && !capture.getStatus().equals("Finished")) {
-                stopCapture(id);
-            }
         }
     }
 
@@ -83,9 +80,6 @@ public class CaptureController {
             Capture capture = captures.get(id);
             capture.setTransactionCount(count);
             capture.updateStatus();
-            if (capture.hasReachedTransactonLimit() && !capture.getStatus().equals("Finished")) {
-                stopCapture(id);
-            }
         }
     }
 
@@ -104,7 +98,7 @@ public class CaptureController {
     {
         LogController logController = getLogController(id);
         Capture capture = getCapture(id);
-        if (logController != null && capture != null)
+        if (logController != null && capture != null && !capture.hasReachedFileSizeLimit())
         {
             logController.processData(capture, CaptureLogController.END);
         }
@@ -222,5 +216,8 @@ public class CaptureController {
         s3Manager.deleteFile(capture.getS3(), capture.getId() + "-Workload.log");
         s3Manager.deleteFile(capture.getS3(), capture.getId() + "-Performance.log");
         return true;
+
+    public static boolean isCaptureIdDuplicate(Capture capture) {
+        return DBUtil.getInstance().checkCaptureNameDuplication(capture.getId());
     }
 }

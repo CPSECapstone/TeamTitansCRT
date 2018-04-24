@@ -41,7 +41,17 @@ function injectSidebar() {
             <li>
                 <a href="settings">Settings</a>
             </li>
+            <li>
+                <a href="#" onclick="window.location.href='https://docs.google.com/forms/d/e/1FAIpQLSd8HFc4JjisWfcFUrVAeJda42GRt9ihAEBaHkY3I2m7RLbjcg/viewform?usp=sf_link'">Give Feedback</a>
+            </li>
+            <li>
+                <a href="#" onclick="window.location.href='https://docs.google.com/forms/d/e/1FAIpQLScw_vf00MAgk1lWAYC7AUOD_jtb8D_bj-goap96NdvqzRNPiw/viewform?usp=sf_link'">Report a Bug</a>
+            </li>
+        </ul>
+        <ul id="feedback_sidebar_button" class="nav nav-sidebar">
+            <li><a href="login">Log out</a></li>
         </ul>
     </nav>`);
 }
+
 

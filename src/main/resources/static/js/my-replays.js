@@ -12,6 +12,7 @@ $(function() {
     var filterStatementsSelector = "filterStatementsSelector";
     var filterUsersSelector = "filterUsersSelector";
 
+    var replayNameSelector = "replayNameSelector";
     var usernameSelector = "usernameSelector";
     var passwordSelector = "passwordSelector";
 
@@ -22,7 +23,7 @@ $(function() {
         <div class="row">
             <div class="col-lg-6 col-lg-offset-3">
                 <h4 class="text-center">My Replays</h4>
-                <p class="text-center">Add page description</p>
+                <p class="text-center">Start and manage workload replays</p>
             </div>
         </div>
         <div class="row">
@@ -33,8 +34,10 @@ $(function() {
                 <div class="${captureSelector}"></div>
                 <div class="${rdsSelector}"></div>
                 <div class="${s3Selector}"></div>
+
+                ${createTextInput("Replay Name:", replayNameSelector)}
                 ${createTextInputValue("Replay RDS Username:", usernameSelector, "admin")}
-                ${createTextInputValue("Replay RDS Password:", passwordSelector, "TeamTitans!")}
+                ${createPasswordInputValue("Replay RDS Password:", passwordSelector, "TeamTitans!")}
 
                 <div class="block">
                     <a data-toggle="collapse" href="#advanced">Advanced <span class="caret"></span></a>
@@ -83,16 +86,16 @@ $(function() {
         }
 
         // Only start capture if rds and s3 selected
-        if ($(`.${rdsSelector}`).val() != '' && $(`.${s3Selector}`).val() != '') {
+        if ($(`.${captureSelector}`).val() != null && $(`.${rdsSelector}`).val() != '' && $(`.${s3Selector}`).val() != '') {
             var replayInner = {
                 databaseInfo: {
-                    dbUrl: "testdb.cgtpml3lsh3i.us-west-1.rds.amazonaws.com:3306",
-                    database: "testdb",
-                    username: "admin",
-                    password: "TeamTitans!"
+                    //dbUrl: "testdb.cgtpml3lsh3i.us-west-1.rds.amazonaws.com:3306",
+                    database: $(`.${rdsSelector}`).val(),
+                    username: $(`.${usernameSelector}`).val(),
+                    password: $(`.${passwordSelector}`).val()
                 },
                 captureId: $(`.${captureSelector}`).val(),
-                id: "TestReplay",
+                id: $(`.${replayNameSelector}`).val(),
                 rds: $(`.${rdsSelector}`).val(),
                 s3: $(`.${s3Selector}`).val(),
                 startTime: startTime,
@@ -101,7 +104,7 @@ $(function() {
                 transactionLimit: $(`.${transactionLimitSelector}`).val(),
                 filterStatements: $(`.${filterStatementsSelector}`).val().split(',').map(x => x.trim()),
                 filterUsers: $(`.${filterUsersSelector}`).val().split(',').map(x => x.trim()),
-                replayType: "Fast Mode"
+                replayType: $(`.${typeSelector}`).val()
             };
 
             // var replayInner = {
@@ -343,14 +346,14 @@ function startReplay(replay) {
         },
         data: JSON.stringify(replay),
         success: function() {
-            $("#exampleModal").html(createStartReplayModal("Successful"));
+            $("#exampleModal").html(createStartReplayModal("Successful", "Your replay is in progress. Go to Dashboard to see the current status."));
             $('#exampleModal').on('hidden.bs.modal', function () {
                 updateReplayList();
             });
             $("#exampleModal").modal("show");
         },
         error: function(err) {
-            $("#exampleModal").html(createStartReplayModal("Failure"));
+            $("#exampleModal").html(createStartReplayModal("Failure", err.responseText ? err.responseText : "Your replay failed to start. Verify all fields are correct."));
             $("#exampleModal").modal("show");
 
             console.log("Error starting relpay");
@@ -359,7 +362,7 @@ function startReplay(replay) {
     });
 }
 
-function createStartReplayModal(result) {
+function createStartReplayModal(result, message) {
     return `
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -367,10 +370,7 @@ function createStartReplayModal(result) {
                 <h5 class="modal-title">Replay ${result}</h5>
             </div>
             <div class="modal-body">
-                ${result === "Successful" ? 
-                    "<p>Your replay is in progress. Go to Dashboard to see the current status.</p>" :
-                    "<p>Your replay failed to start. Verify all fields are correct.</p>"}
-                
+                <p>${message}</p>
             </div>
             <div class="modal-footer">
                 <a href="dashboard" class="btn btn-default">Dashboard</a>
@@ -464,6 +464,14 @@ function createTextInputValue(label, id, value) {
     <div class="form-group">
         <label class="input-label">${label}</label>
         <input id="" class="${id} form-control" type="text" value="${value}">
+    </div>`;
+}
+
+function createPasswordInputValue(label, id, value) {
+    return `
+    <div class="form-group">
+        <label class="input-label">${label}</label>
+        <input id="" class="${id} form-control" type="password" value="${value}">
     </div>`;
 }
 

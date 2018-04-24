@@ -14,10 +14,10 @@ public class Capture implements Session {
     private Date endTime;
     private String status;
 
-    private int fileSizeLimit = NO_LIMIT;
+    private int fileSizeLimit = NO_LIMIT; // in KB
     private int transactionLimit = NO_LIMIT;
 
-    private long dbFileSize = 0;
+    private long dbFileSize = 50; // in Bytes (buffer of 50)
     private int transactionCount = 0;
 
     private List<String> filterStatements;
@@ -43,8 +43,8 @@ public class Capture implements Session {
         this.s3 = s3;
         this.startTime = new Date();
         this.endTime = null;
-        this.fileSizeLimit = fileSizeLimit;
-        this.transactionLimit = transactionLimit;
+        setFileSizeLimit(fileSizeLimit);
+        setTransactionLimit(transactionLimit);
         updateStatus();
     }
 
@@ -63,8 +63,8 @@ public class Capture implements Session {
         this.s3 = s3;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.fileSizeLimit = fileSizeLimit;
-        this.transactionLimit = transactionLimit;
+        setFileSizeLimit(fileSizeLimit);
+        setTransactionLimit(transactionLimit);
         updateStatus();
     }
 
@@ -77,7 +77,7 @@ public class Capture implements Session {
 
         if (startTime != null && currTime.compareTo(startTime) >= 0) {
             if ((endTime != null && currTime.compareTo(endTime) >= 0)
-                    || (fileSizeLimit != NO_LIMIT && dbFileSize > fileSizeLimit)
+                    || (fileSizeLimit != NO_LIMIT && (dbFileSize / 1000.0) > fileSizeLimit)
                     || (transactionLimit != NO_LIMIT && transactionCount > transactionLimit)) {
                 this.status = "Finished";
             } else {
@@ -89,11 +89,10 @@ public class Capture implements Session {
     }
 
     public boolean hasReachedFileSizeLimit() {
-
-        return this.fileSizeLimit == NO_LIMIT ? false : this.dbFileSize >= this.fileSizeLimit;
+        return this.fileSizeLimit == NO_LIMIT ? false : (this.dbFileSize / 1000.0) >= this.fileSizeLimit;
     }
 
-    public boolean hasReachedTransactonLimit() {
+    public boolean hasReachedTransactionLimit() {
         return this.transactionLimit == NO_LIMIT ? false : this.transactionCount >= this.transactionLimit;
     }
 
@@ -146,11 +145,11 @@ public class Capture implements Session {
 
     public int getFileSizeLimit() { return this.fileSizeLimit; }
 
-    public void setFileSizeLimit(int size) {this.fileSizeLimit = size; }
+    public void setFileSizeLimit(int size) {this.fileSizeLimit = size <= 0 ? NO_LIMIT : size; }
 
     public int getTransactionLimit() {return this.transactionLimit; }
 
-    public void setTransactionLimit(int size) {this.transactionLimit = size; }
+    public void setTransactionLimit(int size) {this.transactionLimit = size <= 0 ? NO_LIMIT : size; }
 
     public long getDbFileSize() { return this.dbFileSize; }
 

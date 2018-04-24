@@ -50,9 +50,10 @@
             </button>
             
             <!-- Page Content -->
-            <div id="content" class="col-xs-10">
+            <div id="content" class="col-xs-12">
                 <h3 class="text-center">Compare Results</h3>
-                <div id="performanceTable" style="height:300px;overflow:auto;">
+                <h5>Captures</h5>
+                <div id="captureTable" style="height:300px;overflow:auto;">
                     <table class="table table-striped table-hover">
                         <col width="40">
                         <tr>
@@ -67,24 +68,29 @@
                     </table>
                 </div>
 
+                <h5 style="margin-top:20px">Replays</h5>
+                <div id="replayTable" style="height:300px;overflow:auto;">
+                    <table class="table table-striped table-hover">
+                        <col width="40">
+                        <tr>
+                            <th></th>
+                            <th>ID</th>
+                            <th>CaptureID</th>
+                            <th>RDS</th>
+                            <th>S3</th>
+                            <th>Status</th>
+                            <th>Type</th>
+                            <th>Start</th>
+                            <th>End</th>
+                        </tr>
+                    </table>
+                </div>
+
                 <a href="#" id="btnGetMetrics" class="btn btn-default">Get Metrics</a>
 
                 <div id="metricSelectorDiv"></div>
 
                 <div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
-
-                <table id="captureTable" class="table">
-                    <thead>
-                        <tr class="">
-                            <th>Time</th>
-                            <th>CPU</th>
-                            <th>RAM</th>
-                            <th>Disk I/O</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>

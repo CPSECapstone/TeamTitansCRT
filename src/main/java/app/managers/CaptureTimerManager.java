@@ -108,7 +108,7 @@ public class CaptureTimerManager {
                 public void run() {
                     CaptureController.startCapture(captureID);
                 }
-            }, endTime);
+            }, startTime);
         }
     }
 
