@@ -216,6 +216,7 @@ public class CaptureController {
         s3Manager.deleteFile(capture.getS3(), capture.getId() + "-Workload.log");
         s3Manager.deleteFile(capture.getS3(), capture.getId() + "-Performance.log");
         return true;
+    }
 
     public static boolean isCaptureIdDuplicate(Capture capture) {
         return DBUtil.getInstance().checkCaptureNameDuplication(capture.getId());
