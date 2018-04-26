@@ -69,6 +69,7 @@ public class Capture implements Session {
     }
 
     public void updateStatus() {
+        System.out.println(getId());
         Date currTime = new Date();
 
         if("Failed".equals(status)) {
