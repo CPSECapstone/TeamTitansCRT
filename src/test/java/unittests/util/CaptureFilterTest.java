@@ -99,7 +99,7 @@ public class CaptureFilterTest {
         startTime = new Date(5);
         endTime = new Date();
         transactionLimit = 0;
-        capture = new Capture("id", "", "", startTime, endTime, 0, transactionLimit);
+        capture = new Capture("id", "", "", "", "", startTime, endTime, 0, transactionLimit);
     }
 
     @Test
