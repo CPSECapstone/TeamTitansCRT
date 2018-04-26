@@ -69,6 +69,7 @@ public class Capture implements Session {
     }
 
     public void updateStatus() {
+        System.out.println(getId());
         Date currTime = new Date();
 
         if("Failed".equals(status)) {
@@ -145,11 +146,13 @@ public class Capture implements Session {
 
     public int getFileSizeLimit() { return this.fileSizeLimit; }
 
-    public void setFileSizeLimit(int size) {this.fileSizeLimit = size <= 0 ? NO_LIMIT : size; }
+    public void setFileSizeLimit(int size) {
+        this.fileSizeLimit = size;
+    }
 
     public int getTransactionLimit() {return this.transactionLimit; }
 
-    public void setTransactionLimit(int size) {this.transactionLimit = size <= 0 ? NO_LIMIT : size; }
+    public void setTransactionLimit(int size) {this.transactionLimit = size; }
 
     public long getDbFileSize() { return this.dbFileSize; }
 
