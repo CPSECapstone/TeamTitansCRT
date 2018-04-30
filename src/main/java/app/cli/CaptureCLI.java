@@ -1,15 +1,16 @@
 package app.cli;
 import org.json.simple.JSONObject;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
 public class CaptureCLI extends CLI {
 
-    public static String sendStart(String id, String rdsRegion, String rds, String s3Region, String s3, Date startTime,
+    public static String start(String id, String rdsRegion, String rds, String s3Region, String s3, Date startTime,
                                  Date endTime, long transactionLimit, long fileSizeLimit, List<String> filterStatements,
-                                 List<String> filterUsers) throws Exception {
-        String startString = urlString + "capture/start";
+                                 List<String> filterUsers) throws IOException, RuntimeException {
+        String captureStartURL = urlString + "capture/start";
 
         // build json post data
         JSONObject object = new JSONObject();
@@ -36,13 +37,37 @@ public class CaptureCLI extends CLI {
         if (filterUsers != null) {
             object.put("filterUsers", filterUsers);
         }
-        return completePOST(startString, object.toString());
+        return completePOST(captureStartURL, object.toString());
+
     }
 
-    public static void resourceTestFunc() throws Exception {
-        String urlString2 = urlString + "resource/rds";
-        System.out.println(completeGET(urlString2));
+    public static String stop(String id) throws IOException, RuntimeException {
+        String captureStopURL = urlString + "capture/stop";
+        JSONObject object = new JSONObject();
+        object.put("id", id);
+
+        return completePOST(captureStopURL, object.toString());
     }
+
+    public static String status() throws IOException, RuntimeException {
+        String captureStatusURL = urlString + "capture/status";
+        return completeGET(captureStatusURL);
+    }
+
+    // TODO: Update servlet to reflect POST, take in ID, and grab capture from capture list
+    public static String delete(String id) throws IOException, RuntimeException {
+        String captureDeleteURL = urlString + "capture/stop";
+        JSONObject object = new JSONObject();
+        object.put("id", id);
+
+        return completePOST(captureDeleteURL, object.toString());
+    }
+
+     // TODO: Capture update CLI function
+     /*
+    public static String sendUpdate(String id) throws IOException, RuntimeException {
+
+    }*/
 
     // this main method is only for testing
     /* If you'd like to run this main method, either run it directly or
@@ -57,7 +82,7 @@ public class CaptureCLI extends CLI {
      */
     public static void main(String[] args) {
         try {
-            resourceTestFunc();
+            System.out.println(status());
         } catch (Exception e)
         {
             e.printStackTrace();
