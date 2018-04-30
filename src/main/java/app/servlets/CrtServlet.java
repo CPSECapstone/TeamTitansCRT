@@ -21,7 +21,7 @@ public class CrtServlet {
     public String replay() { return "my-replays.html"; }
 
     @GetMapping("analyze")
-    public String analyze() { return "analyzePage.html"; }
+    public String analyze() { return "my-analyze.html"; }
 
     @GetMapping("login")
     public String login() { return "my-setup.html"; }
