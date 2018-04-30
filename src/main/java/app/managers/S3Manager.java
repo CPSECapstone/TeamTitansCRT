@@ -149,6 +149,10 @@ public class S3Manager {
         outStream.close();
     }
 
+    public String getFileURLFromS3(String bucketName, String fileName) {
+        return s3Client.getUrl(bucketName, fileName).toExternalForm();
+    }
+
     public void deleteFile(String bucketName, String fileName) {
         s3Client.deleteObject(new DeleteObjectRequest(bucketName, fileName));
     }
