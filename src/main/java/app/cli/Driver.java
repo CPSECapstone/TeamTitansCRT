@@ -2,6 +2,7 @@ package app.cli;
 
 import app.models.Capture;
 
+import java.io.IOException;
 import java.util.Scanner;
 import java.util.Date;
 import java.util.ArrayList;
@@ -109,29 +110,86 @@ public class Driver {
         }
 
         try {
-            CaptureCLI.sendStart(id, rdsRegion, rds, s3Region, s3, startTime, endTime, transactionSize, fileSize, filterStatements, filterUsers);
-        } catch (Exception e) {
+            CaptureCLI.start(id, rdsRegion, rds, s3Region, s3, startTime, endTime, transactionSize, fileSize, filterStatements, filterUsers);
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     private void endCapture(String[] line) {
         if (line.length == 2 && line[1] == "help") {
+            printEndCaptureHelp();
             return;
         }
 
-        if (line.length < 5) {
-            commandError(line[0]);
+        if (line.length == 2) {
+            String captureIDString = line[1];
+            try {
+                CaptureCLI.stop(captureIDString);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("Error - Too many arguments");
         }
     }
 
     private void runReplay(String[] line) {
         if (line.length == 2 && line[1] == "help") {
+            printRunReplayHelp();
             return;
         }
 
-        if (line.length < 5) {
+        if (line.length < 8) {
             commandError(line[0]);
+            return;
+        }
+
+
+        String id = line[1];
+        String capture_id = line[2];
+        String rds = line[3];
+        String rdsRegion = line[4];
+        String s3 = line[5];
+        String s3Region = line[6];
+        String mode = line[7];
+        Date startTime = null;
+        Date endTime = null;
+        long transactionSize = 0;
+
+        ArrayList<String> filterStatements = null;
+        ArrayList<String> filterUsers = null;
+
+        if (mode.equals("fast-mode")) {
+            mode = "Fast Mode";
+        } else {
+            System.out.println(mode);
+        }
+
+        for (int i = 8; i < line.length; i++) {
+            if (i + 1 >= line.length) {
+                commandError(line[0]);
+                return;
+            }
+            switch (line[i]) {
+                case "-start":
+                    break;
+                case "-end":
+                    break;
+                case "-transize":
+                    String size = line[i + 1];
+                    transactionSize = Long.parseLong(size);
+                    break;
+                default:
+                    break;
+            }
+
+        }
+
+        try {
+            ReplayCLI.start(id, rdsRegion, rds, s3Region, s3, mode, capture_id, startTime, endTime, transactionSize, filterStatements, filterUsers);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -168,9 +226,9 @@ public class Driver {
 
     private void printCommandsList() {
         System.out.println("\nlist of Commands");
-        System.out.println("\truncp [capture_name][rds_endpoint] [S3_bucket] -start -end -filesize -transize -dbcom -dbuser");
+        System.out.println("\truncp [capture_name][rds_endpoint] [rds_region] [S3_bucket] [S3_region] -start -end -filesize -transize -dbcom -dbuser");
         System.out.println("\tendcp [capture_name]");
-        System.out.println("\trunrp [replay_name] [rds_endpoint] [S3_bucket] -start -end -filesize -transize -dbcom -dbuser");
+        System.out.println("\trunrp [replay_name] [capture_name] [rds_endpoint] [rds_region] [S3_bucket] [S3_region] [mode] -start -end -filesize -transize -dbcom -dbuser");
         System.out.println("\tendcp [replay_name]");
         System.out.println("\tget -replays -captures -rds -s3");
         System.out.println("\tstatus -replay -capture");
@@ -180,6 +238,14 @@ public class Driver {
 
     private void printRunCaptureHelp() {
         System.out.println("runcp instructions");
+    }
+
+    private void printEndCaptureHelp() {
+        System.out.println("endcp instructions");
+    }
+
+    private void printRunReplayHelp() {
+        System.out.println("runrp instructions");
     }
 
 
