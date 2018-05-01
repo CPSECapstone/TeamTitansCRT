@@ -107,28 +107,28 @@
 /*          Tool Tip             */
 /*-------------------------------*/
 
-.tooltip {
-    position: relative;
-    display: inline-block;
-    border-bottom: 1px dotted black;
+.CellWithComment{
+  position:relative;
 }
 
-.tooltip .tooltiptext {
-    visibility: hidden;
-    width: 120px;
-    background-color: black;
-    color: #fff;
-    text-align: center;
-    border-radius: 6px;
-    padding: 5px 0;
-
-    /* Position the tooltip */
-    position: absolute;
-    z-index: 1;
+.CellComment{
+  display:none;
+  position:absolute; 
+  z-index:100;
+  border:1px;
+  background-color:white;
+  border-style:solid;
+  border-width:1px;
+  border-color:black;
+  padding:3px;
+  color:black; 
+  top:0px; 
+  left:0px;
+  transition-delay: 3s;
 }
 
-.tooltip:hover .tooltiptext {
-    visibility: visible;
+.CellWithComment:hover span.CellComment{
+  display:block;
 }
 
 /*-------------------------------*/

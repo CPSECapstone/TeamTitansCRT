@@ -529,8 +529,8 @@ $(function() {
                 
                 table += '<tr>' +
                     '<td><label><input class="replayCheckbox" type="checkbox" value="' + log['id'] + '"' + disabled + ' ' + checked + '></label></td>' +
-                    '<td>' + idReplay + '</td>' +
-                    '<td>' + idCapture + '</td>' +
+                    '<td class="CellWithComment">' + idReplay + '<span class="CellComment">' + log['id'] + '</span></td>' +
+                    '<td class="CellWithComment">' + idCapture + '<span class="CellComment">' + log['captureId'] + '</span></td>' +
                     '<td>' + log['rds'] + '</td>' +
                     '<td>' + log['status'] + '</td>' +
                     '<td>' + log['replayType'] + '</td>' +
