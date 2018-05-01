@@ -14,6 +14,7 @@ public class Driver {
     public static final String END_REPLAY = "endrp";
     public static final String STATUS = "status";
     public static final String GET_LIST = "get";
+    public static final String HELP = "help";
 
 
     public static void main(String[] args) {
@@ -47,8 +48,10 @@ public class Driver {
                     case GET_LIST:
                         driver.getList(line);
                         break;
-                    default:
+                    case HELP:
                         driver.printCommandsList();
+                        break;
+                    default:
                         break;
 
                 }
@@ -109,7 +112,7 @@ public class Driver {
         }
 
         try {
-            CaptureCLI.sendStart(id, rdsRegion, rds, s3Region, s3, startTime, endTime, transactionSize, fileSize, filterStatements, filterUsers);
+            CaptureCLI.start(id, rdsRegion, rds, s3Region, s3, startTime, endTime, transactionSize, fileSize, filterStatements, filterUsers);
         } catch (Exception e) {
             e.printStackTrace();
         }
