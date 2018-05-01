@@ -55,7 +55,7 @@ public class ReplayController {
             Replay replay = replays.get(id);
             replay.setStatus("Running");
             DBUtil.getInstance().saveReplay(replay);
-            int type = replay.getReplayType().equals("Fast Mode") ? ReplayLogController.FAST_MODE :
+            boolean type = replay.getReplayType().equals("Fast Mode") ? ReplayLogController.FAST_MODE :
                     ReplayLogController.TIME_SENSITIVE;
             logController.processData(replay, type);
         }

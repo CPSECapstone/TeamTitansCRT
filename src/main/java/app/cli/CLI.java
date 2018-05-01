@@ -1,6 +1,13 @@
 package app.cli;
 
+import app.models.Capture;
+import app.models.Replay;
+import app.models.Statement;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -8,6 +15,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -22,6 +31,56 @@ public class CLI {
         while (it.hasNext()) {
             System.out.println(it.nextIndex() + ": " + it.next());
         }
+    }
+
+    protected static List<Capture> convertToListCaptures(String string) {
+        JSONParser parser = new JSONParser();
+        List<Capture> captureList = new ArrayList<>();
+        try {
+            Object objArray = parser.parse(string);
+            JSONArray jsonArray = (JSONArray) objArray;
+            ObjectMapper mapper = new ObjectMapper();
+            for (Object obj : jsonArray) {
+                JSONObject captureObj = (JSONObject) obj;
+                Capture capture = mapper.readValue(captureObj.toString(), Capture.class);
+                captureList.add(capture);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return captureList;
+    }
+
+    protected static List<Replay> convertToListReplays(String string) {
+        JSONParser parser = new JSONParser();
+        List<Replay> replayList = new ArrayList<>();
+        try {
+            Object objArray = parser.parse(string);
+            JSONArray jsonArray = (JSONArray) objArray;
+            ObjectMapper mapper = new ObjectMapper();
+            for (Object obj : jsonArray) {
+                JSONObject replayObj = (JSONObject) obj;
+                replayObj.remove("database");
+                replayObj.remove("dburl");
+                replayObj.remove("dbusername");
+                replayObj.remove("dbpassword");
+                replayObj.remove("transactionLimit");
+                Replay replay = mapper.readValue(replayObj.toString(), Replay.class);
+                replayList.add(replay);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return replayList;
+    }
+
+    protected static List<String> convertToListString(String string) {
+        String rdsList = string.replace("[", "").replace("]", "");
+        List<String> list = new ArrayList<String>(Arrays.asList(rdsList.split("\\s*,\\s*")));
+
+        return list;
     }
 
     private static HttpURLConnection createConnection(String url) throws IOException {
@@ -87,6 +146,7 @@ public class CLI {
         System.out.println(con.getResponseMessage());
 
         if (responseCode >= 400) {
+            System.out.println(responseCode + " " + readResponse(con));
             throw new RuntimeException();
         }
 
@@ -101,6 +161,7 @@ public class CLI {
         int responseCode = con.getResponseCode(); // HTTP Response Code
 
         if (responseCode >= 400) {
+            System.out.println(responseCode + " " + readResponse(con));
             throw new RuntimeException();
         }
 

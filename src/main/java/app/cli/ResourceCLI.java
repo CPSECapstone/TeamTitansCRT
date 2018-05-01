@@ -1,40 +1,67 @@
 package app.cli;
 
+import app.models.Capture;
+import app.models.Replay;
+
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class ResourceCLI extends CLI {
 
-    public static String rds() throws IOException, RuntimeException {
+    public static List<String> rds() throws IOException, RuntimeException {
+        // TODO: Add JSON Parsing and return Capture Object
         String rdsURLString = urlString + "/resource/rds";
-        return completeGET(rdsURLString);
+        String rdsResponse = completeGET(rdsURLString);
+
+        return convertToListString(rdsResponse);
     }
 
-    public static String s3() throws IOException, RuntimeException {
+    public static List<String> s3() throws IOException, RuntimeException {
+        // TODO: Add JSON Parsing and return Capture Object
         String s3URLString = urlString + "/resource/s3";
-        return completeGET(s3URLString);
+        String s3Response = completeGET(s3URLString);
+
+        return convertToListString(s3Response);
     }
 
-    public static String captures() throws IOException, RuntimeException {
+    public static List<String> regions() throws IOException, RuntimeException {
+        String regionUrl = urlString + "/resource/regions";
+        String regionResponse = completeGET(regionUrl);
+
+        return convertToListString(regionResponse);
+    }
+
+    public static List<Capture> captures() throws IOException, RuntimeException {
+        // TODO: Add JSON Parsing and return Capture Object
         String captureURLString = urlString + "resource/captures";
-        return completeGET(captureURLString);
+        String captureListString = completeGET(captureURLString);
+        return convertToListCaptures(captureListString);
     }
 
-    public static String captures(String status) throws IOException, RuntimeException {
+    public static List<Capture> captures(String status) throws IOException, RuntimeException {
+        // TODO: Add JSON Parsing and return Capture Object
         String captureURLString = urlString + "resource/captures/" + status;
-        return completeGET(captureURLString);
+        String captureListString = completeGET(captureURLString);
+        return convertToListCaptures(captureListString);
     }
 
-    public static String replays() throws IOException, RuntimeException {
+    public static List<Replay> replays() throws IOException, RuntimeException {
+        // TODO: Add JSON Parsing and return Capture Object
         String replayURLString = urlString + "resource/replays";
-        return completeGET(replayURLString);
+        String replayListString = completeGET(replayURLString);
+        return convertToListReplays(replayListString);
     }
 
-    public static String replays(String status) throws IOException, RuntimeException {
+    public static List<Replay> replays(String status) throws IOException, RuntimeException {
+        // TODO: Add JSON Parsing and return Capture Object
         String replayURLString = urlString + "resource/replays/" + status;
-        return completeGET(replayURLString);
+        String replayListString = completeGET(replayURLString);
+        return convertToListReplays(replayListString);
     }
 
-    /*
+
     public static void main(String[] args) {
         try {
             System.out.println("Get rds: " + rds());
@@ -46,5 +73,5 @@ public class ResourceCLI extends CLI {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    } */
+    }
 }

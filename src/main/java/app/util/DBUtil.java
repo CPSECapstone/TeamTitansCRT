@@ -1,5 +1,6 @@
 package app.util;
 
+import app.models.DatabaseInfo;
 import org.springframework.util.StringUtils;
 import app.models.Capture;
 import app.models.Replay;
@@ -611,7 +612,8 @@ public class DBUtil {
             ResultSet rs;
             ArrayList<Replay> replays = new ArrayList<>();
 
-            String sql = "SELECT * FROM replays WHERE status = '\" + status + \"'\"";
+            //String sql = "SELECT * FROM captures WHERE status = '" + status + "'";
+            String sql = "SELECT * FROM replays WHERE status = '" + status + "'";
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.execute();
             rs = pstmt.getResultSet();
@@ -626,7 +628,7 @@ public class DBUtil {
                 replay.setEndTime(rs.getDate(7));
                 replay.setStatus(rs.getString(8));
                 replay.setReplayType(rs.getString(9));
-
+                replay.setDatabaseInfo(new DatabaseInfo());
                 replays.add(replay);
             }
 

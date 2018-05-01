@@ -98,7 +98,7 @@ public class CaptureController {
     {
         LogController logController = getLogController(id);
         Capture capture = getCapture(id);
-        if (logController != null && capture != null && !capture.hasReachedFileSizeLimit())
+        if (logController != null && capture != null)
         {
             logController.processData(capture, CaptureLogController.END);
         }

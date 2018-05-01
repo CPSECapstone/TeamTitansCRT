@@ -1,4 +1,5 @@
 package app.cli;
+import app.models.Capture;
 import org.json.simple.JSONObject;
 
 import java.io.IOException;
@@ -49,9 +50,11 @@ public class CaptureCLI extends CLI {
         return completePOST(captureStopURL, object.toString());
     }
 
-    public static String status() throws IOException, RuntimeException {
+    public static List<Capture> status() throws IOException, RuntimeException {
+        // TODO: Add JSON Parsing and return Capture Object
         String captureStatusURL = urlString + "capture/status";
-        return completeGET(captureStatusURL);
+        String captureListString = completeGET(captureStatusURL);
+        return convertToListCaptures(captureListString);
     }
 
     // TODO: Update servlet to reflect POST, take in ID, and grab capture from capture list
@@ -80,6 +83,7 @@ public class CaptureCLI extends CLI {
 
     gradle run
      */
+    /*
     public static void main(String[] args) {
         try {
             System.out.println(status());
@@ -87,5 +91,5 @@ public class CaptureCLI extends CLI {
         {
             e.printStackTrace();
         }
-    }
+    }*/
 }
