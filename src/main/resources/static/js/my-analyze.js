@@ -514,11 +514,23 @@ $(function() {
                 if (disabled) {
                     continue;
                 }
-
+                
+                var idReplay = log['id'];
+                if (idReplay.length > 12) {
+                    var strR = idReplay.substr(0, 12);
+                    idReplay = strR.concat("...");
+                }
+                
+                var idCapture = log['captureId']
+                if (idCapture.length > 12) {
+                    var strC = idCapture.substr(0, 12);
+                    idCapture = strC.concat("...");
+                }
+                
                 table += '<tr>' +
                     '<td><label><input class="replayCheckbox" type="checkbox" value="' + log['id'] + '"' + disabled + ' ' + checked + '></label></td>' +
-                    '<td>' + log['id'] + '</td>' +
-                    '<td>' + log['captureId'] + '</td>' +
+                    '<td>' + idReplay + '</td>' +
+                    '<td>' + idCapture + '</td>' +
                     '<td>' + log['rds'] + '</td>' +
                     '<td>' + log['status'] + '</td>' +
                     '<td>' + log['replayType'] + '</td>' +
