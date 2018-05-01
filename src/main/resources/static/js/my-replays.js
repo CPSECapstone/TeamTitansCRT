@@ -5,6 +5,8 @@ $(function() {
     var idSelector = "idSelector";
     var rdsSelector = "rdsSelector";
     var s3Selector = "s3Selector";
+    var rdsRegionSelector = "rdsRegionSelector";
+    var s3RegionSelector = "s3RegionSelector";
     var startTimeSelector = "startTimeSelector";
     var endTimeSelector = "endTimeSelector";
     var fileSizeLimitSelector = "fileSizeLimitSelector";
@@ -32,7 +34,9 @@ $(function() {
                 <hr />
                 ${insertLoadingSpinner("startReplayLoadingIcon")}
                 <div class="${captureSelector}"></div>
+                <div class="${rdsRegionSelector}"></div>
                 <div class="${rdsSelector}"></div>
+                <div class="${s3RegionSelector}"></div>
                 <div class="${s3Selector}"></div>
 
                 ${createTextInput("Replay Name:", replayNameSelector)}
@@ -72,8 +76,8 @@ $(function() {
 
     populateCapturesDropdown(captureSelector);
     populateTypeDropdown(typeSelector);
-    populateRDSDropdown(rdsSelector);
-    populateS3Dropdown(s3Selector);
+    populateResourceDropdowns(rdsRegionSelector, rdsSelector, s3RegionSelector, s3Selector);
+
     $(`.${startBtnSelector}`).on("click", function() {
         var startTime = null;
         if ($(`.${startTimeSelector}`).val()) {
@@ -97,7 +101,9 @@ $(function() {
                 captureId: $(`.${captureSelector}`).val(),
                 id: $(`.${replayNameSelector}`).val(),
                 rds: $(`.${rdsSelector}`).val(),
+                rdsRegion: $(`.${rdsRegionSelector}`).val(),
                 s3: $(`.${s3Selector}`).val(),
+                s3Region: $(`.${s3RegionSelector}`).val(),
                 startTime: startTime,
                 endTime: endTime,
                 fileSizeLimit: $(`.${fileSizeLimitSelector}`).val(),
@@ -385,12 +391,47 @@ function populateTypeDropdown(selector) {
 }
 
 /**
+ * Populate region and rds/s3 dropdowns
+ */
+function populateResourceDropdowns(rdsRegion, rdsSelector, s3Region, s3Selector) {
+    $.ajax({
+        url: "/resource/regions",
+        type: "GET",
+        beforeSend: function() {
+            $(".startReplayLoadingIcon").show();
+        },
+        complete: function() {
+            $(".startReplayLoadingIcon").hide();
+        },
+        success: function(data) {
+            $(`div.${rdsRegion}`).replaceWith(createDropdown("Select RDS Region", rdsRegion, data));
+            $(`div.${s3Region}`).replaceWith(createDropdown("Select S3 Region", s3Region, data));
+
+            $(`.${rdsRegion}`).on("change", function() {
+                updateRDSDropdown(rdsSelector, rdsRegion);
+            });
+
+            $(`.${s3Region}`).on("change", function() {
+                updateS3Dropdown(s3Selector, s3Region);
+            });
+
+            populateRDSDropdown(rdsSelector, rdsRegion);
+            populateS3Dropdown(s3Selector, s3Region);
+        },
+        error: function(err) {
+            console.log("Error populating region dropdowns")
+            console.log(err);
+        }
+    });
+}
+
+/**
  * Populate rds dropdown
  * @param {string} selector
  */
-function populateRDSDropdown(selector) {
+function populateRDSDropdown(selector, regionSelector) {
     $.ajax({
-        url: "/resource/rds",
+        url: "/resource/rds/" + $("." + regionSelector).val(),
         type: "GET",
         beforeSend: function() {
             $(".startReplayLoadingIcon").show();
@@ -409,7 +450,29 @@ function populateRDSDropdown(selector) {
 }
 
 /**
- * Populate rds dropdown
+ * Update rds dropdown
+ * @param {string} selector
+ * @param {string} regionSelector
+ */
+function updateRDSDropdown(selector, regionSelector) {
+    $.ajax({
+        url: "/resource/rds/" + $("." + regionSelector).val(),
+        type: "GET",
+        success: function(data) {
+            $(`.${selector}`).replaceWith(
+                `<select class="${selector} form-control" id="">
+                    ${data.map(createOption).join('')}
+                </select>`);
+        },
+        error: function(err) {
+            console.log("Error populating rds dropdown")
+            console.log(err);
+        }
+    });
+}
+
+/**
+ * Populate capture dropdown
  * @param {string} selector
  */
 function populateCapturesDropdown(selector) {
@@ -434,15 +497,37 @@ function populateCapturesDropdown(selector) {
 }
 
 /**
- * Populate rds dropdown
+ * Populate s3 dropdown
  * @param {string} selector
  */
-function populateS3Dropdown(selector) {
+function populateS3Dropdown(selector, regionSelector) {
     $.ajax({
-        url: "/resource/s3",
+        url: "/resource/s3/" + $("." + regionSelector).val(),
         type: "GET",
         success: function(data) {
             $(`div.${selector}`).replaceWith(createDropdown("Select S3 Endpoint", selector, data));
+        },
+        error: function(err) {
+            console.log("Error populating s3 dropdown")
+            console.log(err);
+        }
+    });
+}
+
+/**
+ * Update s3 dropdown
+ * @param {string} selector
+ * @param {string} regionSelector
+ */
+function updateS3Dropdown(selector, regionSelector) {
+    $.ajax({
+        url: "/resource/s3/" + $("." + regionSelector).val(),
+        type: "GET",
+        success: function(data) {
+            $(`.${selector}`).replaceWith(
+                `<select class="${selector} form-control" id="">
+                    ${data.map(createOption).join('')}
+                </select>`);
         },
         error: function(err) {
             console.log("Error populating s3 dropdown")

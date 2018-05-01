@@ -9,7 +9,9 @@ public class Capture implements Session {
 
     private String id;
     private String rds;
+    private String rdsRegion;
     private String s3;
+    private String s3Region;
     private Date startTime;
     private Date endTime;
     private String status;
@@ -28,39 +30,47 @@ public class Capture implements Session {
 
     }
 
-    public Capture(String id, String rds, String s3) {
+    public Capture(String id, String rds, String rdsRegion, String s3, String s3Region) {
         this.id = id;
         this.rds = rds;
+        this.rdsRegion = rdsRegion;
         this.s3 = s3;
-        this.startTime = new Date();
+        this.s3Region = s3Region;
+        this.startTime = null;
         this.endTime = null;
         updateStatus();
     }
 
-    public Capture(String id, String rds, String s3, int fileSizeLimit, int transactionLimit) {
+    public Capture(String id, String rds, String rdsRegion, String s3, String s3Region, int fileSizeLimit, int transactionLimit) {
         this.id = id;
         this.rds = rds;
+        this.rdsRegion = rdsRegion;
         this.s3 = s3;
-        this.startTime = new Date();
+        this.s3Region = s3Region;
+        this.startTime = null;
         this.endTime = null;
         setFileSizeLimit(fileSizeLimit);
         setTransactionLimit(transactionLimit);
         updateStatus();
     }
 
-    public Capture(String id, String rds, String s3, Date startTime, Date endTime) {
+    public Capture(String id, String rds, String rdsRegion, String s3, String s3Region, Date startTime, Date endTime) {
         this.id = id;
         this.rds = rds;
+        this.rdsRegion = rdsRegion;
         this.s3 = s3;
+        this.s3Region = s3Region;
         this.startTime = startTime;
         this.endTime = endTime;
         updateStatus();
     }
 
-    public Capture(String id, String rds, String s3, Date startTime, Date endTime, int fileSizeLimit, int transactionLimit) {
+    public Capture(String id, String rds, String rdsRegion, String s3, String s3Region, Date startTime, Date endTime, int fileSizeLimit, int transactionLimit) {
         this.id = id;
         this.rds = rds;
+        this.rdsRegion = rdsRegion;
         this.s3 = s3;
+        this.s3Region = s3Region;
         this.startTime = startTime;
         this.endTime = endTime;
         setFileSizeLimit(fileSizeLimit);
@@ -115,6 +125,14 @@ public class Capture implements Session {
     public void setS3(String s3) {
         this.s3 = s3;
     }
+
+    public String getRdsRegion() { return rdsRegion; }
+
+    public void setRdsRegion(String rdsRegion) { this.rdsRegion = rdsRegion; }
+
+    public String getS3Region() { return s3Region; }
+
+    public void setS3Region(String s3Region) { this.s3Region = s3Region; }
 
     public Date getStartTime() {
         return startTime;

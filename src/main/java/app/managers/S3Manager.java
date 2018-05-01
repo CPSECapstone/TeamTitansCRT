@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 public class S3Manager {
     private AmazonS3 s3Client;
 
-    public S3Manager() {
+    public S3Manager(String region) {
         JSONParser parser = new JSONParser();
 
         try {
@@ -36,13 +36,13 @@ public class S3Manager {
 
             this.s3Client = AmazonS3ClientBuilder.standard()
                     .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
-                    .withRegion(Regions.US_WEST_1)
+                    .withRegion(Regions.valueOf(region))
                     .build();
         } catch (Exception e) {
             // Running inside EC2 Instance:
             this.s3Client = AmazonS3ClientBuilder.standard()
                     .withCredentials(InstanceProfileCredentialsProvider.getInstance())
-                    .withRegion(Regions.US_WEST_1)
+                    .withRegion(Regions.valueOf(region))
                     .build();
         }
     }
@@ -130,6 +130,11 @@ public class S3Manager {
     public List<String> getS3Buckets() {
         return s3Client.listBuckets().stream()
                 .map(x->x.getName())
+                .filter(x->{try{
+                    return s3Client.getBucketLocation(x).equals(s3Client.getRegionName());
+                } catch (Exception e) {
+                    return false;
+                }})
                 .collect(Collectors.toList());
     }
   

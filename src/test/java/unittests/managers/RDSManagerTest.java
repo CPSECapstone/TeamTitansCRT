@@ -18,7 +18,7 @@ public class RDSManagerTest {
     public void before() throws Exception {
         File f = new File(".privateKeys");
         org.junit.Assume.assumeTrue(f.exists() && f.isFile());
-        rdsManager = new RDSManager();
+        rdsManager = new RDSManager("US_WEST_1");
     }
 
     @Test

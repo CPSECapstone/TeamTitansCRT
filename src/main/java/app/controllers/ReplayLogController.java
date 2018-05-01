@@ -23,14 +23,14 @@ public class ReplayLogController extends LogController {
     }
 
     @Override
-    public String getLogData(String resourceName, String fileName) {
-        return getMetricsFromS3(resourceName, fileName);
+    public String getLogData(String resourceName, String region, String fileName) {
+        return getMetricsFromS3(resourceName, region, fileName);
     }
 
     public void processData(Session session, int type) {
         Replay replay = (Replay) session;
         Capture associatedCapture = DBUtil.getInstance().loadCapture(replay.getCaptureId());
-        String logData = getLogData(associatedCapture.getS3(), replay.getCaptureLogFileName());
+        String logData = getLogData(associatedCapture.getS3(), associatedCapture.getS3Region(), replay.getCaptureLogFileName());
 
         List<Statement> filteredStatementList = filterLogData(logData);
 
