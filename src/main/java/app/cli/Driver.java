@@ -15,6 +15,7 @@ public class Driver {
     public static final String END_REPLAY = "endrp";
     public static final String STATUS = "status";
     public static final String GET_LIST = "get";
+    public static final String HELP = "help";
 
 
     public static void main(String[] args) {
@@ -48,8 +49,10 @@ public class Driver {
                     case GET_LIST:
                         driver.getList(line);
                         break;
-                    default:
+                    case HELP:
                         driver.printCommandsList();
+                        break;
+                    default:
                         break;
 
                 }
