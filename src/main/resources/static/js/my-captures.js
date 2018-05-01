@@ -209,7 +209,7 @@ function addToCaptureList(capture) {
 function deleteCapture(capture) {
     var id = capture["id"];
     console.log(`deleting ${id}`);
-    console.log(capture);
+
     // sends request to backend
     $.ajax({
         url: "/capture/delete",
@@ -219,18 +219,18 @@ function deleteCapture(capture) {
         },
         data: JSON.stringify(capture),
         success: function() {
-            $("#exampleModal").html(createDeleteCaptureModal("Successful", "Capture deleted Successfully."));
+            $("#exampleModal").html(createDeleteCaptureModal("Successful", `Capture ${id} was deleted.`));
             $('#exampleModal').on('hidden.bs.modal', function () {
                 updateCaptureList();
             });
             $("#exampleModal").modal("show");
         },
         error: function(err) {
-            $("#exampleModal").html(createDeleteCaptureModal("Failure", err.responseText ? err.responseText : "Deletion failed."));
+            $("#exampleModal").html(createDeleteCaptureModal("Failure", "Deletion failed."));
             $("#exampleModal").modal("show");
 
             console.log("Error deleting capture");
-            console.log(err);
+            console.log(err.responseText);
         }
     });
 }
