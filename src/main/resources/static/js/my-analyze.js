@@ -1,5 +1,6 @@
 var defaultMetric = "CPUUtilization"; // Default metric to use when displaying graph
 var metricData = {}; // Metric data used in graph
+var metricsSelector = "MetricsModal";
 
 $(function() {
     $("div.content-placeholder").replaceWith(`
@@ -10,7 +11,7 @@ $(function() {
                 <p class="text-center">Select a Capture and Replays to Compare</p>
             
                 <div> 
-                    <a href="#" id="btnGetMetrics" class="btn btn-default center-block">Get Metrics</a>
+                    <a href="javascript:void(0)" id="btnGetMetrics" class="btn btn-default center-block" data-toggle="modal" data-target="#${metricsSelector}">Get Metrics</a>      
                 </div>
             </div>
         </div>
@@ -49,10 +50,11 @@ $(function() {
                 </div>
             </div>
             
-            <div id="metricSelectorDiv"></div>
-
-            <div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>      
-        </div>        
+            
+            <div id="${metricsSelector}" class="modal fade" role="dialog">
+                ${createMetricsModal(metricsSelector)}
+            </div>    
+        </div>              
     </div>
     `);
 });
@@ -232,6 +234,31 @@ function createEditCaptureModal(capture) {
 }
 
 
+/**
+ * Function that creates a modal with chart from capture and replay comparison
+ * @param   
+ * @return {string}
+ */
+function createMetricsModal(selector) {
+    return `            
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Metrics Comparison</h4>
+                </div>
+                <div class="modal-body">
+                    ${insertLoadingSpinner("manageCapturesLoadingIcon")}
+                    <div id="metricSelectorDiv"></div>
+                    <div id="container"></div> 
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default gray" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>`;
+}
+
 // Requests capture metrics on button click
 $(function() {
     $("#btnGetMetrics").on("click", function() {
@@ -261,10 +288,15 @@ $(function() {
             };
             requests.push(requestMetrics(body));
         }
-
+        
+        $(".manageCapturesLoadingIcon").show();
+        
         if (checkedCaptures.length > 0 || checkedReplays.length > 0) {
             // Draw the graph after all ajax calls complete
             $.when.apply(this, requests).done(function() {
+                
+                $(".manageCapturesLoadingIcon").hide();
+                
                 if (!jQuery.isEmptyObject(metricData)) {
                     createChart(metricData[defaultMetric])
                 } else {
@@ -274,7 +306,7 @@ $(function() {
         } else {
             $('#container').html('')
         }
-
+        $(`#${metricsSelector}`).modal("show");
         return false; // Stops page from jumping to top
     });
 });
