@@ -241,7 +241,7 @@ function createEditCaptureModal(capture) {
  */
 function createMetricsModal(selector) {
     return `            
-        <div class="modal-dialog">
+        <div class="modal-dialog" style="width:1250px;">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
