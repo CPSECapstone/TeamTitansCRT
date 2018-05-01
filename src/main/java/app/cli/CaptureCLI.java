@@ -51,7 +51,6 @@ public class CaptureCLI extends CLI {
     }
 
     public static List<Capture> status() throws IOException, RuntimeException {
-        // TODO: Add JSON Parsing and return Capture Object
         String captureStatusURL = urlString + "capture/status";
         String captureListString = completeGET(captureStatusURL);
         return convertToListCaptures(captureListString);
@@ -67,7 +66,7 @@ public class CaptureCLI extends CLI {
     }
 
      // TODO: Capture update CLI function
-     /*
+    /*
     public static String sendUpdate(String id) throws IOException, RuntimeException {
 
     }*/
