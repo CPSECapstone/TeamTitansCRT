@@ -3,6 +3,8 @@ package app.cli;
 import app.models.Capture;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.Scanner;
 import java.util.Date;
 import java.util.ArrayList;
@@ -16,7 +18,6 @@ public class Driver {
     public static final String STATUS = "status";
     public static final String GET_LIST = "get";
     public static final String HELP = "help";
-
 
     public static void main(String[] args) {
         Driver driver = new Driver();
@@ -57,14 +58,13 @@ public class Driver {
 
                 }
 
-                System.out.print("Enter a command >> ");
-
+                System.out.print("\nEnter a command >> ");
             }
         }
     }
 
     private void runCapture(String[] line) {
-        if (line.length == 2 && line[1] == "help") {
+        if (line.length == 2 && line[1].equals("help")) {
             printRunCaptureHelp();
             return;
         }
@@ -88,23 +88,44 @@ public class Driver {
         ArrayList<String> filterUsers = null;
 
 
-        for (int i = 6; i < line.length; i++) {
+        for (int i = 6; i < line.length; i+=2) {
             if (i + 1 >= line.length) {
+                System.out.println("Here " + i + " length " + line.length);
                 commandError(line[0]);
                 return;
             }
             switch (line[i]) {
-                case "-start":
+                case "-start": {
+                    String startdate = line[i + 1];
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy-hh:mm");
+                    try {
+                        startTime = dateFormat.parse(startdate);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     break;
-                case "-end":
+                }
+                case "-end": {
+                    String enddate = line[i + 1];
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy-hh:mm");
+                    try {
+                        startTime = dateFormat.parse(enddate);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     break;
+                }
                 case "-filesize":
                     String size = line[i + 1];
                     fileSize = Long.parseLong(size);
                     break;
-                case "-transize":
+                case "-transnum":
                     size = line[i + 1];
                     transactionSize = Long.parseLong(size);
+                    break;
+                case "-dbcomignore":
+                    break;
+                case "dbuserignore":
                     break;
                 default:
                     break;
@@ -120,7 +141,7 @@ public class Driver {
     }
 
     private void endCapture(String[] line) {
-        if (line.length == 2 && line[1] == "help") {
+        if (line.length == 2 && line[1].equals("help")) {
             printEndCaptureHelp();
             return;
         }
@@ -138,7 +159,7 @@ public class Driver {
     }
 
     private void runReplay(String[] line) {
-        if (line.length == 2 && line[1] == "help") {
+        if (line.length == 2 && line[1].equals("help")) {
             printRunReplayHelp();
             return;
         }
@@ -175,10 +196,26 @@ public class Driver {
                 return;
             }
             switch (line[i]) {
-                case "-start":
+                case "-start": {
+                    String startdate = line[i + 1];
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy-hh:mm");
+                    try {
+                        startTime = dateFormat.parse(startdate);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     break;
-                case "-end":
+                }
+                case "-end": {
+                    String enddate = line[i + 1];
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy-hh:mm");
+                    try {
+                        startTime = dateFormat.parse(enddate);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     break;
+                }
                 case "-transize":
                     String size = line[i + 1];
                     transactionSize = Long.parseLong(size);
@@ -197,7 +234,7 @@ public class Driver {
     }
 
     private void end_replay(String[] line) {
-        if (line.length == 2 && line[1] == "help") {
+        if (line.length == 2 && line[1].equals("help")) {
             return;
         }
 
@@ -207,7 +244,7 @@ public class Driver {
     }
 
     private void status(String[] line) {
-        if (line.length == 2 && line[1] == "help") {
+        if (line.length == 2 && line[1].equals("help")) {
             return;
         }
 
@@ -217,13 +254,41 @@ public class Driver {
     }
 
     private void getList(String[] line) {
-        if (line.length == 2 && line[1] == "help") {
+        if (line.length == 2 && line[1].equals("help")) {
             return;
         }
 
-        if (line.length < 5) {
+        if (line.length > 0 && line.length < 3) {
             commandError(line[0]);
         }
+
+        switch (line[1]) {
+            case "-rds":
+                try {
+                    List<String> rdsList = ResourceCLI.rds(line[2]);
+                    CLI.presentListOptions(rdsList);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                break;
+            case "-regions":
+                try {
+                    List<String> rdsList = ResourceCLI.regions();
+                    CLI.presentListOptions(rdsList);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                break;
+            case "-s3":
+                try {
+                    List<String> rdsList = ResourceCLI.s3(line[2]);
+                    CLI.presentListOptions(rdsList);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                break;
+        }
+
     }
 
 
@@ -233,14 +298,26 @@ public class Driver {
         System.out.println("\tendcp [capture_name]");
         System.out.println("\trunrp [replay_name] [capture_name] [rds_endpoint] [rds_region] [S3_bucket] [S3_region] [mode] -start -end -filesize -transize -dbcom -dbuser");
         System.out.println("\tendcp [replay_name]");
-        System.out.println("\tget -replays -captures -rds -s3");
+        System.out.println("\tget -replays -captures -rds -s3 -regions");
         System.out.println("\tstatus -replay -capture");
         System.out.println("\thelp");
         System.out.println("");
     }
 
     private void printRunCaptureHelp() {
-        System.out.println("runcp instructions");
+        System.out.println("\nruncp");
+        System.out.println("\tcapture_name\t\t\t\tThe name of the capture.");
+        System.out.println("\trds_endpoint\t\t\t\tThe name of your rds database.");
+        System.out.println("\trds_region\t\t\t\t\tThe region your database is in.");
+        System.out.println("\tS3_bucket\t\t\t\t\tThe S3 bucket to store the capture metrics in");
+        System.out.println("\tS3_region\t\t\t\t\tThe region your S3 bucket is in");
+        System.out.println("\t(optional) -start\t\t\tday/month/year-hour:minute:AM/PM");
+        System.out.println("\t(optional) -end\t\t\t\tday/month/year-hour:minute:AM/PM");
+        System.out.println("\t(optional) -filesize\t\tSize of the capture file");
+        System.out.println("\t(optional) -transnum\t\tNumber of transactions to capture");
+        System.out.println("\t(optional) -dbcomignore\t\tDatabase commands to ignore separated by a space, ending with a ' ! '");
+        System.out.println("\t(optional) -dbuserignore\tDatabase users to ignore separated by a space, ending with a ' ! '");
+        System.out.println();
     }
 
     private void printEndCaptureHelp() {
