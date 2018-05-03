@@ -212,7 +212,7 @@ public class CaptureController {
         logControllers.remove(capture.getId());
         timers.remove(capture.getId());
         DBUtil.getInstance().deleteCapture(capture.getId());
-        S3Manager s3Manager = new S3Manager();
+        S3Manager s3Manager = new S3Manager(capture.getS3Region());
         s3Manager.deleteFile(capture.getS3(), capture.getId() + "-Workload.log");
         s3Manager.deleteFile(capture.getS3(), capture.getId() + "-Performance.log");
         return true;

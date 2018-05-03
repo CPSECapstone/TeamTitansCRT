@@ -19,7 +19,9 @@ public class CaptureServletTest {
 
     @Test
     public void captureCommand() throws Exception {
-        HttpStatus actual = servlet.captureStart(new Capture("id", "testRDS", "testS3")).getStatusCode();
+        Capture capture = new Capture("id", "testRDS", "US_WEST_1", "teamtitans-test-mycrt", "US_WEST_1");
+        servlet.captureDelete(capture);
+        HttpStatus actual = servlet.captureStart(capture).getStatusCode();
         assertEquals(HttpStatus.OK,actual);
     }
 

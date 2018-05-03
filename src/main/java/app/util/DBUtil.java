@@ -128,7 +128,9 @@ public class DBUtil {
                     + " dbId INTEGER PRIMARY KEY AUTOINCREMENT,\n"
                     + " id TEXT UNIQUE,\n"
                     + " rds TEXT,\n"
+                    + " rdsRegion TEXT, \n"
                     + " s3 TEXT,\n"
+                    + " s3Region TEXT, \n"
                     + " startTime TEXT,\n"
                     + " endTime TEXT,\n"
                     + " status TEXT,\n"
@@ -162,7 +164,9 @@ public class DBUtil {
                     + " captureId INTEGER,\n"
                     + " id TEXT UNIQUE,\n"
                     + " rds TEXT,\n"
+                    + " rdsRegion TEXT, \n"
                     + " s3 TEXT,\n"
+                    + " s3Region TEXT, \n"
                     + " startTime TEXT,\n"
                     + " endTime TEXT,\n"
                     + " status TEXT,\n"
@@ -278,9 +282,9 @@ public class DBUtil {
     public boolean saveCapture (Capture capture)
     {
         //inserts values, if value is there then it's replaced
-        String sql = "INSERT OR REPLACE INTO captures(id, rds, s3, startTime, endTime, status, " +
+        String sql = "INSERT OR REPLACE INTO captures(id, rds, rdsRegion, s3, s3Region, startTime, endTime, status, " +
                 "fileSizeLimit, transactionLimit, dbFileSize, numDbTransactions) " +
-                "VALUES (?,?,?,?,?,?,?,?,?,?)";
+                "VALUES (?,?,?,?,?,?,?,?,?,?, ?, ?)";
 
         try
         {
@@ -290,14 +294,16 @@ public class DBUtil {
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, capture.getId());
             pstmt.setString(2, capture.getRds());
-            pstmt.setString(3, capture.getS3());
-            pstmt.setTimestamp(4, startTime);
-            pstmt.setTimestamp(5, endTime);
-            pstmt.setString(6, capture.getStatus());
-            pstmt.setInt(7, capture.getFileSizeLimit());
-            pstmt.setInt(8, capture.getTransactionLimit());
-            pstmt.setLong(9, capture.getDbFileSize());
-            pstmt.setInt(10, capture.getTransactionCount());
+            pstmt.setString(3, capture.getRdsRegion());
+            pstmt.setString(4, capture.getS3());
+            pstmt.setString(5, capture.getS3Region());
+            pstmt.setTimestamp(6, startTime);
+            pstmt.setTimestamp(7, endTime);
+            pstmt.setString(8, capture.getStatus());
+            pstmt.setInt(9, capture.getFileSizeLimit());
+            pstmt.setInt(10, capture.getTransactionLimit());
+            pstmt.setLong(11, capture.getDbFileSize());
+            pstmt.setInt(12, capture.getTransactionCount());
             pstmt.executeUpdate();
 
             pstmt.close();
@@ -343,13 +349,15 @@ public class DBUtil {
 
             capture.setId(rs.getString(2));
             capture.setRds(rs.getString(3));
-            capture.setS3(rs.getString(4));
-            capture.setStartTime(rs.getTimestamp(5));
-            capture.setEndTime(rs.getTimestamp(6));
-            capture.setStatus(rs.getString(7));
-            capture.setFileSizeLimit(rs.getInt(8));
-            capture.setDbFileSize(rs.getInt(9));
-            capture.setTransactionCount(rs.getInt(10));
+            capture.setRdsRegion(rs.getString(4));
+            capture.setS3(rs.getString(5));
+            capture.setS3Region(rs.getString(6));
+            capture.setStartTime(rs.getTimestamp(7));
+            capture.setEndTime(rs.getTimestamp(8));
+            capture.setStatus(rs.getString(9));
+            capture.setFileSizeLimit(rs.getInt(10));
+            capture.setDbFileSize(rs.getInt(11));
+            capture.setTransactionCount(rs.getInt(12));
 
             return capture;
         }
@@ -377,13 +385,15 @@ public class DBUtil {
                 Capture capture = new Capture();
                 capture.setId(rs.getString(2));
                 capture.setRds(rs.getString(3));
-                capture.setS3(rs.getString(4));
-                capture.setStartTime(rs.getTimestamp(5));
-                capture.setEndTime(rs.getTimestamp(6));
-                capture.setStatus(rs.getString(7));
-                capture.setFileSizeLimit(rs.getInt(8));
-                capture.setDbFileSize(rs.getInt(9));
-                capture.setTransactionCount(rs.getInt(10));
+                capture.setRdsRegion(rs.getString(4));
+                capture.setS3(rs.getString(5));
+                capture.setS3Region(rs.getString(6));
+                capture.setStartTime(rs.getTimestamp(7));
+                capture.setEndTime(rs.getTimestamp(8));
+                capture.setStatus(rs.getString(9));
+                capture.setFileSizeLimit(rs.getInt(10));
+                capture.setDbFileSize(rs.getInt(11));
+                capture.setTransactionCount(rs.getInt(12));
 
                 captures.add(capture);
             }
@@ -419,13 +429,15 @@ public class DBUtil {
                 Capture capture = new Capture();
                 capture.setId(rs.getString(2));
                 capture.setRds(rs.getString(3));
-                capture.setS3(rs.getString(4));
-                capture.setStartTime(rs.getTimestamp(5));
-                capture.setEndTime(rs.getTimestamp(6));
-                capture.setStatus(rs.getString(7));
-                capture.setFileSizeLimit(rs.getInt(8));
-                capture.setDbFileSize(rs.getInt(9));
-                capture.setTransactionCount(rs.getInt(10));
+                capture.setRdsRegion(rs.getString(4));
+                capture.setS3(rs.getString(5));
+                capture.setS3Region(rs.getString(6));
+                capture.setStartTime(rs.getTimestamp(7));
+                capture.setEndTime(rs.getTimestamp(8));
+                capture.setStatus(rs.getString(9));
+                capture.setFileSizeLimit(rs.getInt(10));
+                capture.setDbFileSize(rs.getInt(11));
+                capture.setTransactionCount(rs.getInt(12));
 
                 captures.add(capture);
             }
@@ -443,8 +455,8 @@ public class DBUtil {
     public boolean saveReplay(Replay replay)
     {
         //inserts values, if value is there then it's replaced
-        String sql = "INSERT OR REPLACE INTO replays(captureId, id, rds, s3, startTime, endTime, status, type) " +
-                "VALUES (?,?,?,?,?,?,?,?)";
+        String sql = "INSERT OR REPLACE INTO replays(captureId, id, rds, rdsRegion, s3, s3Region, startTime, endTime, status, type) " +
+                "VALUES (?,?,?,?,?,?,?,?, ?, ?)";
 
         try
         {
@@ -455,11 +467,13 @@ public class DBUtil {
             pstmt.setInt(1, getCaptureID(replay.getCaptureId()));
             pstmt.setString(2, replay.getId());
             pstmt.setString(3, replay.getRds());
-            pstmt.setString(4, replay.getS3());
-            pstmt.setTimestamp(5, startTime);
-            pstmt.setTimestamp(6, endTime);
-            pstmt.setString(7, replay.getStatus());
-            pstmt.setString(8, replay.getReplayType());
+            pstmt.setString(4, replay.getRdsRegion());
+            pstmt.setString(5, replay.getS3());
+            pstmt.setString(6, replay.getS3Region());
+            pstmt.setTimestamp(7, startTime);
+            pstmt.setTimestamp(8, endTime);
+            pstmt.setString(9, replay.getStatus());
+            pstmt.setString(10, replay.getReplayType());
             pstmt.executeUpdate();
 
             pstmt.close();
@@ -507,11 +521,13 @@ public class DBUtil {
             replay.setCaptureId(getCaptureName(rs.getInt(2)));
             replay.setId(rs.getString(3));
             replay.setRds(rs.getString(4));
-            replay.setS3(rs.getString(5));
-            replay.setStartTime(rs.getDate(6));
-            replay.setEndTime(rs.getDate(7));
-            replay.setStatus(rs.getString(8));
-            replay.setReplayType(rs.getString(9));
+            replay.setRdsRegion(rs.getString(5));
+            replay.setS3(rs.getString(6));
+            replay.setS3Region(rs.getString(7));
+            replay.setStartTime(rs.getDate(8));
+            replay.setEndTime(rs.getDate(9));
+            replay.setStatus(rs.getString(10));
+            replay.setReplayType(rs.getString(11));
 
             return replay;
         }
@@ -546,11 +562,13 @@ public class DBUtil {
             replay.setCaptureId(getCaptureName(rs.getInt(2)));
             replay.setId(rs.getString(3));
             replay.setRds(rs.getString(4));
-            replay.setS3(rs.getString(5));
-            replay.setStartTime(rs.getDate(6));
-            replay.setEndTime(rs.getDate(7));
-            replay.setStatus(rs.getString(8));
-            replay.setReplayType(rs.getString(9));
+            replay.setRdsRegion(rs.getString(5));
+            replay.setS3(rs.getString(6));
+            replay.setS3Region(rs.getString(7));
+            replay.setStartTime(rs.getDate(8));
+            replay.setEndTime(rs.getDate(9));
+            replay.setStatus(rs.getString(10));
+            replay.setReplayType(rs.getString(11));
 
             return replay;
         }
@@ -581,11 +599,13 @@ public class DBUtil {
                 replay.setCaptureId(getCaptureName(rs.getInt(2)));
                 replay.setId(rs.getString(3));
                 replay.setRds(rs.getString(4));
-                replay.setS3(rs.getString(5));
-                replay.setStartTime(rs.getDate(6));
-                replay.setEndTime(rs.getDate(7));
-                replay.setStatus(rs.getString(8));
-                replay.setReplayType(rs.getString(9));
+                replay.setRdsRegion(rs.getString(5));
+                replay.setS3(rs.getString(6));
+                replay.setS3Region(rs.getString(7));
+                replay.setStartTime(rs.getDate(8));
+                replay.setEndTime(rs.getDate(9));
+                replay.setStatus(rs.getString(10));
+                replay.setReplayType(rs.getString(11));
 
                 replays.add(replay);
             }
@@ -623,12 +643,13 @@ public class DBUtil {
                 replay.setCaptureId(getCaptureName(rs.getInt(2)));
                 replay.setId(rs.getString(3));
                 replay.setRds(rs.getString(4));
-                replay.setS3(rs.getString(5));
-                replay.setStartTime(rs.getDate(6));
-                replay.setEndTime(rs.getDate(7));
-                replay.setStatus(rs.getString(8));
-                replay.setReplayType(rs.getString(9));
-                replay.setDatabaseInfo(new DatabaseInfo());
+                replay.setRdsRegion(rs.getString(5));
+                replay.setS3(rs.getString(6));
+                replay.setS3Region(rs.getString(7));
+                replay.setStartTime(rs.getDate(8));
+                replay.setEndTime(rs.getDate(9));
+                replay.setStatus(rs.getString(10));
+                replay.setReplayType(rs.getString(11));
                 replays.add(replay);
             }
 

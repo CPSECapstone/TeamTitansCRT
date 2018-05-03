@@ -5,6 +5,7 @@ import java.util.Date;
 public class MetricRequest {
 
     private String rds;
+    private String rdsRegion;
     private Date startTime;
     private Date endTime;
     private String[] metrics;
@@ -13,8 +14,9 @@ public class MetricRequest {
 
     }
 
-    public MetricRequest(String rds, Date startTime, Date endTime, String... metrics) {
+    public MetricRequest(String rds, String rdsRegion, Date startTime, Date endTime, String... metrics) {
         this.rds = rds;
+        this.rdsRegion = rdsRegion;
         this.startTime = startTime;
         this.endTime = endTime;
         this.metrics = metrics;
@@ -27,6 +29,10 @@ public class MetricRequest {
     public void setRDS (String rds) {
         this.rds = rds;
     }
+
+    public String getRdsRegion() { return rdsRegion; }
+
+    public void setRdsRegion(String rdsRegion) { this.rdsRegion = rdsRegion; }
 
     public Date getStartTime() {
         return startTime;

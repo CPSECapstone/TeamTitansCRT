@@ -1,5 +1,263 @@
 var defaultMetric = "CPUUtilization"; // Default metric to use when displaying graph
 var metricData = {}; // Metric data used in graph
+var metricsSelector = "MetricsModal";
+
+$(function() {
+    $("div.content-placeholder").replaceWith(`
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 col-lg-offset-3">
+                <h4 class="text-center">Compare Results</h4>
+                <p class="text-center">Select a Capture and Replays to Compare</p>
+            
+                <div> 
+                    <a href="javascript:void(0)" id="btnGetMetrics" class="btn btn-default center-block" data-toggle="modal" data-target="#${metricsSelector}">Get Metrics</a>      
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-6 start-capture-form border-on-right">
+                <p class=""><strong>Captures</strong></p>
+                <hr />
+               <div id="captureTable" style="height:500px;overflow:auto;">
+                    <table class="table table-striped table-hover">
+                        <col width="30">
+                        <tr>
+                            <th></th>
+                            <th>ID</th>
+                            <th>RDS</th>
+                            <th>Status</th>
+                        </tr>
+                    </table>
+                </div>                
+            </div>
+            <div class="col-lg-6">
+                <p class=""><strong>Replays</strong></p>
+                <hr />
+                <div id="replayTable" style="height:500px;overflow:auto;">
+                    <table class="table table-striped table-hover">
+                        <col width="30">
+                        <tr>
+                            <th></th>
+                            <th>ID</th>
+                            <th>CaptureID</th>
+                            <th>RDS</th>
+                            <th>Status</th>
+                            <th>Type</th>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            
+            
+            <div id="${metricsSelector}" class="modal fade" role="dialog">
+                ${createMetricsModal(metricsSelector)}
+            </div>    
+        </div>              
+    </div>
+    `);
+});
+
+function testCaptureList() {
+    var data = [
+        {
+            id: "Running",
+            startTime: 1520871274784,
+            endTime: null,
+            fileSizeLimit: 420,
+            transactionLimit: 840,
+            status: "Running"
+        },
+        {
+            id: "Queued",
+            startTime: 1520871274784,
+            endTime: null,
+            fileSizeLimit: 420,
+            transactionLimit: 840,
+            status: "Queued"
+        },
+        {
+            id: "Finished",
+            startTime: 1520871274784,
+            endTime: null,
+            fileSizeLimit: 420,
+            transactionLimit: 840,
+            status: "Finished"
+        },
+        {
+            id: "Failed",
+            startTime: 1520871274784,
+            endTime: 1520881274784,
+            fileSizeLimit: 420,
+            transactionLimit: 840,
+            status: "Failed"
+        }
+    ]
+    addAllToCaptureList(data);
+}
+
+function insertLoadingSpinner(selector) {
+    return `
+    <div class="${selector}" tabindex="-1" role="dialog">
+        <div class="text-center">Loading...</div>
+        <div class="spinner"></div>
+    </div>`;
+}
+
+/**
+ * Top level function for creating list of capture cards
+ */
+function updateCaptureList() {
+    $.ajax({
+        url: "/resource/captures",
+        type: "GET",
+        beforeSend: function() {
+            $(".manageCapturesLoadingIcon").show();
+        },
+        success: function(data) {
+            console.log(data);
+            if (data.length > 0) {
+                setTimeout(function()
+                {
+                    $(".manageCapturesLoadingIcon").hide();
+                    addAllToCaptureList(data);
+                },
+                500);
+            }
+            else {
+                $(".manageCapturesLoadingIcon").hide();
+                $("#CaptureList").append(`<p>You have no capture history</p>`);
+            }
+        },
+        error: function(err) {
+            console.log(err);
+            $(".manageCapturesLoadingIcon").hide();
+        }
+    });
+}
+
+function addAllToCaptureList(data) {
+    // clears contents of the CaptureList
+    $('#CaptureList').empty();
+    data.map(addToCaptureList).join('')
+}
+
+/**
+ * Takes a capture, adds it to the list of capture cards, and creates the save binding
+ * @param {Capture}
+ */
+function addToCaptureList(capture) {
+    $("#CaptureList").append(createEditCaptureModal(capture));
+
+    var id = capture["id"];
+    $(`#${id}-save`).on("click", function() {
+        updateCapture(id);
+    });
+
+    $(`#${id}-analyze`).on("click", function() {
+        openAnalysis(id);
+    });
+
+    // disables fields on finished or failed captures
+    var status = capture["status"]
+    if (status == 'Finished' || status == 'Failed') {
+        $(`#${id}-modal input`).attr("readonly", true);
+    }
+    else {
+        $(`#${id}-modal input`).attr("readonly", false);
+    }
+}
+
+/**
+ * Function that uses a template to create a card
+ * @param  {Capture}
+ * @return {string}
+ */
+function createEditCaptureModal(capture) {
+    var id = capture["id"];
+    var status = capture["status"];
+    
+    // to be fixed with user set timezone
+    var startTime = new Date(capture["startTime"]);
+    // startTime.setHours(startTime.getHours() - 7); // daylight savings lol
+    startTime.setHours(startTime.getHours());
+    startTime = startTime.toISOString().replace("Z", "");
+    var endTime = capture["endTime"];
+    if (endTime != null) {
+        endTime = new Date(endTime);
+        // endTime.setHours(endTime.getHours() - 7); // daylight savings lol
+        endTime.setHours(endTime.getHours());
+        endTime = endTime.toISOString().replace("Z", "");
+    }
+    else {
+        endTime = "";
+    }
+
+    var fileSizeLimit = capture["fileSizeLimit"];
+    var transactionLimit = capture["transactionLimit"];
+
+    var footer = '';
+    if (status == "Queued" || status == "Running") {
+        footer += `<a id="${id}-save" class="btn btn-primary" data-dismiss="modal">Save</a>`;
+    }
+    else if (status == "Finished") {
+        footer += `<a href="analyze" id="${id}-analyze" class="btn btn-default">Analyze</a>`
+    }
+    footer += `<a class="btn btn-secondary" data-dismiss="modal">Close</a>`;
+                        
+
+    return `
+    ${createCaptureListItem(id, status, `${id}-modal`)}
+    <div class="modal fade" id="${id}-modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">${id}  - ${status}</h5>
+                </div>
+                <div class="modal-body">
+                    <label class="input-label">Start Time:
+                        <input id="" class="txtStartTime form-control" type="datetime-local" value="${startTime}">
+                    </label>
+                    <label class="input-label">End Time:
+                        <input id="" class="txtEndTime form-control" type="datetime-local" value="${endTime}">
+                    </label>
+                    ${createNumericInputValue("Max Capture Size (KB):", "txtMaxSize", fileSizeLimit)}
+                    ${createNumericInputValue("Max Number of Transactions:", "txtMaxTrans", transactionLimit)}
+                </div>
+                <div class="modal-footer">
+                    ${footer}
+                </div>
+            </div>
+        </div>
+    </div>`;
+}
+
+
+/**
+ * Function that creates a modal with chart from capture and replay comparison
+ * @param   
+ * @return {string}
+ */
+function createMetricsModal(selector) {
+    return `            
+        <div class="modal-dialog" style="width:1250px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Metrics Comparison</h4>
+                </div>
+                <div class="modal-body">
+                    ${insertLoadingSpinner("manageCapturesLoadingIcon")}
+                    <div id="metricSelectorDiv"></div>
+                    <div id="container"></div> 
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default gray" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>`;
+}
 
 // Requests capture metrics on button click
 $(function() {
@@ -30,10 +288,15 @@ $(function() {
             };
             requests.push(requestMetrics(body));
         }
-
+        
+        $(".manageCapturesLoadingIcon").show();
+        
         if (checkedCaptures.length > 0 || checkedReplays.length > 0) {
             // Draw the graph after all ajax calls complete
             $.when.apply(this, requests).done(function() {
+                
+                $(".manageCapturesLoadingIcon").hide();
+                
                 if (!jQuery.isEmptyObject(metricData)) {
                     createChart(metricData[defaultMetric])
                 } else {
@@ -43,7 +306,7 @@ $(function() {
         } else {
             $('#container').html('')
         }
-
+        $(`#${metricsSelector}`).modal("show");
         return false; // Stops page from jumping to top
     });
 });
@@ -186,10 +449,7 @@ $(function() {
                 '<th></th>' +
                 '<th>ID</th>' +
                 '<th>RDS</th>' +
-                '<th>S3</th>' +
                 '<th>Status</th>' +
-                '<th>Start</th>' +
-                '<th>End</th>' +
                 '</tr>';
 
             for (var i = 0; i < data.length; i++) {
@@ -208,10 +468,7 @@ $(function() {
                     '<td><label><input class="captureCheckbox" type="checkbox" value="' + log['id'] + '"' + disabled + ' ' + checked + '></label></td>' +
                     '<td>' + log['id'] + '</td>' +
                     '<td>' + log['rds'] + '</td>' +
-                    '<td>' + log['s3'] + '</td>' +
                     '<td>' + log['status'] + '</td>' +
-                    '<td>' + startTime + '</td>' +
-                    '<td>' + endTime + '</td>' +
                     '</tr>';
             }
             $('#captureTable').html(table);
@@ -242,11 +499,8 @@ $(function() {
                 '<th>ID</th>' +
                 '<th>CaptureID</th>' +
                 '<th>RDS</th>' +
-                '<th>S3</th>' +
                 '<th>Status</th>' +
                 '<th>Type</th>' +
-                '<th>Start</th>' +
-                '<th>End</th>' +
                 '</tr>';
 
             for (var i = 0; i < data.length; i++) {
@@ -260,17 +514,26 @@ $(function() {
                 if (disabled) {
                     continue;
                 }
-
+                
+                var idReplay = log['id'];
+                if (idReplay.length > 12) {
+                    var strR = idReplay.substr(0, 12);
+                    idReplay = strR.concat("...");
+                }
+                
+                var idCapture = log['captureId']
+                if (idCapture.length > 12) {
+                    var strC = idCapture.substr(0, 12);
+                    idCapture = strC.concat("...");
+                }
+                
                 table += '<tr>' +
                     '<td><label><input class="replayCheckbox" type="checkbox" value="' + log['id'] + '"' + disabled + ' ' + checked + '></label></td>' +
-                    '<td>' + log['id'] + '</td>' +
-                    '<td>' + log['captureId'] + '</td>' +
+                    '<td class="CellWithComment">' + idReplay + '<span class="CellComment">' + log['id'] + '</span></td>' +
+                    '<td class="CellWithComment">' + idCapture + '<span class="CellComment">' + log['captureId'] + '</span></td>' +
                     '<td>' + log['rds'] + '</td>' +
-                    '<td>' + log['s3'] + '</td>' +
                     '<td>' + log['status'] + '</td>' +
                     '<td>' + log['replayType'] + '</td>' +
-                    '<td>' + startTime + '</td>' +
-                    '<td>' + endTime + '</td>' +
                     '</tr>';
             }
             $('#replayTable').html(table);

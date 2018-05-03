@@ -23,7 +23,7 @@ public class RDSManager extends AmazonWebServiceResult{
 
     private AmazonRDS rdsClient;
 
-    public RDSManager() {
+    public RDSManager(String region) {
 
         JSONParser parser = new JSONParser();
 
@@ -40,13 +40,13 @@ public class RDSManager extends AmazonWebServiceResult{
 
             this.rdsClient = AmazonRDSClientBuilder.standard()
                     .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
-                    .withRegion(Regions.US_WEST_1)
+                    .withRegion(Regions.valueOf(region))
                     .build();
         } catch (Exception e) {
             // Running inside EC2 Instance:
             this.rdsClient = AmazonRDSClientBuilder.standard()
                     .withCredentials(InstanceProfileCredentialsProvider.getInstance())
-                    .withRegion(Regions.US_WEST_1)
+                    .withRegion(Regions.valueOf(region))
                     .build();
         }
     }

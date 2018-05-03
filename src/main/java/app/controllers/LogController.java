@@ -21,11 +21,11 @@ public abstract class LogController
 
     protected LogFilter logFilter;
 
-    public abstract String getLogData(String resourceName, String fileName);
+    public abstract String getLogData(String resourceName, String region, String fileName);
 
-    public static String getMetricsFromS3(String s3Bucket, String fileName)
+    public static String getMetricsFromS3(String s3Bucket, String region, String fileName)
     {
-        S3Manager s3Manager = new S3Manager();
+        S3Manager s3Manager = new S3Manager(region);
         return s3Manager.getFileAsString(s3Bucket, fileName);
     }
 
@@ -44,28 +44,28 @@ public abstract class LogController
 
     public abstract void uploadAllFiles(Session session);
 
-    public static String getMetricsFromCloudWatch(String rds, Date startTime, Date endTime)
+    public static String getMetricsFromCloudWatch(String rds, String region, Date startTime, Date endTime)
     {
-        CloudWatchManager cloudManager = new CloudWatchManager();
+        CloudWatchManager cloudManager = new CloudWatchManager(region);
         return cloudManager.getAllMetricStatisticsAsJson(rds, startTime, endTime);
     }
 
     public void uploadMetrics(Session session)
     {
-        String stats = getMetricsFromCloudWatch(session.getRds(), session.getStartTime(), session.getEndTime());
+        String stats = getMetricsFromCloudWatch(session.getRds(), session.getRdsRegion(), session.getStartTime(), session.getEndTime());
         InputStream statStream = new ByteArrayInputStream(stats.getBytes(StandardCharsets.UTF_8));
-        uploadInputStream(session.getS3(), session.getId() + PerformanceTag, statStream);
+        uploadInputStream(session.getS3(), session.getRdsRegion(),session.getId() + PerformanceTag, statStream);
     }
 
-    public void uploadInputStream(String s3, String fileName, InputStream stream)
+    public void uploadInputStream(String s3, String region, String fileName, InputStream stream)
     {
-        S3Manager s3Manager = new S3Manager();
+        S3Manager s3Manager = new S3Manager(region);
         s3Manager.uploadFile(s3, fileName, stream, new ObjectMetadata());
     }
 
-    public void uploadFile(String s3, String fileName, File file)
+    public void uploadFile(String s3, String region, String fileName, File file)
     {
-        S3Manager s3Manager = new S3Manager();
+        S3Manager s3Manager = new S3Manager(region);
         s3Manager.uploadFile(s3, fileName, file);
     }
 }

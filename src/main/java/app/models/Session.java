@@ -11,6 +11,10 @@ public interface Session {
 
     public String getS3();
 
+    public String getRdsRegion();
+
+    public String getS3Region();
+
     public Date getStartTime();
 
     public Date getEndTime();

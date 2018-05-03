@@ -37,8 +37,8 @@ public class CaptureLogController extends LogController
     }
 
     @Override
-    public String getLogData(String resourceName, String fileName) {
-        RDSManager rdsManager = new RDSManager();
+    public String getLogData(String resourceName, String region, String fileName) {
+        RDSManager rdsManager = new RDSManager(region);
         return rdsManager.downloadLog(resourceName, fileName);
     }
 
@@ -58,7 +58,7 @@ public class CaptureLogController extends LogController
             isFinalWrite = true;
         }
 
-        String logData = getLogData(capture.getRds(), fileName);
+        String logData = getLogData(capture.getRds(), capture.getRdsRegion(), fileName);
         if (logData == null)
         {
             return;
@@ -229,7 +229,7 @@ public class CaptureLogController extends LogController
         {
             createDummyFile();
         }
-        uploadFile(capture.getS3(), localFileName, getFile());
+        uploadFile(capture.getS3(), capture.getS3Region(), localFileName, getFile());
         deleteFile();
     }
 

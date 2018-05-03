@@ -104,6 +104,34 @@
 }
 
 /*-------------------------------*/
+/*          Tool Tip             */
+/*-------------------------------*/
+
+.CellWithComment{
+  position:relative;
+}
+
+.CellComment{
+  display:none;
+  position:absolute; 
+  z-index:100;
+  border:1px;
+  background-color:white;
+  border-style:solid;
+  border-width:1px;
+  border-color:black;
+  padding:3px;
+  color:black; 
+  top:0px; 
+  left:0px;
+  transition-delay: 3s;
+}
+
+.CellWithComment:hover span.CellComment{
+  display:block;
+}
+
+/*-------------------------------*/
 /*     Sidebar nav styles        */
 /*-------------------------------*/
 

@@ -146,7 +146,7 @@ public class CLI {
         System.out.println(con.getResponseMessage());
 
         if (responseCode >= 400) {
-            System.out.println(responseCode + " " + readResponse(con));
+            System.out.println(responseCode);
             throw new RuntimeException();
         }
 
@@ -161,7 +161,7 @@ public class CLI {
         int responseCode = con.getResponseCode(); // HTTP Response Code
 
         if (responseCode >= 400) {
-            System.out.println(responseCode + " " + readResponse(con));
+            System.out.println(responseCode);
             throw new RuntimeException();
         }
 

@@ -20,7 +20,7 @@ public class CloudWatchManager {
 
     private AmazonCloudWatch cwClient;
 
-    public CloudWatchManager() {
+    public CloudWatchManager(String region) {
 
         JSONParser parser = new JSONParser();
 
@@ -37,13 +37,13 @@ public class CloudWatchManager {
 
             this.cwClient = AmazonCloudWatchClientBuilder.standard()
                     .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
-                    .withRegion(Regions.US_WEST_1)
+                    .withRegion(Regions.valueOf(region))
                     .build();
         } catch (Exception e) {
             // Running inside EC2 Instance:
             this.cwClient = AmazonCloudWatchClientBuilder.standard()
                     .withCredentials(InstanceProfileCredentialsProvider.getInstance())
-                    .withRegion(Regions.US_WEST_1)
+                    .withRegion(Regions.valueOf(region))
                     .build();
         }
     }

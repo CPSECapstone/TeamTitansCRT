@@ -6,6 +6,7 @@ public class DatabaseInfo {
 
     private String dbUrl;
     private String database;
+    private String region;
     private String username;
     private String password;
 
@@ -13,9 +14,10 @@ public class DatabaseInfo {
         
     }
 
-    public DatabaseInfo(String dbUrl, String database, String username, String password) {
+    public DatabaseInfo(String dbUrl, String database, String region, String username, String password) {
         this.dbUrl = dbUrl;
         this.database = database;
+        this.region = region;
         this.username = username;
         this.password = password; // Should this be encrypted?
     }
@@ -27,6 +29,8 @@ public class DatabaseInfo {
     public String getDatabase() {
         return this.database;
     }
+
+    public String getRegion() { return this.region; }
 
     public String getUsername() {
         return this.username;
@@ -42,10 +46,18 @@ public class DatabaseInfo {
 
     public void setDatabase(String database) {
         this.database = database;
+        updateDbUrl();
+    }
 
-        if (getDbUrl() == null) {
-            RDSManager rdsManager = new RDSManager();
-            setDbUrl(rdsManager.getRDSInstanceUrl(database));
+    public void setRegion(String region) {
+        this.region = region;
+        updateDbUrl();
+    }
+
+    private void updateDbUrl() {
+        if (getDbUrl() == null && getDatabase() != null && getRegion() != null) {
+            RDSManager rdsManager = new RDSManager(getRegion());
+            setDbUrl(rdsManager.getRDSInstanceUrl(getDatabase()));
         }
     }
 
