@@ -96,8 +96,8 @@ public class CaptureServlet {
         return new ResponseEntity<>(CaptureController.getAllCaptureValues(), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/capture/delete", method = RequestMethod.GET)
-    public ResponseEntity<String> captureDelete(Capture capture) {
+    @RequestMapping(value = "/capture/delete", method = RequestMethod.POST)
+    public ResponseEntity<String> captureDelete(@RequestBody Capture capture) {
         if (capture.getId() == null || capture.getS3() == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }

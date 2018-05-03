@@ -117,6 +117,7 @@ function createTableRow(capture) {
     var id = capture["id"];
     var status = capture["status"];
     var rds = capture["rds"];
+    var rdsRegion = capture["rdsRegion"];
     var startTimeMilli = capture["startTime"];
     var startTime = "Not Specified";
     var tempStartTime = new Date(startTimeMilli);
@@ -133,7 +134,7 @@ function createTableRow(capture) {
         endTime = tempEndTime.customFormat("#MM#/#DD#/#YYYY# #hh#:#mm#:#ss# #AMPM#")
     }
     
-    createRow(id, rds,  status, startTimeMilli, startTime, endTimeMilli, endTime);
+    createRow(id, rds, rdsRegion, status, startTimeMilli, startTime, endTimeMilli, endTime);
     var id = capture["id"];
     $(`a#stopButton${id}`).on("click", function() {
         stopCapture(id);
@@ -141,9 +142,10 @@ function createTableRow(capture) {
     });
 }
 
-function createRow(id, rds, status, startTimeMilli, startTime, endTimeMilli, endTime) {
+function createRow(id, rds, rdsRegion, status, startTimeMilli, startTime, endTimeMilli, endTime) {
      var body = {
         rds: rds,
+        rdsRegion: rdsRegion,
         startTime: startTimeMilli,
         endTime: endTimeMilli,
         metrics: ["CPUUtilization", "FreeStorageSpace", "WriteThroughput"]

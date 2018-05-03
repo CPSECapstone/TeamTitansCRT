@@ -2,6 +2,8 @@ $(function() {
     var idSelector = "idSelector";
     var rdsSelector = "rdsSelector";
     var s3Selector = "s3Selector";
+    var rdsRegionSelector = "rdsRegionSelector";
+    var s3RegionSelector = "s3RegionSelector";
     var startTimeSelector = "startTimeSelector";
     var endTimeSelector = "endTimeSelector";
     var fileSizeLimitSelector = "fileSizeLimitSelector";
@@ -24,7 +26,9 @@ $(function() {
                 <p class=""><strong>Start a Capture</strong></p>
                 <hr />
                 ${insertLoadingSpinner("startCaptureLoadingIcon")}
+                <div class="${rdsRegionSelector}"></div>
                 <div class="${rdsSelector}"></div>
+                <div class="${s3RegionSelector}"></div>
                 <div class="${s3Selector}"></div>
                 ${createTextInput("Capture ID:", idSelector)}
 
@@ -57,9 +61,7 @@ $(function() {
     `);
     updateCaptureList();
     // testCaptureList();
-
-    populateRDSDropdown(rdsSelector);
-    populateS3Dropdown(s3Selector);
+    populateResourceDropdowns(rdsRegionSelector, rdsSelector, s3RegionSelector, s3Selector);
     $(`.${startBtnSelector}`).on("click", function() {
         var startTime = null;
         if ($(`.${startTimeSelector}`).val()) {
@@ -77,7 +79,9 @@ $(function() {
             var capture = {
                 id: $(`.${idSelector}`).val(),
                 rds: $(`.${rdsSelector}`).val(),
+                rdsRegion: $(`.${rdsRegionSelector}`).val(),
                 s3: $(`.${s3Selector}`).val(),
+                s3Region: $(`.${s3RegionSelector}`).val(),
                 startTime: startTime,
                 endTime: endTime,
                 fileSizeLimit: $(`.${fileSizeLimitSelector}`).val(),
@@ -199,6 +203,40 @@ function addToCaptureList(capture) {
     else {
         $(`#${id}-modal input`).attr("readonly", false);
     }
+
+    // link delete button to modal
+    $(`#${id}-delete-link`).on("click", function() {
+        deleteCapture(capture);
+    });
+}
+
+function deleteCapture(capture) {
+    var id = capture["id"];
+    console.log(`deleting ${id}`);
+
+    // sends request to backend
+    $.ajax({
+        url: "/capture/delete",
+        type: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        data: JSON.stringify(capture),
+        success: function() {
+            $("#exampleModal").html(createDeleteCaptureModal("Successful", `Capture ${id} was deleted.`));
+            $('#exampleModal').on('hidden.bs.modal', function () {
+                updateCaptureList();
+            });
+            $("#exampleModal").modal("show");
+        },
+        error: function(err) {
+            $("#exampleModal").html(createDeleteCaptureModal("Failure", "Deletion failed."));
+            $("#exampleModal").modal("show");
+
+            console.log("Error deleting capture");
+            console.log(err.responseText);
+        }
+    });
 }
 
 /**
@@ -238,6 +276,8 @@ function createEditCaptureModal(capture) {
     }
     footer += `<a class="btn btn-secondary" data-dismiss="modal">Close</a>`;
                         
+    footerDelete = `<a id="${id}-delete-link" class="btn btn-primary" data-dismiss="modal">Delete</a>`;
+    footerDelete += `<a class="btn btn-secondary" data-dismiss="modal">Close</a>`;
 
     return `
     ${createCaptureListItem(id, status, `${id}-modal`)}
@@ -262,7 +302,37 @@ function createEditCaptureModal(capture) {
                 </div>
             </div>
         </div>
+    </div>
+    <div class="modal fade" id="${id}-modal-delete" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete Capture: ${id}</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Are sure you want to delete capture?</p>
+                </div>
+                <div class="modal-footer">
+                    ${footerDelete}
+                </div>
+            </div>
+        </div>
     </div>`;
+}
+
+function createCaptureListItem(id, status, selector) {
+    // 
+    return `
+    <li id="item-${id}" class="list-group-item">
+        ${createIcon(status)}
+        ${id}
+        <div class="pull-right">
+            <a data-toggle="modal" data-target="#${selector}-delete" class="pull-right" href="javascript:void(0)"><span class="glyphicon glyphicon-trash"></span></a>
+            <a data-toggle="modal" data-target="#${selector}" href="javascript:void(0)" class="pad-right">
+                ${status == 'Finished' || status == 'Failed' ? 'View' : 'Edit'}
+            </a>
+        </div>
+    </li>`;
 }
 
 /**
@@ -305,16 +375,6 @@ function updateCapture(id) {
             console.log(err);
         }
     });
-}
-
-function createCaptureListItem(id, status, selector) {
-    return `
-    <li id="item-${id}" class="list-group-item">
-        ${createIcon(status)}${id}
-        <a data-toggle="modal" data-target="#${selector}" href="javascript:void(0)" class="pull-right">
-        ${status == 'Finished' || status == 'Failed' ? 'View' : 'Edit'}
-        </a>
-    </li>`;
 }
 
 function createIcon(status) {
@@ -379,13 +439,29 @@ function createStartCaptureModal(result, message) {
     </div>`;
 }
 
+function createDeleteCaptureModal(result, message) {
+    return `
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete ${result}</h5>
+            </div>
+            <div class="modal-body">
+                <p>${message}</p>
+            </div>
+            <div class="modal-footer">
+                <a class="btn btn-secondary" data-dismiss="modal">Close</a>
+            </div>
+        </div>
+    </div>`;
+}
+
 /**
- * Populate rds dropdown
- * @param {string} selector
+ * Populate region and rds/s3 dropdowns
  */
-function populateRDSDropdown(selector) {
+function populateResourceDropdowns(rdsRegion, rdsSelector, s3Region, s3Selector) {
     $.ajax({
-        url: "/resource/rds",
+        url: "/resource/regions",
         type: "GET",
         beforeSend: function() {
             $(".startCaptureLoadingIcon").show();
@@ -393,6 +469,36 @@ function populateRDSDropdown(selector) {
         complete: function() {
             $(".startCaptureLoadingIcon").hide();
         },
+        success: function(data) {
+            $(`div.${rdsRegion}`).replaceWith(createDropdown("Select RDS Region", rdsRegion, data));
+            $(`div.${s3Region}`).replaceWith(createDropdown("Select S3 Region", s3Region, data));
+
+            $(`.${rdsRegion}`).on("change", function() {
+                updateRDSDropdown(rdsSelector, rdsRegion);
+            });
+
+            $(`.${s3Region}`).on("change", function() {
+                updateS3Dropdown(s3Selector, s3Region);
+            });
+
+            populateRDSDropdown(rdsSelector, rdsRegion);
+            populateS3Dropdown(s3Selector, s3Region);
+        },
+        error: function(err) {
+            console.log("Error populating region dropdowns")
+            console.log(err);
+        }
+    });
+}
+
+/**
+ * Populate rds dropdown
+ * @param {string} selector
+ */
+function populateRDSDropdown(selector, regionSelector) {
+    $.ajax({
+        url: "/resource/rds/" + $("." + regionSelector).val(),
+        type: "GET",
         success: function(data) {
             $(`div.${selector}`).replaceWith(createDropdown("Select RDS Endpoint", selector, data));
         },
@@ -404,15 +510,59 @@ function populateRDSDropdown(selector) {
 }
 
 /**
- * Populate rds dropdown
+ * Update rds dropdown
+ * @param {string} selector
+ * @param {string} regionSelector
+ */
+function updateRDSDropdown(selector, regionSelector) {
+    $.ajax({
+        url: "/resource/rds/" + $("." + regionSelector).val(),
+        type: "GET",
+        success: function(data) {
+            $(`.${selector}`).replaceWith(
+                `<select class="${selector} form-control" id="">
+                    ${data.map(createOption).join('')}
+                </select>`);
+        },
+        error: function(err) {
+            console.log("Error populating rds dropdown")
+            console.log(err);
+        }
+    });
+}
+
+/**
+ * Populate s3 dropdown
  * @param {string} selector
  */
-function populateS3Dropdown(selector) {
+function populateS3Dropdown(selector, regionSelector) {
     $.ajax({
-        url: "/resource/s3",
+        url: "/resource/s3/" + $("." + regionSelector).val(),
         type: "GET",
         success: function(data) {
             $(`div.${selector}`).replaceWith(createDropdown("Select S3 Endpoint", selector, data));
+        },
+        error: function(err) {
+            console.log("Error populating s3 dropdown")
+            console.log(err);
+        }
+    });
+}
+
+/**
+ * Update s3 dropdown
+ * @param {string} selector
+ * @param {string} regionSelector
+ */
+function updateS3Dropdown(selector, regionSelector) {
+    $.ajax({
+        url: "/resource/s3/" + $("." + regionSelector).val(),
+        type: "GET",
+        success: function(data) {
+            $(`.${selector}`).replaceWith(
+                `<select class="${selector} form-control" id="">
+                    ${data.map(createOption).join('')}
+                </select>`);
         },
         error: function(err) {
             console.log("Error populating s3 dropdown")

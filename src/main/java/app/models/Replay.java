@@ -12,7 +12,9 @@ public class Replay implements Session {
 
     private String id;
     private String rds;
+    private String rdsRegion;
     private String s3;
+    private String s3Region;
     private String status;
     private String captureLogFileName;
     private String captureId;
@@ -28,22 +30,26 @@ public class Replay implements Session {
 
     }
 
-    public Replay(String id, String rds, String s3, String replayType, String captureId) {
+    public Replay(String id, String rds, String rdsRegion, String s3, String s3Region, String replayType, String captureId) {
         this.id = id;
         this.rds = rds;
+        this.rdsRegion = rdsRegion;
         this.s3 = s3;
+        this.s3Region = s3Region;
         this.captureId = captureId;
         this.captureLogFileName = this.captureId + LogController.WorkloadTag;
-        this.startTime = new Date();
+        this.startTime = null;
         this.endTime = null;
         this.replayType = replayType;
         updateStatus();
     }
 
-    public Replay(String id, String rds, String s3, String replayType, String captureId, Date startTime) {
+    public Replay(String id, String rds, String rdsRegion, String s3, String s3Region, String replayType, String captureId, Date startTime) {
         this.id = id;
         this.rds = rds;
+        this.rdsRegion = rdsRegion;
         this.s3 = s3;
+        this.s3Region = s3Region;
         this.captureId = captureId;
         this.captureLogFileName = this.captureId + LogController.WorkloadTag;
         this.startTime = startTime;
@@ -84,6 +90,14 @@ public class Replay implements Session {
     public void setS3(String s3) {
         this.s3 = s3;
     }
+
+    public String getRdsRegion() { return rdsRegion; }
+
+    public void setRdsRegion(String rdsRegion) { this.rdsRegion = rdsRegion; }
+
+    public String getS3Region() { return s3Region; }
+
+    public void setS3Region(String s3Region) { this.s3Region = s3Region; }
 
     public Date getStartTime() {
         return startTime;

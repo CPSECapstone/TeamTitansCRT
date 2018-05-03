@@ -1,6 +1,7 @@
 package app.servlets;
 
 import app.managers.RDSManager;
+import com.amazonaws.regions.Regions;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,6 +15,7 @@ import app.managers.S3Manager;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Servlet to handle all resource calls.
@@ -21,18 +23,25 @@ import java.util.Collection;
 @RestController
 public class ResourceServlet {
 
-    @RequestMapping(value = "/resource/rds", method = RequestMethod.GET)
-    public ResponseEntity<Collection<String>> getRDSInstances() {
+    @RequestMapping(value = "/resource/rds/{region}", method = RequestMethod.GET)
+    public ResponseEntity<Collection<String>> getRDSInstances(@PathVariable String region) {
 
-        RDSManager rdsManager = new RDSManager();
+        RDSManager rdsManager = new RDSManager(region);
         return new ResponseEntity<>(rdsManager.getRDSInstances(), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/resource/s3", method = RequestMethod.GET)
-    public ResponseEntity<Collection<String>> getS3Buckets() {
-
-        S3Manager s3Manager = new S3Manager();
+    @RequestMapping(value = "/resource/s3/{region}", method = RequestMethod.GET)
+    public ResponseEntity<Collection<String>> getS3Buckets(@PathVariable String region) {
+        S3Manager s3Manager = new S3Manager(region);
         return new ResponseEntity<>(s3Manager.getS3Buckets(), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/resource/regions", method = RequestMethod.GET)
+    public ResponseEntity<Regions[]> getRegions() {
+        ArrayList<Regions> regions = new ArrayList<>();
+        Collections.addAll(regions, Regions.values());
+        regions.remove(Regions.valueOf("GovCloud"));
+        return new ResponseEntity<>(regions.toArray(new Regions[regions.size()]), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/resource/captures", method = RequestMethod.GET)

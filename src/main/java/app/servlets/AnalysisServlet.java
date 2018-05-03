@@ -2,7 +2,6 @@ package app.servlets;
 
 import app.models.Session;
 import com.amazonaws.services.cloudwatch.model.Datapoint;
-import com.amazonaws.services.cloudwatch.model.GetMetricStatisticsResult;
 import com.amazonaws.util.IOUtils;
 import app.controllers.LogController;
 import app.managers.CloudWatchManager;
@@ -19,7 +18,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
@@ -54,10 +52,10 @@ public class AnalysisServlet {
 
         // Get metric stream
         if (session.getStatus().equals("Running")) { // Obtain from CloudWatch if capture is currently running
-            String metrics = LogController.getMetricsFromCloudWatch(session.getRds(), session.getStartTime(), new Date());
+            String metrics = LogController.getMetricsFromCloudWatch(session.getRds(), session.getRdsRegion(), session.getStartTime(), new Date());
             stream = new ByteArrayInputStream(metrics.getBytes(StandardCharsets.UTF_8));
         } else if (session.getStatus().equals("Finished")) { // Obtain from S3 if capture has already finished
-            String metrics = LogController.getMetricsFromS3(session.getS3(), session.getId() + "-Performance.log");
+            String metrics = LogController.getMetricsFromS3(session.getS3(), session.getRdsRegion(), session.getId() + "-Performance.log");
             stream = new ByteArrayInputStream(metrics.getBytes(StandardCharsets.UTF_8));
         } else {
             writeError(response, "Error: Capture is not 'Running' or 'Finished'");
@@ -109,7 +107,7 @@ public class AnalysisServlet {
 
         //Iterate through list of metrics.
         for(String metric : request.getMetrics()) {
-            averages.add(calculateAverage(request.getRDS(), request.getStartTime(), request.getEndTime(), metric));
+            averages.add(calculateAverage(request.getRDS(), request.getRdsRegion(), request.getStartTime(), request.getEndTime(), metric));
         }
 
         return new ResponseEntity<List<Double>>(averages, HttpStatus.OK);
@@ -123,8 +121,8 @@ public class AnalysisServlet {
      * @param  metric Metric name to request ex. "CPUUtilization".
      * @return        Average of a single metric.
      */
-    public double calculateAverage(String rds, Date start, Date end, String metric){
-        CloudWatchManager cloudWatchManager = new CloudWatchManager();
+    public double calculateAverage(String rds, String rdsRegion, Date start, Date end, String metric){
+        CloudWatchManager cloudWatchManager = new CloudWatchManager(rdsRegion);
         List<Datapoint> dataPoints = new ArrayList<>();
         //10 hour intervals
         long hour = 3600 * 1000 * 10;
