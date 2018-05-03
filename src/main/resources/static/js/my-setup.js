@@ -13,7 +13,7 @@ $(function() {
 
                     <p><a href="/dashboard" class="btn btn-default gray" >Use My Instance Profile</a></p>
 
-                    <p>or <a href="javascript:void(0)" class="" data-toggle="modal" data-target="#${instProfHelpSelector}">Set Up An Instance Profile</a></p>                    
+                    <p><a href="javascript:void(0)" class="" data-toggle="modal" data-target="#${instProfHelpSelector}">Set Up An Instance Profile</a></p>                    
                 </div>
                 <div id="${instProfHelpSelector}" class="modal fade" role="dialog">
                     ${createInstanceProfHelpModal(instProfHelpSelector)}
