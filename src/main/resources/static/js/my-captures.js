@@ -203,6 +203,40 @@ function addToCaptureList(capture) {
     else {
         $(`#${id}-modal input`).attr("readonly", false);
     }
+
+    // link delete button to modal
+    $(`#${id}-delete-link`).on("click", function() {
+        deleteCapture(capture);
+    });
+}
+
+function deleteCapture(capture) {
+    var id = capture["id"];
+    console.log(`deleting ${id}`);
+
+    // sends request to backend
+    $.ajax({
+        url: "/capture/delete",
+        type: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        data: JSON.stringify(capture),
+        success: function() {
+            $("#exampleModal").html(createDeleteCaptureModal("Successful", `Capture ${id} was deleted.`));
+            $('#exampleModal').on('hidden.bs.modal', function () {
+                updateCaptureList();
+            });
+            $("#exampleModal").modal("show");
+        },
+        error: function(err) {
+            $("#exampleModal").html(createDeleteCaptureModal("Failure", "Deletion failed."));
+            $("#exampleModal").modal("show");
+
+            console.log("Error deleting capture");
+            console.log(err.responseText);
+        }
+    });
 }
 
 /**
@@ -242,6 +276,8 @@ function createEditCaptureModal(capture) {
     }
     footer += `<a class="btn btn-secondary" data-dismiss="modal">Close</a>`;
                         
+    footerDelete = `<a id="${id}-delete-link" class="btn btn-primary" data-dismiss="modal">Delete</a>`;
+    footerDelete += `<a class="btn btn-secondary" data-dismiss="modal">Close</a>`;
 
     return `
     ${createCaptureListItem(id, status, `${id}-modal`)}
@@ -266,7 +302,37 @@ function createEditCaptureModal(capture) {
                 </div>
             </div>
         </div>
+    </div>
+    <div class="modal fade" id="${id}-modal-delete" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete Capture: ${id}</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Are sure you want to delete capture?</p>
+                </div>
+                <div class="modal-footer">
+                    ${footerDelete}
+                </div>
+            </div>
+        </div>
     </div>`;
+}
+
+function createCaptureListItem(id, status, selector) {
+    // 
+    return `
+    <li id="item-${id}" class="list-group-item">
+        ${createIcon(status)}
+        ${id}
+        <div class="pull-right">
+            <a data-toggle="modal" data-target="#${selector}-delete" class="pull-right" href="javascript:void(0)"><span class="glyphicon glyphicon-trash"></span></a>
+            <a data-toggle="modal" data-target="#${selector}" href="javascript:void(0)" class="pad-right">
+                ${status == 'Finished' || status == 'Failed' ? 'View' : 'Edit'}
+            </a>
+        </div>
+    </li>`;
 }
 
 /**
@@ -309,16 +375,6 @@ function updateCapture(id) {
             console.log(err);
         }
     });
-}
-
-function createCaptureListItem(id, status, selector) {
-    return `
-    <li id="item-${id}" class="list-group-item">
-        ${createIcon(status)}${id}
-        <a data-toggle="modal" data-target="#${selector}" href="javascript:void(0)" class="pull-right">
-        ${status == 'Finished' || status == 'Failed' ? 'View' : 'Edit'}
-        </a>
-    </li>`;
 }
 
 function createIcon(status) {
@@ -377,6 +433,23 @@ function createStartCaptureModal(result, message) {
             </div>
             <div class="modal-footer">
                 <a href="dashboard" class="btn btn-default">Dashboard</a>
+                <a class="btn btn-secondary" data-dismiss="modal">Close</a>
+            </div>
+        </div>
+    </div>`;
+}
+
+function createDeleteCaptureModal(result, message) {
+    return `
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete ${result}</h5>
+            </div>
+            <div class="modal-body">
+                <p>${message}</p>
+            </div>
+            <div class="modal-footer">
                 <a class="btn btn-secondary" data-dismiss="modal">Close</a>
             </div>
         </div>

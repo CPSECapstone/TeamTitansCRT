@@ -84,4 +84,4 @@ atlassian-ide-plugin.xml
 .gradletasknamecache
 
 #Database Files
-*.db
+*.db*
