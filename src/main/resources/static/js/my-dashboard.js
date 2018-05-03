@@ -1,7 +1,7 @@
 $(function() {
     $("div.content-placeholder").replaceWith(`
     <div class="container">
-        <a id="toggle-btn" class="btn btn-default">Toggle Dashboard</a>
+        <a id="toggle-btn" class="btn btn-default pull-right">Show Replays</a>
         <div class="row capture-row">
             <div class="col-lg-6 col-lg-offset-3">
                 <h4 class="text-center">Capture Dashboard</h4>
@@ -25,8 +25,8 @@ $(function() {
     $("#toggle-btn").on("click", function() {
         toggleDashboard();
     });
-    // updateStatus();
-    testDashboardTable();
+    updateStatus();
+    // testDashboardTable();
 });
 
 function testDashboardTable() {
@@ -96,7 +96,6 @@ function testDashboardTable() {
     fillTable("tbody.replay-table", testReps);
 
     $("div.replay-row").hide();
-    toggleDashboard();
 }
 
 function toggleDashboard() {
@@ -104,10 +103,12 @@ function toggleDashboard() {
     if (replayShown) {
         $("div.replay-row").hide();
         $("div.capture-row").show();
+        $("#toggle-btn").html("Show Replays");
     }
     else {
         $("div.replay-row").show();
         $("div.capture-row").hide();
+        $("#toggle-btn").html("Show Captures");
     }
 }
 
@@ -119,11 +120,11 @@ function insertLoadingSpinner(selector) {
     </div>`;
 }
 
-function emptyDashboard() {
+function emptyDashboard(body, btn, ref) {
     return `
-    <p class="text-center">You have no captures or replays currently running! Let's get started!</p>
+    <p class="text-center">${body}</p>
     <div class="text-center">
-        <a href="capture" class="btn btn-default">Start new capture</a>
+        <a href="${ref}" class="btn btn-default">${btn}</a>
     </div>`;
 }
 
@@ -146,7 +147,8 @@ function updateStatus() {
                     fillTable("tbody.capture-table", data);
                 }
                 else {
-                    $("div.capture-dashboard").replaceWith(emptyDashboard());    
+                    var body = "You have no captures currently running! Let's get started!";
+                    $("div.capture-dashboard").replaceWith(emptyDashboard(body, "Start new capture", "capture"));
                 }
             },
             500);
@@ -157,6 +159,36 @@ function updateStatus() {
             $(".tableLoadingIcon").hide();
         }
     });
+    $.ajax({
+        url: "/replay/status",
+        type: "GET",
+        beforeSend: function() {
+            console.log("show");
+            $(".tableLoadingIcon").show();
+        },
+        success: function(data) {
+            setTimeout(function()
+            {
+                console.log("hide");
+                $(".tableLoadingIcon").hide();
+                if (data.length > 0) {
+                    $("div.replay-dashboard").replaceWith(replayDashboard(data));    
+                    fillTable("tbody.replay-table", data);
+                }
+                else {
+                    var body = "You have no replays currently running! Let's get started!";
+                    $("div.replay-dashboard").replaceWith(emptyDashboard(body, "Start new replay", "replay"));
+                }
+            },
+            500);
+        },
+        error: function(err) {
+            console.log(err);
+            console.log("Error updating the status.")
+            $(".tableLoadingIcon").hide();
+        }
+    });
+    $("div.replay-row").hide();
 }
 
 function captureDashboard(data) {

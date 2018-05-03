@@ -61,6 +61,7 @@ $(function() {
     `);
     updateCaptureList();
     // testCaptureList();
+    
     populateResourceDropdowns(rdsRegionSelector, rdsSelector, s3RegionSelector, s3Selector);
     $(`.${startBtnSelector}`).on("click", function() {
         var startTime = null;

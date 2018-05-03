@@ -42,7 +42,7 @@ public class ReplayController {
         }
     }
 
-    public static Collection<Replay> getAllReplays()
+    public static Collection<Replay> getAllReplayValues()
     {
         return replays.values();
     }

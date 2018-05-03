@@ -240,6 +240,57 @@ function addToReplayList(replay) {
     $(`#${id}-save`).on("click", function() {
         updateReplay(id);
     });
+
+    // link delete button to modal
+    $(`#${id}-delete-link`).on("click", function() {
+        deleteReplay(replay);
+    });
+}
+
+function deleteReplay(replay) {
+    var id = replay["id"];
+    console.log(`deleting ${id}`);
+
+    // sends request to backend
+    $.ajax({
+        url: "/replay/delete",
+        type: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        data: JSON.stringify(replay),
+        success: function() {
+            $("#exampleModal").html(createDeleteReplayModal("Successful", `Replay ${id} was deleted.`));
+            $('#exampleModal').on('hidden.bs.modal', function () {
+                updateReplayList();
+            });
+            $("#exampleModal").modal("show");
+        },
+        error: function(err) {
+            $("#exampleModal").html(createDeleteReplayModal("Failure", "Deletion failed."));
+            $("#exampleModal").modal("show");
+
+            console.log("Error deleting replay");
+            console.log(err.responseText);
+        }
+    });
+}
+
+function createDeleteReplayModal(result, message) {
+    return `
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete ${result}</h5>
+            </div>
+            <div class="modal-body">
+                <p>${message}</p>
+            </div>
+            <div class="modal-footer">
+                <a class="btn btn-secondary" data-dismiss="modal">Close</a>
+            </div>
+        </div>
+    </div>`;
 }
 
 /**
