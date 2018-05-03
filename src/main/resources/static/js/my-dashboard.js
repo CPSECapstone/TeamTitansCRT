@@ -14,11 +14,12 @@ $(function() {
         </div>
     </div>
     `);
-    updateStatus();
-    // testDashboardTable();
+    // updateStatus();
+    testDashboardTable();
 });
 
 function testDashboardTable() {
+    console.log('testing');
     var data = [
         {
             id: "Test1",
@@ -150,14 +151,8 @@ function createRow(id, rds, rdsRegion, status, startTimeMilli, startTime, endTim
         endTime: endTimeMilli,
         metrics: ["CPUUtilization", "FreeStorageSpace", "WriteThroughput"]
     };
-    
-    $.ajax({
-         url: "/cloudwatch/average",
-        type: "POST",
-        headers: { "Content-Type": "application/json" },
-        data: JSON.stringify(body),
-        success: function(data) {
-            $("tbody.capture-table").append(`
+
+    var row = `
             <tr data-toggle="collapse" data-target="#accordion${id}" class="clickable">
                 <td width="(100/12)%">${createIcon(status)}</td>
                 <td width="(100/4)%">${id}</td>
@@ -165,7 +160,15 @@ function createRow(id, rds, rdsRegion, status, startTimeMilli, startTime, endTim
                 <td width="(100/6)%">${startTime}</td>
                 <td width="(100/6)%">${endTime}</td>
                 <td width="(100/6)%">${createButton(id, status)}</td>
-            </tr>
+            </tr>`;
+    
+    $.ajax({
+         url: "/cloudwatch/average",
+        type: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: JSON.stringify(body),
+        success: function(data) {
+            row += `
             <tr class="collapse" id="accordion${id}">
                 <td colspan="6">
                     <div>
@@ -176,20 +179,26 @@ function createRow(id, rds, rdsRegion, status, startTimeMilli, startTime, endTim
                         </ul>
                     </div>
                 </td>
-            </tr>`);
-                
-            $(`#stopButton${id}`).on("click", function() {
-                stopCapture(id);
-                updateStatus();
-            });
-            
-            $(`#${id}-analyze`).on("click", function() {
-                openAnalysis(id);
-            });
+            </tr>`;
+            addRowToHtml(row, id);
             },
         error: function(err) {
+            addRowToHtml(row, id);
             console.log(err);
         }
+    });
+}
+
+function addRowToHtml(row, id) {
+    $("tbody.capture-table").append(row);
+        
+    $(`#stopButton${id}`).on("click", function() {
+        stopCapture(id);
+        updateStatus();
+    });
+    
+    $(`#${id}-analyze`).on("click", function() {
+        openAnalysis(id);
     });
 }
 
