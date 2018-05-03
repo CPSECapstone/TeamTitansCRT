@@ -140,20 +140,44 @@ $(function() {
 function testReplayList() {
     var data = [
         {
-            id: "Test1",
-            startTime: 1520871274784,
-            endTime: null,
-            fileSizeLimit: 420,
-            transactionLimit: 840,
-            status: "Running"
+            captureId: "test_capture",
+            captureLogFileName: "test_capture-Workload.log",
+            database: null,
+            dbpassword: null,
+            dburl: null,
+            dbusername: null,
+            endTime: "2018-05-03",
+            filterStatements: [],
+            filterUsers: [],
+            id: "MyReplay",
+            rds: "testdb",
+            rdsRegion: "US_WEST_1",
+            replayType: "Fast Mode",
+            s3: "teamtitans-test-mycrt",
+            s3Region: "US_WEST_1",
+            startTime: "2018-05-03",
+            status: "Finished",
+            transactionLimit: 0
         },
         {
-            id: "Test2",
-            startTime: 1520871274784,
-            endTime: 1520881274784,
-            fileSizeLimit: 420,
-            transactionLimit: 840,
-            status: "Finished"
+            captureId: "test_capture",
+            captureLogFileName: "test_capture-Workload.log",
+            database: null,
+            dbpassword: null,
+            dburl: null,
+            dbusername: null,
+            endTime: "2018-05-03",
+            filterStatements: [],
+            filterUsers: [],
+            id: "MyReplay_2",
+            rds: "testdb",
+            rdsRegion: "US_WEST_1",
+            replayType: "Fast Mode",
+            s3: "teamtitans-test-mycrt",
+            s3Region: "US_WEST_1",
+            startTime: "2018-05-03",
+            status: "Finished",
+            transactionLimit: 0
         }
     ]
     addAllToReplayList(data);
@@ -314,12 +338,34 @@ function updateReplay(id) {
 }
 
 function createReplayListItem(id, status, selector) {
-    return `
+    /*
+        return `
     <li id="item-${id}" class="list-group-item">
-        ${createIcon(status)}${id}
+        ${createIcon(status)}
+        ${id}
+        <div class="pull-right">
+            <a data-toggle="modal" data-target="#${selector}-delete" class="pull-right" href="javascript:void(0)"><span class="glyphicon glyphicon-trash"></span></a>
+            <a data-toggle="modal" data-target="#${selector}" href="javascript:void(0)" class="pad-right">
+                ${status == 'Finished' || status == 'Failed' ? 'View' : 'Edit'}
+            </a>
+        </div>
+    </li>`;
+
         <a data-toggle="modal" data-target="#${selector}" href="javascript:void(0)" class="pull-right">
         ${status == "Finished" ? "View" : "Edit"}
         </a>
+     */
+
+    return `
+    <li id="item-${id}" class="list-group-item">
+        ${createIcon(status)}
+        ${id}
+        <div class="pull-right">
+            <a data-toggle="modal" data-target="#${selector}-delete" class="pull-right" href="javascript:void(0)"><span class="glyphicon glyphicon-trash"></span></a>
+            <a data-toggle="modal" data-target="#${selector}" href="javascript:void(0)" class="pad-right">
+                ${status == 'Finished' || status == 'Failed' ? 'View' : 'Edit'}
+            </a>
+        </div>
     </li>`;
 }
 

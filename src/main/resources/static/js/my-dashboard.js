@@ -14,12 +14,11 @@ $(function() {
         </div>
     </div>
     `);
-    // updateStatus();
-    testDashboardTable();
+    updateStatus();
+    // testDashboardTable();
 });
 
 function testDashboardTable() {
-    console.log('testing');
     var data = [
         {
             id: "Test1",
@@ -39,12 +38,12 @@ function testDashboardTable() {
         }
     ]
     $("div.dashboard-content").replaceWith(captureDashboard(data));
-    fillTable(data);
+    fillTable("tbody.capture-table", data);
 }
 
 function insertLoadingSpinner(selector) {
     return `
-    <div class="${selector}" tabindex="-1" role="dialog">
+    <div class="${selector}" style="display: none;" tabindex="-1" role="dialog">
         <div class="text-center">Loading...</div>
         <div class="spinner"></div>
     </div>`;
@@ -74,7 +73,7 @@ function updateStatus() {
                 $(".tableLoadingIcon").hide();
                 if (data.length > 0) {
                     $("div.dashboard-content").replaceWith(captureDashboard(data));    
-                    fillTable(data);
+                    fillTable("tbody.capture-table", data);
                 }
                 else {
                     $("div.dashboard-content").replaceWith(emptyDashboard());    
@@ -108,8 +107,8 @@ function captureDashboard(data) {
     </table>`;
 }
 
-function fillTable(data) {
-    $("tbody.capture-table").empty();
+function fillTable(selector, data) {
+    $(selector).empty();
     data.map(createTableRow);
 }
 
