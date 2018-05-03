@@ -50,17 +50,17 @@ $(function() {
                 <div id="advanced" class="collapse">
                     <div class="${typeSelector}"></div>
                     <label class="input-label">Start Time:
-                        <input id="" class="${startTimeSelector} form-control" type="datetime-local" value="">
+                        <input class="${startTimeSelector} form-control" type="datetime-local" value="">
                     </label>
                     <label class="input-label">End Time:
-                        <input id="" class="${endTimeSelector} form-control" type="datetime-local" value="">
+                        <input class="${endTimeSelector} form-control" type="datetime-local" value="">
                     </label>
                     ${createTextInput("Max Replay Size (mB):", fileSizeLimitSelector)}
                     ${createTextInput("Max Number of Transactions:", transactionLimitSelector)}
                     ${createTextInput("Database Commands to Ignore (comma delimited):", filterStatementsSelector)}
                     ${createTextInput("Database Users to Ignore (comma delimited):", filterUsersSelector)}
                 </div>
-                <a href="javascript:void(0)" id="" class="${startBtnSelector} btn btn-default">Start Replay</a>
+                <a href="javascript:void(0)" class="${startBtnSelector} btn btn-default">Start Replay</a>
             </div>
             <div class="col-lg-6">
                 <p class=""><strong>Manage Replays</strong></p>
@@ -253,10 +253,10 @@ function createEditReplayModal(replay) {
                 </div>
                 <div class="modal-body">
                     <label class="input-label">Start Time:
-                        <input id="" class="txtStartTime form-control" type="datetime-local" value="${startTime}">
+                        <input class="txtStartTime form-control" type="datetime-local" value="${startTime}">
                     </label>
                     <label class="input-label">End Time:
-                        <input id="" class="txtEndTime form-control" type="datetime-local" value="${endTime}">
+                        <input class="txtEndTime form-control" type="datetime-local" value="${endTime}">
                     </label>
                     ${createTextInputValue("Max Replay Size (mB):", "txtMaxSize", fileSizeLimit)}
                     ${createTextInputValue("Max Number of Transactions:", "txtMaxTrans", transactionLimit)}
@@ -460,7 +460,7 @@ function updateRDSDropdown(selector, regionSelector) {
         type: "GET",
         success: function(data) {
             $(`.${selector}`).replaceWith(
-                `<select class="${selector} form-control" id="">
+                `<select class="${selector} form-control">
                     ${data.map(createOption).join('')}
                 </select>`);
         },
@@ -525,7 +525,7 @@ function updateS3Dropdown(selector, regionSelector) {
         type: "GET",
         success: function(data) {
             $(`.${selector}`).replaceWith(
-                `<select class="${selector} form-control" id="">
+                `<select class="${selector} form-control">
                     ${data.map(createOption).join('')}
                 </select>`);
         },
@@ -540,7 +540,7 @@ function createTextInput(label, id) {
     return `
     <div class="form-group">
         <label class="input-label">${label}</label>
-        <input id="" class="${id} form-control" type="text" value="">
+        <input class="${id} form-control" type="text" value="">
     </div>`;
 }
 
@@ -548,7 +548,7 @@ function createTextInputValue(label, id, value) {
     return `
     <div class="form-group">
         <label class="input-label">${label}</label>
-        <input id="" class="${id} form-control" type="text" value="${value}">
+        <input class="${id} form-control" type="text" value="${value}">
     </div>`;
 }
 
@@ -556,7 +556,7 @@ function createPasswordInputValue(label, id, value) {
     return `
     <div class="form-group">
         <label class="input-label">${label}</label>
-        <input id="" class="${id} form-control" type="password" value="${value}">
+        <input class="${id} form-control" type="password" value="${value}">
     </div>`;
 }
 
@@ -564,7 +564,7 @@ function createDropdown(label, id, options) {
     return `
     <div class="form-group">
         <label class="input-label">${label}</label>
-        <select class="${id} form-control" id="">
+        <select class="${id} form-control">
             ${options.map(createOption).join('')}
         </select>
     </div>`;
