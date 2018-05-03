@@ -321,7 +321,6 @@ function createEditCaptureModal(capture) {
 }
 
 function createCaptureListItem(id, status, selector) {
-    // 
     return `
     <li id="item-${id}" class="list-group-item">
         ${createIcon(status)}
