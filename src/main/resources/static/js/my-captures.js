@@ -61,6 +61,7 @@ $(function() {
     `);
     updateCaptureList();
     // testCaptureList();
+    
     populateResourceDropdowns(rdsRegionSelector, rdsSelector, s3RegionSelector, s3Selector);
     $(`.${startBtnSelector}`).on("click", function() {
         var startTime = null;
@@ -321,7 +322,6 @@ function createEditCaptureModal(capture) {
 }
 
 function createCaptureListItem(id, status, selector) {
-    // 
     return `
     <li id="item-${id}" class="list-group-item">
         ${createIcon(status)}

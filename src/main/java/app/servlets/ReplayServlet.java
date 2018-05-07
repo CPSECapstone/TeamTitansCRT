@@ -11,6 +11,7 @@ import app.models.Replay;
 import app.controllers.ReplayController;
 import app.managers.ReplayTimerManager;
 
+import java.util.Collection;
 import java.util.Date;
 
 @RestController
@@ -72,6 +73,11 @@ public class ReplayServlet {
         ReplayController.deleteReplay(replay);
 
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/replay/status", method = RequestMethod.GET)
+    public ResponseEntity<Collection<Replay>> replayStatus() {
+        return new ResponseEntity<>(ReplayController.getAllReplayValues(), HttpStatus.OK);
     }
 
     // Add the ability to support editing scheduled replays

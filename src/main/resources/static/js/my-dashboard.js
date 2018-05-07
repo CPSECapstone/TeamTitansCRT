@@ -1,25 +1,36 @@
 $(function() {
     $("div.content-placeholder").replaceWith(`
     <div class="container">
-        <div class="row">
+        <a id="toggle-btn" class="btn btn-default pull-right">Show Replays</a>
+        <div class="row capture-row">
             <div class="col-lg-6 col-lg-offset-3">
-                <h4 class="text-center">Capture and Replay Dashboard</h4>
+                <h4 class="text-center">Capture Dashboard</h4>
+            </div>
+            <div class="col-lg-12">
+                <div class="capture-dashboard"></div>
+                ${insertLoadingSpinner("tableLoadingIcon")}
             </div>
         </div>
-        <div class="row">
+        <div class="row replay-row">
+            <div class="col-lg-6 col-lg-offset-3">
+                <h4 class="text-center">Replay Dashboard</h4>
+            </div>
             <div class="col-lg-12">
-                <div class="dashboard-content"></div>
+                <div class="replay-dashboard"></div>
                 ${insertLoadingSpinner("tableLoadingIcon")}
             </div>
         </div>
     </div>
     `);
+    $("#toggle-btn").on("click", function() {
+        toggleDashboard();
+    });
     updateStatus();
     // testDashboardTable();
 });
 
 function testDashboardTable() {
-    var data = [
+    var testCaps = [
         {
             id: "Test1",
             startTime: 1520871274784,
@@ -37,23 +48,83 @@ function testDashboardTable() {
             status: "Finished"
         }
     ]
-    $("div.dashboard-content").replaceWith(captureDashboard(data));
-    fillTable(data);
+    var testReps = [
+        {
+            captureId: "test_capture",
+            captureLogFileName: "test_capture-Workload.log",
+            database: null,
+            dbpassword: null,
+            dburl: null,
+            dbusername: null,
+            endTime: "2018-05-03",
+            filterStatements: [],
+            filterUsers: [],
+            id: "MyReplay",
+            rds: "testdb",
+            rdsRegion: "US_WEST_1",
+            replayType: "Fast Mode",
+            s3: "teamtitans-test-mycrt",
+            s3Region: "US_WEST_1",
+            startTime: "2018-05-03",
+            status: "Finished",
+            transactionLimit: 0
+        },
+        {
+            captureId: "test_capture",
+            captureLogFileName: "test_capture-Workload.log",
+            database: null,
+            dbpassword: null,
+            dburl: null,
+            dbusername: null,
+            endTime: "2018-05-03",
+            filterStatements: [],
+            filterUsers: [],
+            id: "MyReplay_2",
+            rds: "testdb",
+            rdsRegion: "US_WEST_1",
+            replayType: "Fast Mode",
+            s3: "teamtitans-test-mycrt",
+            s3Region: "US_WEST_1",
+            startTime: "2018-05-03",
+            status: "Finished",
+            transactionLimit: 0
+        }
+    ]
+    $("div.capture-dashboard").html(captureDashboard(testCaps));
+    fillTable("tbody.capture-table", testCaps);
+    $("div.replay-dashboard").html(replayDashboard(testReps));
+    fillTable("tbody.replay-table", testReps);
+
+    $("div.replay-row").hide();
+}
+
+function toggleDashboard() {
+    replayShown = $("div.replay-row").is(":visible");
+    if (replayShown) {
+        $("div.replay-row").hide();
+        $("div.capture-row").show();
+        $("#toggle-btn").html("Show Replays");
+    }
+    else {
+        $("div.replay-row").show();
+        $("div.capture-row").hide();
+        $("#toggle-btn").html("Show Captures");
+    }
 }
 
 function insertLoadingSpinner(selector) {
     return `
-    <div class="${selector}" tabindex="-1" role="dialog">
+    <div class="${selector}" style="display: none;" tabindex="-1" role="dialog">
         <div class="text-center">Loading...</div>
         <div class="spinner"></div>
     </div>`;
 }
 
-function emptyDashboard() {
+function emptyDashboard(body, btn, ref) {
     return `
-    <p class="text-center">You have no captures or replays currently running! Let's get started!</p>
+    <p class="text-center">${body}</p>
     <div class="text-center">
-        <a href="capture" class="btn btn-default">Start new capture</a>
+        <a href="${ref}" class="btn btn-default">${btn}</a>
     </div>`;
 }
 
@@ -72,11 +143,12 @@ function updateStatus() {
                 console.log("hide");
                 $(".tableLoadingIcon").hide();
                 if (data.length > 0) {
-                    $("div.dashboard-content").replaceWith(captureDashboard(data));    
-                    fillTable(data);
+                    $("div.capture-dashboard").replaceWith(captureDashboard(data));    
+                    fillTable("tbody.capture-table", data);
                 }
                 else {
-                    $("div.dashboard-content").replaceWith(emptyDashboard());    
+                    var body = "You have no captures currently running! Let's get started!";
+                    $("div.capture-dashboard").replaceWith(emptyDashboard(body, "Start new capture", "capture"));
                 }
             },
             500);
@@ -87,6 +159,36 @@ function updateStatus() {
             $(".tableLoadingIcon").hide();
         }
     });
+    $.ajax({
+        url: "/replay/status",
+        type: "GET",
+        beforeSend: function() {
+            console.log("show");
+            $(".tableLoadingIcon").show();
+        },
+        success: function(data) {
+            setTimeout(function()
+            {
+                console.log("hide");
+                $(".tableLoadingIcon").hide();
+                if (data.length > 0) {
+                    $("div.replay-dashboard").replaceWith(replayDashboard(data));    
+                    fillTable("tbody.replay-table", data);
+                }
+                else {
+                    var body = "You have no replays currently running! Let's get started!";
+                    $("div.replay-dashboard").replaceWith(emptyDashboard(body, "Start new replay", "replay"));
+                }
+            },
+            500);
+        },
+        error: function(err) {
+            console.log(err);
+            console.log("Error updating the status.")
+            $(".tableLoadingIcon").hide();
+        }
+    });
+    $("div.replay-row").hide();
 }
 
 function captureDashboard(data) {
@@ -107,13 +209,35 @@ function captureDashboard(data) {
     </table>`;
 }
 
-function fillTable(data) {
-    $("tbody.capture-table").empty();
-    data.map(createTableRow);
+function replayDashboard(data) {
+    return `
+    <table class="table table-hover" width="100%">
+        <thead class="thead-dark">
+            <tr class="">
+                <th scope="col"> </th> 
+                <th scope="col">Name</th>
+                <th scope="col">Status</th>
+                <th scope="col">Start Time</th>
+                <th scope="col">End Time</th>
+                <th scope="col"> </th>
+            </tr>
+        </thead>
+        <tbody class="replay-table">
+        </tbody>
+    </table>`;
+}
+
+function fillTable(selector, data) {
+    $(selector).empty();
+    for(let i = 0; i < data.length; i++) {
+        createTableRow(selector, data[i]);
+    }
 }
 
 
-function createTableRow(capture) {
+function createTableRow(selector, capture) {
+    console.log('creating row');
+    console.log(capture);
     var id = capture["id"];
     var status = capture["status"];
     var rds = capture["rds"];
@@ -134,7 +258,7 @@ function createTableRow(capture) {
         endTime = tempEndTime.customFormat("#MM#/#DD#/#YYYY# #hh#:#mm#:#ss# #AMPM#")
     }
     
-    createRow(id, rds, rdsRegion, status, startTimeMilli, startTime, endTimeMilli, endTime);
+    createRow(selector, id, rds, rdsRegion, status, startTimeMilli, startTime, endTimeMilli, endTime);
     var id = capture["id"];
     $(`a#stopButton${id}`).on("click", function() {
         stopCapture(id);
@@ -142,7 +266,7 @@ function createTableRow(capture) {
     });
 }
 
-function createRow(id, rds, rdsRegion, status, startTimeMilli, startTime, endTimeMilli, endTime) {
+function createRow(selector, id, rds, rdsRegion, status, startTimeMilli, startTime, endTimeMilli, endTime) {
      var body = {
         rds: rds,
         rdsRegion: rdsRegion,
@@ -150,14 +274,8 @@ function createRow(id, rds, rdsRegion, status, startTimeMilli, startTime, endTim
         endTime: endTimeMilli,
         metrics: ["CPUUtilization", "FreeStorageSpace", "WriteThroughput"]
     };
-    
-    $.ajax({
-         url: "/cloudwatch/average",
-        type: "POST",
-        headers: { "Content-Type": "application/json" },
-        data: JSON.stringify(body),
-        success: function(data) {
-            $("tbody.capture-table").append(`
+
+    var row = `
             <tr data-toggle="collapse" data-target="#accordion${id}" class="clickable">
                 <td width="(100/12)%">${createIcon(status)}</td>
                 <td width="(100/4)%">${id}</td>
@@ -165,7 +283,15 @@ function createRow(id, rds, rdsRegion, status, startTimeMilli, startTime, endTim
                 <td width="(100/6)%">${startTime}</td>
                 <td width="(100/6)%">${endTime}</td>
                 <td width="(100/6)%">${createButton(id, status)}</td>
-            </tr>
+            </tr>`;
+    
+    $.ajax({
+         url: "/cloudwatch/average",
+        type: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: JSON.stringify(body),
+        success: function(data) {
+            row += `
             <tr class="collapse" id="accordion${id}">
                 <td colspan="6">
                     <div>
@@ -176,20 +302,26 @@ function createRow(id, rds, rdsRegion, status, startTimeMilli, startTime, endTim
                         </ul>
                     </div>
                 </td>
-            </tr>`);
-                
-            $(`#stopButton${id}`).on("click", function() {
-                stopCapture(id);
-                updateStatus();
-            });
-            
-            $(`#${id}-analyze`).on("click", function() {
-                openAnalysis(id);
-            });
+            </tr>`;
+            addRowToHtml(selector, row, id);
             },
         error: function(err) {
+            addRowToHtml(selector, row, id);
             console.log(err);
         }
+    });
+}
+
+function addRowToHtml(selector, row, id) {
+    $(selector).append(row);
+        
+    $(`#stopButton${id}`).on("click", function() {
+        stopCapture(id);
+        updateStatus();
+    });
+    
+    $(`#${id}-analyze`).on("click", function() {
+        openAnalysis(id);
     });
 }
 
