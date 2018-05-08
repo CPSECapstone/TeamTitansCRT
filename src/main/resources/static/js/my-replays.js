@@ -89,8 +89,10 @@ $(function() {
             endTime = new Date(String($(`.${endTimeSelector}`).val()));
         }
 
-        // Only start capture if rds and s3 selected
-        if ($(`.${captureSelector}`).val() != null && $(`.${rdsSelector}`).val() != '' && $(`.${s3Selector}`).val() != '') {
+        // Only start capture if rds and s3 selected and a username and password have been entered
+        if ($(`.${captureSelector}`).val() != null && $(`.${rdsSelector}`).val() != '' && $(`.${s3Selector}`).val() != '' &&
+        $(`.${usernameSelector}`).val() != '' &&
+        $(`.${passwordSelector}`).val() != '') {
             var replayInner = {
                 databaseInfo: {
                     //dbUrl: "testdb.cgtpml3lsh3i.us-west-1.rds.amazonaws.com:3306",
@@ -133,6 +135,10 @@ $(function() {
             //     replayType: "Fast Mode"
             // };
             startReplay(replayInner);
+        }
+        else {
+            $("#exampleModal").html(createStartReplayModal("Failure", "Your replay failed to start. Verify all fields are correct."));
+            $("#exampleModal").modal("show");
         }
     });
 });
