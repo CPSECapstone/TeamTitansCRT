@@ -344,6 +344,9 @@ function createButton(id, status) {
     if (status == "Running") {
         return `<a href="javascript:void(0)" id="stopButton${id}" class="defaultLinkColor">Stop Capture</a>`;
     }
+    else if (status == "Queued") {
+        return `<a href="javascript:void(0)" id="" class="defaultLinkColor">Remove From Queue</a>`;
+    }
     else if (status == "Finished") {
         return `<a href="analyze" id="${id}-analyze" class="defaultLinkColor">Analyze</a>`;
     }
