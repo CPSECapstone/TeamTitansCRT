@@ -24,10 +24,10 @@ public class ReplayCLI extends CLI {
         object.put("replayType", replayType);
         object.put("captureId", captureId);
         if (startTime != null) {
-            object.put("startTime", startTime);
+            object.put("startTime", startTime.getTime());
         }
         if (endTime != null) {
-            object.put("endTime", endTime);
+            object.put("endTime", endTime.getTime());
         }
         if (transactionLimit > 0) {
             object.put("transactionLimit", transactionLimit);

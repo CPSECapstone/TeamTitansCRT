@@ -97,7 +97,7 @@ public class Driver {
             switch (line[i]) {
                 case "-start": {
                     String startdate = line[i + 1];
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy-hh:mm");
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy-hh:mm:aa");
                     try {
                         startTime = dateFormat.parse(startdate);
                     } catch (Exception e) {
@@ -311,8 +311,8 @@ public class Driver {
         System.out.println("\trds_region\t\t\t\t\tThe region your database is in.");
         System.out.println("\tS3_bucket\t\t\t\t\tThe S3 bucket to store the capture metrics in");
         System.out.println("\tS3_region\t\t\t\t\tThe region your S3 bucket is in");
-        System.out.println("\t(optional) -start\t\t\tday/month/year-hour:minute:AM/PM");
-        System.out.println("\t(optional) -end\t\t\t\tday/month/year-hour:minute:AM/PM");
+        System.out.println("\t(optional) -start\t\t\tmonth/day/year-hour:minute:AM/PM");
+        System.out.println("\t(optional) -end\t\t\t\tmonth/day/year-hour:minute:AM/PM");
         System.out.println("\t(optional) -filesize\t\tSize of the capture file");
         System.out.println("\t(optional) -transnum\t\tNumber of transactions to capture");
         System.out.println("\t(optional) -dbcomignore\t\tDatabase commands to ignore separated by a space, ending with a ' ! '");

@@ -21,10 +21,10 @@ public class CaptureCLI extends CLI {
         object.put("rdsRegion", rdsRegion);
         object.put("rds", rds);
         if (startTime != null) {
-            object.put("startTime", startTime);
+            object.put("startTime", startTime.getTime());
         }
         if (endTime != null) {
-            object.put("endTime", endTime);
+            object.put("endTime", endTime.getTime());
         }
         if (transactionLimit > 0) {
             object.put("transactionLimit", transactionLimit);
