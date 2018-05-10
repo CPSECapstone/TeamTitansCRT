@@ -33,6 +33,13 @@ public class CLI {
         }
     }
 
+    protected static void presentCaptureIdListOptions(List<Capture> captures) {
+        ListIterator<Capture> it = captures.listIterator();
+        while (it.hasNext()) {
+            System.out.println(it.nextIndex() + ": " + it.next().getId());
+        }
+    }
+
     protected static List<Capture> convertToListCaptures(String string) {
         JSONParser parser = new JSONParser();
         List<Capture> captureList = new ArrayList<>();
@@ -77,7 +84,7 @@ public class CLI {
     }
 
     protected static List<String> convertToListString(String string) {
-        String rdsList = string.replace("[", "").replace("]", "");
+        String rdsList = string.replace("[", "").replace("]", "").replace("\"", "");
         List<String> list = new ArrayList<String>(Arrays.asList(rdsList.split("\\s*,\\s*")));
 
         return list;
@@ -142,10 +149,13 @@ public class CLI {
         int responseCode = con.getResponseCode(); // HTTP Response Code
 
         // printing request properties
+        /*
         System.out.println("Response Code : " + responseCode);
         System.out.println(con.getResponseMessage());
-
+        */
         if (responseCode >= 400) {
+            System.out.println("Response Code : " + responseCode);
+            System.out.println(con.getResponseMessage());
             System.out.println(responseCode);
             throw new RuntimeException();
         }

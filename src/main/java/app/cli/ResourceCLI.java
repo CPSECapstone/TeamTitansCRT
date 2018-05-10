@@ -58,12 +58,8 @@ public class ResourceCLI extends CLI {
 
     public static void main(String[] args) {
         try {
-            System.out.println("Get rds: " + rds("us-west-1"));
-            System.out.println("Get S3: " + s3("us-west-1"));
             System.out.println("Get Captures: " + captures());
-            System.out.println("Get Captures with Status: " + captures("Finished"));
-            System.out.println("Get Replays: " + replays());
-            System.out.println("Get Replays with Status: " + replays("Finished"));
+            System.out.println("Get Captures with Status: " + captures("Running"));
         } catch (Exception e) {
             e.printStackTrace();
         }

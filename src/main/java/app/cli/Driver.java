@@ -4,10 +4,7 @@ import app.models.Capture;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.Scanner;
-import java.util.Date;
-import java.util.ArrayList;
+import java.util.*;
 
 public class Driver {
 
@@ -66,6 +63,10 @@ public class Driver {
     private void runCapture(String[] line) {
         if (line.length == 2 && line[1].equals("help")) {
             printRunCaptureHelp();
+            return;
+        }
+        else if (line.length >= 2 && line[1].equals("-i")) {
+            runCaptureInteractive(line);
             return;
         }
 
@@ -140,6 +141,144 @@ public class Driver {
         }
     }
 
+    private void runCaptureInteractive(String[] line) {
+        String id = null;
+        String rds = null;
+        String rdsRegion = null;
+        String s3 = null;
+        String s3Region = null;
+        Date startTime = null;
+        Date endTime = null;
+        long fileSize = 0;
+        long transactionSize = 0;
+
+        ArrayList<String> filterStatements = null;
+        ArrayList<String> filterUsers = null;
+        try {
+            Scanner scanner = new Scanner(System.in);
+            while (true) {
+                System.out.print("Please enter a capture name >> ");
+                if (scanner.hasNextLine()) {
+                    id = scanner.nextLine();
+                    break;
+                }
+            }
+            List<String> regions = ResourceCLI.regions();
+            while (true) {
+                CLI.presentListOptions(regions);
+                System.out.print("Please enter the digit of RDS region >> ");
+                if (scanner.hasNextLine()) {
+                    int index = Integer.parseInt(scanner.nextLine());
+                    if (index >= 0 && index < regions.size()) {
+                        rdsRegion = regions.get(index);
+                        List<String> rdsInstances = ResourceCLI.rds(rdsRegion);
+                        CLI.presentListOptions(rdsInstances);
+                        System.out.println("Please enter the digit of RDS instance >> ");
+                        if (scanner.hasNextLine()) {
+                            int instanceIndex = Integer.parseInt(scanner.nextLine());
+                            if (instanceIndex >= 0 && instanceIndex < rdsInstances.size()) {
+                                rds = rdsInstances.get(instanceIndex);
+                                break;
+                            } else {
+                                System.out.println("Why are you here");
+                                return;
+                            }
+                        }
+                    }
+                } else {
+                    return;
+                }
+            }
+            while (true) {
+                CLI.presentListOptions(regions);
+                System.out.println("Please enter the digit of S3 region >> ");
+                if (scanner.hasNextLine()) {
+                    int index = Integer.parseInt(scanner.nextLine());
+                    if (index >= 0 && index < regions.size()) {
+                        s3Region = regions.get(index);
+                        List<String> s3Instances = ResourceCLI.s3(s3Region);
+                        CLI.presentListOptions(s3Instances);
+                        System.out.println("Please enter the digit of s3 bucket >> ");
+                        if (scanner.hasNextLine()) {
+                            int instanceIndex = Integer.parseInt(scanner.nextLine());
+                            if (instanceIndex >= 0 && instanceIndex < s3Instances.size()) {
+                                s3 = s3Instances.get(instanceIndex);
+                                break;
+                            } else {
+                                return;
+                            }
+                        }
+                    }
+                } else {
+                    return;
+                }
+            }
+            for (int i = 2; i < line.length; i++) {
+                if (i + 1 >= line.length) {
+                    System.out.println("Here " + i + " length " + line.length);
+                    commandError(line[0]);
+                    return;
+                }
+                switch (line[i]) {
+                    case "-start": {
+                        String startdate = line[i + 1];
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy-hh:mm:aa");
+                        try {
+                            startTime = dateFormat.parse(startdate);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        break;
+                    }
+                    case "-end": {
+                        String enddate = line[i + 1];
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy-hh:mm");
+                        try {
+                            startTime = dateFormat.parse(enddate);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        break;
+                    }
+                    case "-filesize":
+                        String size = line[i + 1];
+                        fileSize = Long.parseLong(size);
+                        break;
+                    case "-transnum":
+                        size = line[i + 1];
+                        transactionSize = Long.parseLong(size);
+                        break;
+                    case "-dbcomignore":
+                        break;
+                    case "dbuserignore":
+                        break;
+                    default:
+                        break;
+                }
+            }
+            /*
+            System.out.println("Would you like to view advanced options? (y/n)");
+            if (scanner.hasNextLine()) {
+                String advancedOptions = scanner.nextLine();
+                if (advancedOptions.toLowerCase().equals("y")) {
+                    System.out.println("Please enter a start time, null ")
+                }
+                else {
+
+                }
+            }*/
+            CaptureCLI.start(id, rdsRegion, rds, s3Region, s3, startTime, endTime, transactionSize, fileSize,
+                    filterStatements, filterUsers);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("An error has occurred, please try again.");
+            return;
+        }
+
+
+    }
+
     private void endCapture(String[] line) {
         if (line.length == 2 && line[1].equals("help")) {
             printEndCaptureHelp();
@@ -163,6 +302,10 @@ public class Driver {
             printRunReplayHelp();
             return;
         }
+        else if (line.length >= 2 && line[1].equals("-i")) {
+            runReplayInteractive(line);
+            return;
+        }
 
         if (line.length < 8) {
             commandError(line[0]);
@@ -177,6 +320,8 @@ public class Driver {
         String s3 = line[5];
         String s3Region = line[6];
         String mode = line[7];
+        String dbUsername = null; // add switch statement support
+        String dbPassword = null;
         Date startTime = null;
         Date endTime = null;
         long transactionSize = 0;
@@ -227,10 +372,178 @@ public class Driver {
         }
 
         try {
-            ReplayCLI.start(id, rdsRegion, rds, s3Region, s3, mode, capture_id, startTime, endTime, transactionSize, filterStatements, filterUsers);
+            ReplayCLI.start(id, rdsRegion, rds, s3Region, s3, mode, capture_id, startTime, endTime, transactionSize, filterStatements, filterUsers, dbUsername, dbPassword);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void runReplayInteractive(String[] line) {
+        String id = null;
+        String capture_id = null;
+        String rds = null;
+        String rdsRegion = null;
+        String s3 = null;
+        String s3Region = null;
+        String mode = null;
+        String dbUsername = null;
+        String dbPassword = null;
+        Date startTime = null;
+        Date endTime = null;
+        long transactionSize = 0;
+
+        ArrayList<String> filterStatements = null;
+        ArrayList<String> filterUsers = null;
+
+        try {
+            Scanner scanner = new Scanner(System.in);
+            while (true) {
+                List<Capture> captures = ResourceCLI.captures("Finished");
+                CLI.presentCaptureIdListOptions(captures);
+                System.out.print("Please select the digit of the capture to replay >> ");
+                if (scanner.hasNextLine()) {
+                    int index = Integer.parseInt(scanner.nextLine());
+                    if (index >= 0 && index < captures.size()) {
+                        capture_id = captures.get(index).getId();
+                        break;
+                    }
+                }
+            }
+            while (true) {
+                System.out.print("Please enter a replay name >> ");
+                if (scanner.hasNextLine()) {
+                    id = scanner.nextLine();
+                    break;
+                }
+            }
+            List<String> regions = ResourceCLI.regions();
+            while (true) {
+                CLI.presentListOptions(regions);
+                System.out.print("Please enter the digit of RDS region >> ");
+                if (scanner.hasNextLine()) {
+                    int index = Integer.parseInt(scanner.nextLine());
+                    if (index >= 0 && index < regions.size()) {
+                        rdsRegion = regions.get(index);
+                        List<String> rdsInstances = ResourceCLI.rds(rdsRegion);
+                        CLI.presentListOptions(rdsInstances);
+                        System.out.print("Please enter the digit of RDS instance >> ");
+                        if (scanner.hasNextLine()) {
+                            int instanceIndex = Integer.parseInt(scanner.nextLine());
+                            if (instanceIndex >= 0 && instanceIndex < rdsInstances.size()) {
+                                rds = rdsInstances.get(instanceIndex);
+                                break;
+                            } else {
+                                return;
+                            }
+                        }
+                    }
+                } else {
+                    return;
+                }
+            }
+            while (true) {
+                CLI.presentListOptions(regions);
+                System.out.print("Please enter the digit of S3 region >> ");
+                if (scanner.hasNextLine()) {
+                    int index = Integer.parseInt(scanner.nextLine());
+                    if (index >= 0 && index < regions.size()) {
+                        s3Region = regions.get(index);
+                        List<String> s3Instances = ResourceCLI.s3(s3Region);
+                        CLI.presentListOptions(s3Instances);
+                        System.out.print("Please enter the digit of s3 bucket >> ");
+                        if (scanner.hasNextLine()) {
+                            int instanceIndex = Integer.parseInt(scanner.nextLine());
+                            if (instanceIndex >= 0 && instanceIndex < s3Instances.size()) {
+                                s3 = s3Instances.get(instanceIndex);
+                                break;
+                            } else {
+                                return;
+                            }
+                        }
+                    }
+                } else {
+                    return;
+                }
+            }
+            while (true) {
+                System.out.print("Username for " + rds + " >> ");
+                if (scanner.hasNextLine()) {
+                    dbUsername = scanner.nextLine();
+                }
+                System.out.print("Password for " + rds + " >> ");
+                if (scanner.hasNextLine()) {
+                    dbPassword = scanner.nextLine();
+                    break;
+                }
+            }
+            while (true) {
+                List<String> modeOptions = Arrays.asList("Fast-Mode", "Time-Sensitive");
+                CLI.presentListOptions(modeOptions);
+                System.out.print("Please select the digit for the replay mode >> ");
+                if (scanner.hasNextLine()) {
+                    int index = Integer.parseInt(scanner.nextLine());
+                    if (index >= 0 && index < modeOptions.size()) {
+                        mode = modeOptions.get(index);
+                        break;
+                    }
+                }
+            }
+            for (int i = 2; i < line.length; i++) {
+                if (i + 1 >= line.length) {
+                    System.out.println("Here " + i + " length " + line.length);
+                    commandError(line[0]);
+                    return;
+                }
+                switch (line[i]) {
+                    case "-start": {
+                        String startdate = line[i + 1];
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy-hh:mm");
+                        try {
+                            startTime = dateFormat.parse(startdate);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        break;
+                    }
+                    case "-end": {
+                        String enddate = line[i + 1];
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy-hh:mm");
+                        try {
+                            startTime = dateFormat.parse(enddate);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        break;
+                    }
+                    case "-transize":
+                        String size = line[i + 1];
+                        transactionSize = Long.parseLong(size);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            /*
+            System.out.println("Would you like to view advanced options? (y/n)");
+            if (scanner.hasNextLine()) {
+                String advancedOptions = scanner.nextLine();
+                if (advancedOptions.toLowerCase().equals("y")) {
+                    System.out.println("Please enter a start time, null ")
+                }
+                else {
+
+                }
+            }*/
+            ReplayCLI.start(id, rdsRegion, rds, s3Region, s3, mode, capture_id, startTime, endTime, transactionSize,
+                    filterStatements, filterUsers, dbUsername, dbPassword);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("An error has occurred, please try again.");
+            return;
+        }
+
+
     }
 
     private void end_replay(String[] line) {

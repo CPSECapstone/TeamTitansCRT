@@ -11,7 +11,7 @@ public class ReplayCLI extends CLI {
     public static String start(String id, String rdsRegion, String rds, String s3Region, String s3,
                                    String replayType, String captureId, Date startTime, Date endTime,
                                    long transactionLimit, List<String> filterStatements,
-                                   List<String> filterUsers) throws IOException, RuntimeException {
+                                   List<String> filterUsers, String username, String password) throws IOException, RuntimeException {
         String replayStartURL = urlString + "replay/start";
 
         // build json post data
@@ -23,6 +23,13 @@ public class ReplayCLI extends CLI {
         object.put("rds", rds);
         object.put("replayType", replayType);
         object.put("captureId", captureId);
+        JSONObject dbInfo = new JSONObject();
+        dbInfo.put("database", rds);
+        dbInfo.put("region", rdsRegion);
+        dbInfo.put("username", username);
+        dbInfo.put("password", password);
+        object.put("databaseInfo", dbInfo);
+
         if (startTime != null) {
             object.put("startTime", startTime.getTime());
         }

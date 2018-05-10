@@ -23,6 +23,10 @@ public class ReplayServlet {
             return new ResponseEntity<>(ErrorsUtil.DuplicateReplayIDError(), HttpStatus.BAD_REQUEST);
         }
 
+        if (!replay.getId().matches("[A-Za-z0-9]+")) {
+            return new ResponseEntity<>(ErrorsUtil.idContainsNonAlphaNumeric(), HttpStatus.BAD_REQUEST);
+        }
+
         if (replay.getStartTime() == null) {
             replay.setStartTime(new Date());
         }
