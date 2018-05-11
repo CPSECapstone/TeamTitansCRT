@@ -592,3 +592,7 @@ a.defaultLinkColor {
     border-radius: 1em;
     overflow: hidden;
 }
+
+.margin-top {
+    margin-top: 3em;
+}

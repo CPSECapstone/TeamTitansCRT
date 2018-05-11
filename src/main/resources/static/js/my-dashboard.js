@@ -249,7 +249,7 @@ function mainTemplate() {
 
 function captureDashboardTemplate() {
     return `
-    <div class="panel z-depth-1">
+    <div class="margin-top panel z-depth-1">
         <table class="capture-table table table-hover table-bordered" >
             <thead class="thead-dark">
                 <tr class="">
@@ -277,7 +277,7 @@ function captureDashboardEmptyTemplate() {
 
 function replayDashboardTemplate() {
     return `
-    <div class="panel z-depth-1">
+    <div class="margin-top panel z-depth-1">
         <table class="replay-table table table-hover table-bordered" >
             <thead class="thead-dark">
                 <tr class="">
