@@ -3,8 +3,8 @@ $(function() {
     $("#toggle-btn").on("click", function() {
         toggleDashboard();
     });
-    testDashboardTable();
-    // updateStatus();
+    // testDashboardTable();
+    updateStatus();
     $(".replay-row").hide();
 });
 
@@ -177,12 +177,12 @@ function createTableRow(capture) {
 
     var row = `
     <tr data-toggle="collapse" data-target="#${selectorCloudwatch(id)}" class="clickable">
-        <td width="(100/12)%">${icon}</td>
-        <td width="(100/4)%">${id}</td>
-        <td width="(100/6)%">${status}</td>
-        <td width="(100/6)%">${startTime}</td>
-        <td width="(100/6)%">${endTime}</td>
-        <td width="(100/6)%">${btn}</td>
+        <td>${icon}</td>
+        <td>${id}</td>
+        <td>${status}</td>
+        <td>${startTime}</td>
+        <td>${endTime}</td>
+        <td>${btn}</td>
     </tr>`;
 
     return row;
