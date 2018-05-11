@@ -402,114 +402,92 @@ Date.prototype.customFormat = function(formatString){
   return formatString.replace("#hhhh#",hhhh).replace("#hhh#",hhh).replace("#hh#",hh).replace("#h#",h).replace("#mm#",mm).replace("#m#",m).replace("#ss#",ss).replace("#s#",s).replace("#ampm#",ampm).replace("#AMPM#",AMPM);
 };
 
+function getRndInteger(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) ) + min;
+}
+
 /* ----------------------- Testing ------------------------------------------- */
 function testDashboardTable() {
-    var testCaps = [
-    {
-        dbFileSize: 0,
-        endTime: 1525371692181,
-        fileSizeLimit: 0,
-        filterStatements: [],
-        filterUsers: [],
-        id: "test_capture",
-        rds: "testdb",
-        rdsRegion: "US_WEST_1",
-        s3: "teamtitans-test-mycrt",
-        s3Region: "US_WEST_1",
-        startTime: 1525371672121,
-        status: "Running",
-        transactionCount: 50,
-        transactionLimit: 0
-    },
-    {
-        dbFileSize: 0,
-        endTime: 1525371692181,
-        fileSizeLimit: 0,
-        filterStatements: [],
-        filterUsers: [],
-        id: "test_capture_2",
-        rds: "testdb",
-        rdsRegion: "US_WEST_1",
-        s3: "teamtitans-test-mycrt",
-        s3Region: "US_WEST_1",
-        startTime: 1525371672121,
-        status: "Queued",
-        transactionCount: 50,
-        transactionLimit: 0
-    },
-    {
-        dbFileSize: 0,
-        endTime: 1525371692181,
-        fileSizeLimit: 0,
-        filterStatements: [],
-        filterUsers: [],
-        id: "test_capture_3",
-        rds: "testdb",
-        rdsRegion: "US_WEST_1",
-        s3: "teamtitans-test-mycrt",
-        s3Region: "US_WEST_1",
-        startTime: 1525371672121,
-        status: "Running",
-        transactionCount: 50,
-        transactionLimit: 0
-    },
-    {
-        dbFileSize: 0,
-        endTime: 1525371692181,
-        fileSizeLimit: 0,
-        filterStatements: [],
-        filterUsers: [],
-        id: "test_capture_4",
-        rds: "testdb",
-        rdsRegion: "US_WEST_1",
-        s3: "teamtitans-test-mycrt",
-        s3Region: "US_WEST_1",
-        startTime: 1525371672121,
-        status: "Queued",
-        transactionCount: 50,
-        transactionLimit: 0
-    }];
-    var testReps = [
-    {
-        captureId: "test_capture",
-        captureLogFileName: "test_capture-Workload.log",
-        database: null,
-        dbpassword: null,
-        dburl: null,
-        dbusername: null,
-        endTime: "2018-05-03",
-        filterStatements: [],
-        filterUsers: [],
-        id: "MyReplay",
-        rds: "testdb",
-        rdsRegion: "US_WEST_1",
-        replayType: "Fast Mode",
-        s3: "teamtitans-test-mycrt",
-        s3Region: "US_WEST_1",
-        startTime: "2018-05-03",
-        status: "Finished",
-        transactionLimit: 0
-    },
-    {
-        captureId: "test_capture",
-        captureLogFileName: "test_capture-Workload.log",
-        database: null,
-        dbpassword: null,
-        dburl: null,
-        dbusername: null,
-        endTime: "2018-05-03",
-        filterStatements: [],
-        filterUsers: [],
-        id: "MyReplay_2",
-        rds: "testdb",
-        rdsRegion: "US_WEST_1",
-        replayType: "Fast Mode",
-        s3: "teamtitans-test-mycrt",
-        s3Region: "US_WEST_1",
-        startTime: "2018-05-03",
-        status: "Finished",
-        transactionLimit: 0
-    }];
+    let testCaps = [];
+    for (let i = 0; i < 6; i++) testCaps.push(makeRandomCapture("TestCapture_" + i));
+
+    let testReps = [];
+    for (let i = 0; i < 3; i++) testReps.push(makeRandomReplay("TestReplay_" + i));
+
     createCaptureDashboard(testCaps);
     createReplayDashboard(testReps);
+}
+
+function makeRandomCapture(id) {
+    // all in millis
+    const one_day = 1000 * 60 * 60 * 24;
+    const now = new Date().getTime();
+
+    // startTime is in range: now +/- half day
+    let startTime = now + getRndInteger(0, one_day) - (one_day/2);
+    let endTime = startTime + getRndInteger(0, one_day);
+
+    let status = "";
+    if (startTime < now) {
+        status = "Running";
+    }
+    else if (startTime > now) {
+        status = "Queued";
+    }
+
+    return {
+        dbFileSize: getRndInteger(0, 200),
+        endTime: endTime,
+        fileSizeLimit: getRndInteger(0, 200),
+        filterStatements: [],
+        filterUsers: [],
+        id: id,
+        rds: "testdb",
+        rdsRegion: "US_WEST_1",
+        s3: "teamtitans-test-mycrt",
+        s3Region: "US_WEST_1",
+        startTime: startTime,
+        status: status,
+        transactionCount: getRndInteger(0, 200),
+        transactionLimit: getRndInteger(0, 200)
+    };
+}
+
+function makeRandomReplay(id) {
+    // all in millis
+    const one_day = 1000 * 60 * 60 * 24;
+    const now = new Date().getTime();
+
+    // startTime is in range: now +/- half day
+    let startTime = now + getRndInteger(0, one_day) - (one_day/2);
+    let endTime = startTime + getRndInteger(0, one_day);
+
+    let status = "";
+    if (startTime < now) {
+        status = "Running";
+    }
+    else if (startTime > now) {
+        status = "Queued";
+    }
+
+    return {
+        captureId: "ExampleCaptureId",
+        captureLogFileName: "test_capture-Workload.log",
+        database: null,
+        dbpassword: null,
+        dburl: null,
+        dbusername: null,
+        endTime: endTime,
+        filterStatements: [],
+        filterUsers: [],
+        id: id,
+        rds: "testdb",
+        rdsRegion: "US_WEST_1",
+        replayType: getRndInteger(0, 1) ? "Time Sensitive" : "Fast Mode",
+        s3: "teamtitans-test-mycrt",
+        s3Region: "US_WEST_1",
+        startTime: startTime,
+        status: status,
+        transactionLimit: 0
+    };
 }
