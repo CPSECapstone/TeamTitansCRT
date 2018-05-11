@@ -320,7 +320,6 @@ function metricsTemplate(metrics) {
 function getMetrics(capture) {
     // adds required metrics field
     capture["metrics"] = ["CPUUtilization", "FreeStorageSpace", "WriteThroughput"];
-    console.log(capture);
 
     return $.ajax({
         url: "/cloudwatch/average",

@@ -588,8 +588,8 @@ a.defaultLinkColor {
 }
 
 .panel {
-    border: 1px solid grey;
-    border-radius: 1em;
+    border: 0px solid grey;
+    border-radius: .5em;
     overflow: hidden;
 }
 
