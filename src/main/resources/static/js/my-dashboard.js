@@ -1,11 +1,11 @@
 $(function() {
-    $("div.content-placeholder").replaceWith(mainTemplate());
+    $(".content-placeholder").replaceWith(mainTemplate());
     $("#toggle-btn").on("click", function() {
         toggleDashboard();
     });
-    // testDashboardTable();
-    updateStatus();
-    $("div.replay-row").hide();
+    testDashboardTable();
+    // updateStatus();
+    $(".replay-row").hide();
 });
 
 /* ----------------------- Main Functions ------------------------------------ */
@@ -37,8 +37,8 @@ function createCaptureDashboard(data) {
     setTimeout(function()
     {
         if (data.length > 0) {
-            $("div.capture-dashboard").replaceWith(captureDashboardTemplate());    
-            $("tbody.capture-table").empty();
+            $(".capture-dashboard").replaceWith(captureDashboardTemplate());    
+            $(".capture-table-body").empty();
 
             // sort running captures first
             data.sort(sortRunningFirst);
@@ -62,7 +62,7 @@ function createCaptureDashboard(data) {
                 });
             }
 
-            $("tbody.capture-table").append(rows);
+            $(".capture-table-body").append(rows);
 
             // add event handlers to each row
             $.each(data, function(index, capture) {
@@ -86,7 +86,7 @@ function createCaptureDashboard(data) {
             });
         }
         else {
-            $("div.capture-dashboard").replaceWith(captureDashboardEmptyTemplate());
+            $(".capture-dashboard").replaceWith(captureDashboardEmptyTemplate());
         }
     },
     500);
@@ -96,8 +96,8 @@ function createReplayDashboard(data) {
     setTimeout(function()
     {
         if (data.length > 0) {
-            $("div.replay-dashboard").replaceWith(replayDashboardTemplate());    
-            $("tbody.replay-table").empty();
+            $(".replay-dashboard").replaceWith(replayDashboardTemplate());    
+            $(".replay-table-body").empty();
 
             // sort running replays first
             data.sort(sortRunningFirst);
@@ -107,7 +107,7 @@ function createReplayDashboard(data) {
                 rows += createTableRow(data[i]);
             }
 
-            $("tbody.replay-table").append(rows);
+            $(".replay-table-body").append(rows);
 
             $.each(data, function(index, replay) {
                 var id = replay["id"];
@@ -130,7 +130,7 @@ function createReplayDashboard(data) {
             });
         }
         else {
-            $("div.replay-dashboard").replaceWith(replayDashboardEmptyTemplate());
+            $(".replay-dashboard").replaceWith(replayDashboardEmptyTemplate());
         }
     },
     500);
@@ -189,15 +189,15 @@ function createTableRow(capture) {
 }
 
 function toggleDashboard() {
-    replayShown = $("div.replay-row").is(":visible");
+    replayShown = $(".replay-row").is(":visible");
     if (replayShown) {
-        $("div.replay-row").hide();
-        $("div.capture-row").show();
+        $(".replay-row").hide();
+        $(".capture-row").show();
         $("#toggle-btn").html("Show Replays");
     }
     else {
-        $("div.replay-row").show();
-        $("div.capture-row").hide();
+        $(".replay-row").show();
+        $(".capture-row").hide();
         $("#toggle-btn").html("Show Captures");
     }
 }
@@ -249,20 +249,22 @@ function mainTemplate() {
 
 function captureDashboardTemplate() {
     return `
-    <table class="table table-hover" width="100%">
-        <thead class="thead-dark">
-            <tr class="">
-                <th scope="col"> </th> 
-                <th scope="col">Name</th>
-                <th scope="col">Status</th>
-                <th scope="col">Start Time</th>
-                <th scope="col">End Time</th>
-                <th scope="col"> </th>
-            </tr>
-        </thead>
-        <tbody class="capture-table">
-        </tbody>
-    </table>`;
+    <div class="panel z-depth-1">
+        <table class="capture-table table table-hover table-bordered" >
+            <thead class="thead-dark">
+                <tr class="">
+                    <th scope="col"> </th> 
+                    <th scope="col">Name</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Start Time</th>
+                    <th scope="col">End Time</th>
+                    <th scope="col"> </th>
+                </tr>
+            </thead>
+            <tbody class="capture-table-body">
+            </tbody>
+        </table>
+    </div>`;
 }
 
 function captureDashboardEmptyTemplate() {
@@ -275,20 +277,22 @@ function captureDashboardEmptyTemplate() {
 
 function replayDashboardTemplate() {
     return `
-    <table class="table table-hover" width="100%">
-        <thead class="thead-dark">
-            <tr class="">
-                <th scope="col"> </th> 
-                <th scope="col">Name</th>
-                <th scope="col">Status</th>
-                <th scope="col">Start Time</th>
-                <th scope="col">End Time</th>
-                <th scope="col"> </th>
-            </tr>
-        </thead>
-        <tbody class="replay-table">
-        </tbody>
-    </table>`;
+    <div class="panel z-depth-1">
+        <table class="replay-table table table-hover table-bordered" >
+            <thead class="thead-dark">
+                <tr class="">
+                    <th scope="col"> </th> 
+                    <th scope="col">Name</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Start Time</th>
+                    <th scope="col">End Time</th>
+                    <th scope="col"> </th>
+                </tr>
+            </thead>
+            <tbody class="replay-table-body">
+            </tbody>
+        </table>
+    </div>`;
 }
 
 function replayDashboardEmptyTemplate() {

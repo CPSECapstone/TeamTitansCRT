@@ -586,3 +586,9 @@ a.defaultLinkColor {
     text-decoration-color: orange;
     font-size: 7rem;
 }
+
+.panel {
+    border: 1px solid grey;
+    border-radius: 1em;
+    overflow: hidden;
+}
