@@ -40,6 +40,9 @@ function createCaptureDashboard(data) {
             $("div.capture-dashboard").replaceWith(captureDashboardTemplate());    
             $("tbody.capture-table").empty();
 
+            // sort running captures first
+            data.sort(sortRunningFirst);
+
             var rows = "";
             for(let i = 0; i < data.length; i++) {
                 var capture = data[i];
@@ -95,6 +98,9 @@ function createReplayDashboard(data) {
         if (data.length > 0) {
             $("div.replay-dashboard").replaceWith(replayDashboardTemplate());    
             $("tbody.replay-table").empty();
+
+            // sort running replays first
+            data.sort(sortRunningFirst);
 
             var rows = "";
             for(let i = 0; i < data.length; i++) {
@@ -368,6 +374,12 @@ function getReplays() {
 /* ----------------------- Utility ------------------------------------------- */
 function openAnalysis(id) {
     sessionStorage.setItem("defaultCapture", id);
+}
+
+function sortRunningFirst(cap1, cap2) {
+    if (cap1["status"] == "Running") return -1;
+    if (cap2["status"] == "Running") return 1;
+    return 0;
 }
 
 Date.prototype.customFormat = function(formatString){
