@@ -3,8 +3,8 @@ $(function() {
     $("#toggle-btn").on("click", function() {
         toggleDashboard();
     });
-    // testDashboardTable();
-    updateStatus();
+    testDashboardTable();
+    // updateStatus();
     $(".replay-row").hide();
 });
 
@@ -162,17 +162,17 @@ function createTableRow(capture) {
 
     if (status == "Running") {
         btn = `<a href="javascript:void(0)" id="${selectorStop(id)}" class="defaultLinkColor">Stop Capture</a>`;
-        icon = `<img src="../img/running.png" alt="running">`;
+        icon = getRunningImageTemplate();
     }                
     else if (status == "Finished") {
         btn = `<a href="analyze" id="${selectorAnalyze(id)}" class="defaultLinkColor">Analyze</a>`;
-        icon = `<img src="../img/finished.png" alt="finished">`;
+        icon = getFinishedImageTemplate();
     }
     else if (status == "Queued") {
-        icon = `<img src="../img/queued.png" alt="queued">`;
+        icon = getQueuedImageTemplate();
     }
     else {
-        icon = `<img src="../img/failed.png" alt="failed">`;
+        icon = getFailedImageTemplate();
     }
 
     var row = `
@@ -314,6 +314,23 @@ function metricsTemplate(metrics) {
             </ul>
         </div>
     </td>`;
+}
+
+function getRunningImageTemplate() {
+    return `<i class="fa fa-circle-o-notch fa-spin"></i>`;
+    // return `<img src="./img/running.png" alt="running">`;
+}
+
+function getFinishedImageTemplate() {
+    return `<img src="./img/finished.png" alt="finished">`;
+}
+
+function getQueuedImageTemplate() {
+    return `<img src="./img/queued.png" alt="queued">`;
+}
+
+function getFailedImageTemplate() {
+    return `<img src="./img/failed.png" alt="failed">`;
 }
 
 /* ----------------------- API Calls ----------------------------------------- */
