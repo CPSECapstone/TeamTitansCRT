@@ -596,3 +596,8 @@ a.defaultLinkColor {
 .margin-top {
     margin-top: 3em;
 }
+
+.dashboard-icon {
+  /*margin-left: 0em;*/
+  /*margin-right: -1em;*/
+}

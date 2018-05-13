@@ -38,18 +38,26 @@ function createCaptureDashboard(data) {
     {
         if (data.length > 0) {
             $(".capture-dashboard").replaceWith(captureDashboardTemplate());    
-            $(".capture-table-body").empty();
+            $(".capture-table-body-running").empty();
+            $(".capture-table-body-queued").empty();
 
             // sort running captures first
             data.sort(sortRunningFirst);
 
-            var rows = "";
+            var runningRows = [];
+            var queuedRows = [];
             for(let i = 0; i < data.length; i++) {
                 var capture = data[i];
                 var id = capture["id"];
 
-                rows += createTableRow(capture);
-                rows += `<tr class="collapse" id="${selectorCloudwatch(id)}"></tr>`;
+                if (capture["status"] == "Running") {
+                    runningRows.push(createTableRow(capture));
+                    runningRows.push(`<tr class="collapse" id="${selectorCloudwatch(id)}"></tr>`);
+                }
+                else if (capture["status"] == "Queued") {
+                    queuedRows.push(createTableRow(capture));
+                    queuedRows.push(`<tr class="collapse" id="${selectorCloudwatch(id)}"></tr>`);
+                }
 
                 // async adds cloudwatch data
                 getMetrics(capture)
@@ -62,7 +70,8 @@ function createCaptureDashboard(data) {
                 });
             }
 
-            $(".capture-table-body").append(rows);
+            $(".capture-table-body-running").append(runningRows.join(''));
+            $(".capture-table-body-queued").append(queuedRows.join(''));
 
             // add event handlers to each row
             $.each(data, function(index, capture) {
@@ -223,6 +232,7 @@ function mainTemplate() {
         <div class="row capture-row">
             <div class="col-lg-6 col-lg-offset-3">
                 <h4 class="text-center">Capture Dashboard</h4>
+                <hr>
             </div>
             <div class="col-lg-12">
                 <div class="capture-dashboard"></div>
@@ -235,6 +245,7 @@ function mainTemplate() {
         <div class="row replay-row">
             <div class="col-lg-6 col-lg-offset-3">
                 <h4 class="text-center">Replay Dashboard</h4>
+                <hr>
             </div>
             <div class="col-lg-12">
                 <div class="replay-dashboard"></div>
@@ -249,6 +260,7 @@ function mainTemplate() {
 
 function captureDashboardTemplate() {
     return `
+    <h4>Running</h4>
     <div class="margin-top panel z-depth-1">
         <table class="capture-table table table-hover table-bordered" >
             <thead class="thead-dark">
@@ -261,7 +273,25 @@ function captureDashboardTemplate() {
                     <th scope="col"> </th>
                 </tr>
             </thead>
-            <tbody class="capture-table-body">
+            <tbody class="capture-table-body-running">
+            </tbody>
+        </table>
+    </div>
+    <br>
+    <h4>Queued</h4>
+    <div class="margin-top panel z-depth-1">
+        <table class="capture-table table table-hover table-bordered" >
+            <thead class="thead-dark">
+                <tr class="">
+                    <th scope="col"> </th> 
+                    <th scope="col">Name</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Start Time</th>
+                    <th scope="col">End Time</th>
+                    <th scope="col"> </th>
+                </tr>
+            </thead>
+            <tbody class="capture-table-body-queued">
             </tbody>
         </table>
     </div>`;
@@ -317,7 +347,7 @@ function metricsTemplate(metrics) {
 }
 
 function getRunningImageTemplate() {
-    return `<i class="fa fa-circle-o-notch fa-spin"></i>`;
+    return `<i class="dashboard-icon fa fa-circle-o-notch fa-spin" style="color:rgb(0,0,200);"></i>`;
     // return `<img src="./img/running.png" alt="running">`;
 }
 
@@ -326,7 +356,8 @@ function getFinishedImageTemplate() {
 }
 
 function getQueuedImageTemplate() {
-    return `<img src="./img/queued.png" alt="queued">`;
+    return `<i class="dashboard-icon fa fa-clock-o" style="color:rgb(200,200,0);"></i>`;
+    // return `<img src="./img/queued.png" alt="queued">`;
 }
 
 function getFailedImageTemplate() {
