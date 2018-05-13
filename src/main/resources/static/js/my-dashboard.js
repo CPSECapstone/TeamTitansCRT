@@ -227,7 +227,7 @@ function selectorAnalyze(id) {
 /* ----------------------- Template Functions -------------------------------- */
 function mainTemplate() {
     return `
-    <div class="container">
+    <div class="container main-dashboard">
         <a id="toggle-btn" class="btn btn-default pull-right">Show Replays</a>
         <div class="row capture-row">
             <div class="col-lg-6 col-lg-offset-3">
@@ -261,6 +261,7 @@ function mainTemplate() {
 function captureDashboardTemplate() {
     return `
     <h4>Running</h4>
+    <hr>
     <div class="margin-top panel z-depth-1">
         <table class="capture-table table table-hover table-bordered" >
             <thead class="thead-dark">
@@ -279,6 +280,7 @@ function captureDashboardTemplate() {
     </div>
     <br>
     <h4>Queued</h4>
+    <hr>
     <div class="margin-top panel z-depth-1">
         <table class="capture-table table table-hover table-bordered" >
             <thead class="thead-dark">
@@ -347,7 +349,7 @@ function metricsTemplate(metrics) {
 }
 
 function getRunningImageTemplate() {
-    return `<i class="dashboard-icon fa fa-circle-o-notch fa-spin" style="color:rgb(0,0,200);"></i>`;
+    return `<i class="fa fa-circle-o-notch fa-spin" style="color:rgb(0,0,200);"></i>`;
     // return `<img src="./img/running.png" alt="running">`;
 }
 
@@ -356,7 +358,7 @@ function getFinishedImageTemplate() {
 }
 
 function getQueuedImageTemplate() {
-    return `<i class="dashboard-icon fa fa-clock-o" style="color:rgb(200,200,0);"></i>`;
+    return `<i class="fa fa-clock-o" style="color:rgb(200,200,0);"></i>`;
     // return `<img src="./img/queued.png" alt="queued">`;
 }
 
