@@ -506,6 +506,10 @@ public class Driver {
         List<String> rdsInstances;
         try {
             rdsInstances = ResourceCLI.rds(rdsRegion);
+            if (rdsInstances.size() == 0) {
+                System.out.println("There are no rds instances at the selected region: "  + rdsRegion);
+                return;
+            }
         } catch (IOException e) {
             System.out.println("An error occurred when attempting to retrieve RDS instances at " + rdsRegion
                     + " region");
@@ -540,6 +544,10 @@ public class Driver {
         List<String> s3Buckets;
         try {
             s3Buckets = ResourceCLI.s3(s3Region);
+            if (s3Buckets.size() == 0) {
+                System.out.println("There are no rds instances at the selected region: "  + s3Region);
+                return;
+            }
         } catch (IOException e) {
             System.out.println("An error occurred when attempting to retrieve S3 buckets at " + rdsRegion
                     + " region");
@@ -665,9 +673,9 @@ public class Driver {
 
     private void printCommandsList() {
         System.out.println("\nlist of Commands");
-        System.out.println("\truncp [capture_name][rds_endpoint] [rds_region] [S3_bucket] [S3_region] -start -end -filesize -transize -dbcom -dbuser");
+        System.out.println("\truncp [capture_name][rds_endpoint] [rds_region] [S3_bucket] [S3_region] -i -start -end -filesize -transize -dbcom -dbuser");
         System.out.println("\tendcp [capture_name]");
-        System.out.println("\trunrp [replay_name] [capture_name] [rds_endpoint] [rds_region] [S3_bucket] [S3_region] [mode] -start -end -filesize -transize -dbcom -dbuser");
+        System.out.println("\trunrp [replay_name] [capture_name] [rds_endpoint] [rds_region] [S3_bucket] [S3_region] [mode] -i -start -end -filesize -transize -dbcom -dbuser");
         System.out.println("\tendcp [replay_name]");
         System.out.println("\tget -replays -captures -rds -s3 -regions");
         System.out.println("\tstatus -replay -capture");

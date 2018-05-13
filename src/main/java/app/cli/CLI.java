@@ -86,6 +86,7 @@ public class CLI {
     protected static List<String> convertToListString(String string) {
         String rdsList = string.replace("[", "").replace("]", "").replace("\"", "");
         List<String> list = new ArrayList<String>(Arrays.asList(rdsList.split("\\s*,\\s*")));
+        list.removeAll(Arrays.asList("", null));
 
         return list;
     }
