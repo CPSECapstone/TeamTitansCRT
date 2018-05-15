@@ -3,8 +3,8 @@ $(function() {
     $("#toggle-btn").on("click", function() {
         toggleDashboard();
     });
-    testDashboardTable();
-    // updateStatus();
+    // testDashboardTable();
+    updateStatus();
     $(".replay-row").hide();
 });
 
@@ -106,17 +106,40 @@ function createReplayDashboard(data) {
     {
         if (data.length > 0) {
             $(".replay-dashboard").replaceWith(replayDashboardTemplate());    
-            $(".replay-table-body").empty();
+            $(".replay-table-body-running").empty();
+            $(".replay-table-body-queued").empty();
 
             // sort running replays first
             data.sort(sortRunningFirst);
 
-            var rows = "";
+            var runningRows = [];
+            var queuedRows = [];
             for(let i = 0; i < data.length; i++) {
-                rows += createTableRow(data[i]);
+                var replay = data[i];
+                var id = replay["id"];
+
+                if (replay["status"] == "Running") {
+                    runningRows.push(createTableRow(replay));
+                    runningRows.push(`<tr class="collapse" id="${selectorCloudwatch(id)}"></tr>`);
+                }
+                else if (replay["status"] == "Queued") {
+                    queuedRows.push(createTableRow(replay));
+                    queuedRows.push(`<tr class="collapse" id="${selectorCloudwatch(id)}"></tr>`);
+                }
+
+                // async adds cloudwatch data
+                getMetrics(replay)
+                .done(function(metrics) {
+                    console.log('adding cloudwatch data');
+                    $(`#${selectorCloudwatch(id)}`).html(metricsTemplate(metrics));
+                })
+                .fail(function(err) {
+                    console.log('cloudwatch failed');
+                });
             }
 
-            $(".replay-table-body").append(rows);
+            $(".replay-table-body-running").append(runningRows.join(''));
+            $(".replay-table-body-queued").append(queuedRows.join(''));
 
             $.each(data, function(index, replay) {
                 var id = replay["id"];
@@ -309,6 +332,8 @@ function captureDashboardEmptyTemplate() {
 
 function replayDashboardTemplate() {
     return `
+    <h4>Running</h4>
+    <hr>
     <div class="margin-top panel z-depth-1">
         <table class="replay-table table table-hover table-bordered" >
             <thead class="thead-dark">
@@ -321,7 +346,26 @@ function replayDashboardTemplate() {
                     <th scope="col"> </th>
                 </tr>
             </thead>
-            <tbody class="replay-table-body">
+            <tbody class="replay-table-body-running">
+            </tbody>
+        </table>
+    </div>
+    <br>
+    <h4>Queued</h4>
+    <hr>
+    <div class="margin-top panel z-depth-1">
+        <table class="replay-table table table-hover table-bordered" >
+            <thead class="thead-dark">
+                <tr class="">
+                    <th scope="col"> </th> 
+                    <th scope="col">Name</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Start Time</th>
+                    <th scope="col">End Time</th>
+                    <th scope="col"> </th>
+                </tr>
+            </thead>
+            <tbody class="replay-table-body-queued">
             </tbody>
         </table>
     </div>`;
