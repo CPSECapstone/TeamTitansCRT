@@ -24,7 +24,7 @@ public class ErrorsUtil {
     }
 
     public static String idContainsNonAlphaNumeric() {
-        return "Error: Capture ID can only contain alpha numeric characters";
+        return "Error: Capture ID can only contain alphanumeric characters";
     }
 
 }

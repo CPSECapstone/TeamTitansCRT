@@ -1,8 +1,13 @@
 package app.cli;
 
 import app.models.Capture;
+import app.models.Replay;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -33,7 +38,7 @@ public class Driver {
         while (it.hasNext()) {
             System.out.println(it.nextIndex() + ": " + it.next());
         }
-        System.out.println("Please enter the number corresponding to the value you would like >> ");
+        System.out.print("Please enter the number corresponding to the value you would like >> ");
         if (scanner.hasNextLine()) {
             String response = scanner.nextLine();
             if (response.toLowerCase().equals("quit")) {
@@ -85,80 +90,101 @@ public class Driver {
         }
     }*/
 
-    public static void main(String[] args) {
-        Driver driver = new Driver();
+    public void startCommandPrompt() {
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("Welcome to MyCRT!");
-        driver.printCommandsList();
+        printCommandsList();
         System.out.print("Enter a command >> ");
 
         while (true) {
             if (scanner.hasNextLine()) {
                 String input = scanner.nextLine();
-                String[] line = input.split(" ");
-                switch (line[0]) {
-                    case RUN_CAPTURE:
-                        driver.runCapture(line);
-                        break;
-                    case END_CAPTURE:
-                        driver.endCapture(line);
-                        break;
-                    case RUN_REPLAY:
-                        driver.runReplay(line);
-                        break;
-                    case END_REPLAY:
-                        driver.end_replay(line);
-                        break;
-                    case STATUS:
-                        driver.status(line);
-                        break;
-                    case GET_LIST:
-                        driver.getList(line);
-                        break;
-                    case HELP:
-                        driver.printCommandsList();
-                        break;
-                    default:
-                        break;
-
+                if (input.toLowerCase().equals("quit") || input.toLowerCase().equals("exit")) {
+                    System.out.println("Quitting the MyCRT CLI...");
+                    break;
                 }
-
-                System.out.print("\nEnter a command >> ");
+                handleCommand(input);
             }
+            System.out.print("\nEnter a command >> ");
+        }
+
+    }
+
+
+    public void processCommandFile(String filename) {
+        try {
+            File file = new File(filename);
+            if (!file.isFile()) {
+                System.out.println("Cannot find file");
+                return;
+            }
+            FileReader reader = new FileReader(file);
+            BufferedReader buffReader = new BufferedReader(reader);
+            String line;
+            while ((line = buffReader.readLine()) != null) {
+                handleCommand(line);
+            }
+            reader.close();
+        } catch (IOException e) {
+            System.out.println("An error occurred when processing file.");
+            return;
         }
     }
 
-    private void runCapture(String[] line) {
-        if (line.length == 2 && line[1].equals("help")) {
-            printRunCaptureHelp();
-            return;
+    public void handleCommand(String command) {
+        String[] line = command.split(" ");
+        switch (line[0]) {
+            case RUN_CAPTURE:
+                runCapture(line);
+                break;
+            case END_CAPTURE:
+                endCapture(line);
+                break;
+            case RUN_REPLAY:
+                runReplay(line);
+                break;
+            case END_REPLAY:
+                end_replay(line);
+                break;
+            case STATUS:
+                status(line);
+                break;
+            case GET_LIST:
+                getList(line);
+                break;
+            case HELP:
+                printCommandsList();
+                break;
+            default:
+                System.out.println("Command not recognized");
+                break;
         }
-        else if (line.length >= 2 && line[1].equals("-i")) {
-            runCaptureInteractive(line);
-            return;
+    }
+
+    public static void main(String[] args) {
+        Driver driver = new Driver();
+
+        if (args.length >= 1) {
+            driver.processCommandFile(args[0]);
+        }
+        else {
+            driver.startCommandPrompt();
         }
 
-        if (line.length < 6) {
-            commandError(line[0]);
-            return;
-        }
+    }
 
-        String id = line[1];
-        String rds = line[2];
-        String rdsRegion = line[3];
-        String s3 = line[4];
-        String s3Region = line[5];
+    private void handleCaptureOptionals(String[] line, int startIndex, String id, String rds, String rdsRegion,
+                                        String s3, String s3Region) {
         Date startTime = null;
         Date endTime = null;
         long fileSize = 0;
         long transactionSize = 0;
-
         ArrayList<String> filterStatements = null;
         ArrayList<String> filterUsers = null;
 
 
-        for (int i = 6; i < line.length; i+=2) {
+        for (int i = startIndex; i < line.length; i+=2) {
             if (i + 1 >= line.length) {
                 System.out.println("Here " + i + " length " + line.length);
                 commandError(line[0]);
@@ -204,10 +230,95 @@ public class Driver {
         }
 
         try {
-            CaptureCLI.start(id, rdsRegion, rds, s3Region, s3, startTime, endTime, transactionSize, fileSize, filterStatements, filterUsers);
+            CaptureCLI.start(id, rdsRegion, rds, s3Region, s3, startTime, endTime, transactionSize,
+                    fileSize, filterStatements, filterUsers);
+        } catch (IOException e) {
+            System.out.println("An error occurred sending your capture. Please try again.");
+            return;
+        }
+    }
+
+    private void handleReplayOptionals(String[] line, int startIndex, String capture_id, String id, String rds, String rdsRegion,
+                                       String s3, String s3Region, String mode, String dbUsername, String dbPassword) {
+        Date startTime = null;
+        Date endTime = null;
+        long fileSize = 0;
+        long transactionSize = 0;
+        ArrayList<String> filterStatements = null;
+        ArrayList<String> filterUsers = null;
+
+        for (int i = startIndex; i < line.length; i++) {
+            if (i + 1 >= line.length) {
+                commandError(line[0]);
+                return;
+            }
+            switch (line[i]) {
+                case "-start": {
+                    String startdate = line[i + 1];
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy-hh:mm");
+                    try {
+                        startTime = dateFormat.parse(startdate);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                }
+                case "-end": {
+                    String enddate = line[i + 1];
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy-hh:mm");
+                    try {
+                        startTime = dateFormat.parse(enddate);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                }
+                case "-transize":
+                    String size = line[i + 1];
+                    transactionSize = Long.parseLong(size);
+                    break;
+                default:
+                    break;
+            }
+
+        }
+
+        try {
+            ReplayCLI.start(id, rdsRegion, rds, s3Region, s3, mode, capture_id, startTime, endTime,
+                    transactionSize, filterStatements, filterUsers, dbUsername, dbPassword);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void runCapture(String[] line) {
+        if (line.length == 2 && line[1].equals("help")) {
+            printRunCaptureHelp();
+            return;
+        }
+        else if (line.length >= 2 && line[1].equals("-i")) {
+            runCaptureInteractive(line);
+            return;
+        }
+
+        if (line.length < 6) {
+            commandError(line[0]);
+            return;
+        }
+
+        String id = line[1];
+        if (!id.matches("[A-Za-z0-9]+")) {
+            System.out.println("Replay name can only contain a-z, A-Z, 0-9");
+            System.out.println("Quitting...");
+            return;
+        }
+        String rds = line[2];
+        String rdsRegion = line[3];
+        String s3 = line[4];
+        String s3Region = line[5];
+
+
+        handleCaptureOptionals(line, 6, id, rds, rdsRegion, s3, s3Region);
     }
 
     private void runCaptureInteractive(String[] line) {
@@ -216,13 +327,6 @@ public class Driver {
         String rdsRegion = null;
         String s3 = null;
         String s3Region = null;
-        Date startTime = null;
-        Date endTime = null;
-        long fileSize = 0;
-        long transactionSize = 0;
-
-        ArrayList<String> filterStatements = null;
-        ArrayList<String> filterUsers = null;
 
         int responseIndex;
         Scanner scanner = new Scanner(System.in);
@@ -236,6 +340,11 @@ public class Driver {
                 }
                 break;
             }
+        }
+        if (!id.matches("[A-Za-z0-9]+")) {
+            System.out.println("Replay name can only contain a-z, A-Z, 0-9");
+            System.out.println("Quitting...");
+            return;
         }
         System.out.println("Configuring RDS....");
         List<String> regions;
@@ -286,58 +395,8 @@ public class Driver {
             return;
         }
         s3 = s3Buckets.get(responseIndex);
-        for (int i = 2; i < line.length; i++) {
-            if (i + 1 >= line.length) {
-                System.out.println("Here " + i + " length " + line.length);
-                commandError(line[0]);
-                return;
-            }
-            switch (line[i]) {
-                case "-start": {
-                    String startdate = line[i + 1];
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy-hh:mm:aa");
-                    try {
-                        startTime = dateFormat.parse(startdate);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    break;
-                }
-                case "-end": {
-                    String enddate = line[i + 1];
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy-hh:mm");
-                    try {
-                        startTime = dateFormat.parse(enddate);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    break;
-                }
-                case "-filesize":
-                    String size = line[i + 1];
-                    fileSize = Long.parseLong(size);
-                    break;
-                case "-transnum":
-                    size = line[i + 1];
-                    transactionSize = Long.parseLong(size);
-                    break;
-                case "-dbcomignore":
-                    break;
-                case "dbuserignore":
-                    break;
-                default:
-                    break;
-            }
-        }
-        try {
-            CaptureCLI.start(id, rdsRegion, rds, s3Region, s3, startTime, endTime, transactionSize, fileSize,
-                    filterStatements, filterUsers);
-        } catch (IOException e) {
-            System.out.println("An error occurred sending your capture. Please try again.");
-            return;
-        }
 
-
+        handleCaptureOptionals(line, 2, id, rds, rdsRegion, s3, s3Region);
     }
 
     private void endCapture(String[] line) {
@@ -368,27 +427,27 @@ public class Driver {
             return;
         }
 
-        if (line.length < 8) {
+        if (line.length < 10) {
             commandError(line[0]);
             return;
         }
 
 
         String id = line[1];
+        if (!id.matches("[A-Za-z0-9]+")) {
+            System.out.println("Replay name can only contain a-z, A-Z, 0-9");
+            System.out.println("Quitting...");
+            return;
+        }
         String capture_id = line[2];
         String rds = line[3];
         String rdsRegion = line[4];
         String s3 = line[5];
         String s3Region = line[6];
         String mode = line[7];
-        String dbUsername = null; // add switch statement support
-        String dbPassword = null;
-        Date startTime = null;
-        Date endTime = null;
-        long transactionSize = 0;
+        String dbUsername = line[8];
+        String dbPassword = line[9];
 
-        ArrayList<String> filterStatements = null;
-        ArrayList<String> filterUsers = null;
 
         if (mode.equals("fast-mode")) {
             mode = "Fast Mode";
@@ -396,47 +455,7 @@ public class Driver {
             System.out.println(mode);
         }
 
-        for (int i = 8; i < line.length; i++) {
-            if (i + 1 >= line.length) {
-                commandError(line[0]);
-                return;
-            }
-            switch (line[i]) {
-                case "-start": {
-                    String startdate = line[i + 1];
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy-hh:mm");
-                    try {
-                        startTime = dateFormat.parse(startdate);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    break;
-                }
-                case "-end": {
-                    String enddate = line[i + 1];
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy-hh:mm");
-                    try {
-                        startTime = dateFormat.parse(enddate);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    break;
-                }
-                case "-transize":
-                    String size = line[i + 1];
-                    transactionSize = Long.parseLong(size);
-                    break;
-                default:
-                    break;
-            }
-
-        }
-
-        try {
-            ReplayCLI.start(id, rdsRegion, rds, s3Region, s3, mode, capture_id, startTime, endTime, transactionSize, filterStatements, filterUsers, dbUsername, dbPassword);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        handleReplayOptionals(line, 10, capture_id, id, rds, rdsRegion, s3, s3Region, mode, dbUsername, dbPassword);
     }
 
     private void runReplayInteractive(String[] line) {
@@ -449,12 +468,6 @@ public class Driver {
         String mode = null;
         String dbUsername = null;
         String dbPassword = null;
-        Date startTime = null;
-        Date endTime = null;
-        long transactionSize = 0;
-
-        ArrayList<String> filterStatements = null;
-        ArrayList<String> filterUsers = null;
 
         Scanner scanner = new Scanner(System.in);
         int responseIndex;
@@ -489,6 +502,11 @@ public class Driver {
                 break;
             }
         }
+        if (!id.matches("[A-Za-z0-9]+")) {
+            System.out.println("Replay name can only contain a-z, A-Z, 0-9");
+            System.out.println("Quitting...");
+            return;
+        }
         System.out.println("Configuring RDS....");
         List<String> regions;
         try {
@@ -522,11 +540,11 @@ public class Driver {
         }
         rds = rdsInstances.get(responseIndex);
 
-        System.out.println("What is the username of the database?");
+        System.out.print("What is the username of the database?");
         if (scanner.hasNextLine()) {
             dbUsername = scanner.nextLine();
         }
-        System.out.println("What is the password of the database?");
+        System.out.print("What is the password of the database?");
         if (scanner.hasNextLine()) {
             dbPassword = scanner.nextLine();
         }
@@ -568,48 +586,9 @@ public class Driver {
         }
         mode = replayModes.get(responseIndex);
 
-        for (int i = 2; i < line.length; i++) {
-            if (i + 1 >= line.length) {
-                System.out.println("Here " + i + " length " + line.length);
-                commandError(line[0]);
-                return;
-            }
-            switch (line[i]) {
-                case "-start": {
-                    String startdate = line[i + 1];
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy-hh:mm");
-                    try {
-                        startTime = dateFormat.parse(startdate);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    break;
-                }
-                case "-end": {
-                    String enddate = line[i + 1];
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy-hh:mm");
-                    try {
-                        startTime = dateFormat.parse(enddate);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    break;
-                }
-                case "-transize":
-                    String size = line[i + 1];
-                    transactionSize = Long.parseLong(size);
-                    break;
-                default:
-                    break;
-            }
-        }
-        try {
-            ReplayCLI.start(id, rdsRegion, rds, s3Region, s3, mode, capture_id, startTime, endTime, transactionSize,
-                    filterStatements, filterUsers, dbUsername, dbPassword);
-        } catch (IOException e) {
-            System.out.println("An error occurred when sending your Replay. Please try again.");
-            return;
-        }
+        handleReplayOptionals(line, 2, capture_id, id, rds, rdsRegion, s3, s3Region, mode, dbUsername,
+                dbPassword);
+
     }
 
     private void end_replay(String[] line) {
@@ -617,8 +596,15 @@ public class Driver {
             return;
         }
 
-        if (line.length < 5) {
-            commandError(line[0]);
+        if (line.length == 2) {
+            String replayIDString = line[1];
+            try {
+                ReplayCLI.stop(replayIDString);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("Error - Too many arguments");
         }
     }
 
@@ -637,16 +623,20 @@ public class Driver {
             return;
         }
 
-        if (line.length > 0 && line.length < 3) {
-            commandError(line[0]);
-        }
 
         switch (line[1]) {
             case "-rds":
+                if (line.length > 0 && line.length < 3) {
+                    System.out.println("This command requires a region.");
+                    commandError(line[0]);
+                    break;
+                }
                 try {
                     List<String> rdsList = ResourceCLI.rds(line[2]);
                     CLI.presentListOptions(rdsList);
-                } catch (Exception e) {
+                } catch (ConnectException ce) {
+                    System.out.println("Connection refused");
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
                 break;
@@ -654,15 +644,44 @@ public class Driver {
                 try {
                     List<String> rdsList = ResourceCLI.regions();
                     CLI.presentListOptions(rdsList);
-                } catch (Exception e) {
+                } catch (ConnectException ce) {
+                    System.out.println("Connection refused");
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
                 break;
             case "-s3":
+                if (line.length > 0 && line.length < 3) {
+                    System.out.println("This command requires a region.");
+                    commandError(line[0]);
+                    break;
+                }
                 try {
                     List<String> rdsList = ResourceCLI.s3(line[2]);
                     CLI.presentListOptions(rdsList);
+                } catch (ConnectException ce) {
+                    System.out.println("Connection refused");
                 } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                break;
+            case "-captures":
+                try {
+                    List<Capture> captureList = ResourceCLI.captures();
+                    CLI.presentCaptureIdListOptions(captureList);
+                } catch (ConnectException ce) {
+                    System.out.println("Connection refused");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                break;
+            case "-replays":
+                try {
+                    List<Replay> replayList = ResourceCLI.replays();
+                    CLI.presentReplayIdListOptions(replayList);
+                } catch (ConnectException ce) {
+                    System.out.println("Connection refused");
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
                 break;
@@ -675,8 +694,8 @@ public class Driver {
         System.out.println("\nlist of Commands");
         System.out.println("\truncp [capture_name][rds_endpoint] [rds_region] [S3_bucket] [S3_region] -i -start -end -filesize -transize -dbcom -dbuser");
         System.out.println("\tendcp [capture_name]");
-        System.out.println("\trunrp [replay_name] [capture_name] [rds_endpoint] [rds_region] [S3_bucket] [S3_region] [mode] -i -start -end -filesize -transize -dbcom -dbuser");
-        System.out.println("\tendcp [replay_name]");
+        System.out.println("\trunrp [replay_name] [capture_name] [rds_endpoint] [rds_region] [S3_bucket] [S3_region] [mode] [dbUsername] [dbPassword] -i -start -end -filesize -transize -dbcom -dbuser");
+        System.out.println("\tendrp [replay_name]");
         System.out.println("\tget -replays -captures -rds -s3 -regions");
         System.out.println("\tstatus -replay -capture");
         System.out.println("\thelp");

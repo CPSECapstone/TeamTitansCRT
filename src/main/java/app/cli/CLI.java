@@ -2,12 +2,10 @@ package app.cli;
 
 import app.models.Capture;
 import app.models.Replay;
-import app.models.Statement;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -35,6 +33,13 @@ public class CLI {
 
     protected static void presentCaptureIdListOptions(List<Capture> captures) {
         ListIterator<Capture> it = captures.listIterator();
+        while (it.hasNext()) {
+            System.out.println(it.nextIndex() + ": " + it.next().getId());
+        }
+    }
+
+    protected static void presentReplayIdListOptions(List<Replay> replays) {
+        ListIterator<Replay> it = replays.listIterator();
         while (it.hasNext()) {
             System.out.println(it.nextIndex() + ": " + it.next().getId());
         }
