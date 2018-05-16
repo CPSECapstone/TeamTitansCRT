@@ -10,6 +10,7 @@ $(function() {
     var transactionLimitSelector = "transactionLimitSelector";
     var filterStatementsSelector = "filterStatementsSelector";
     var filterUsersSelector = "filterUsersSelector";
+    var searchSelector = "searchSelector";
 
     var startBtnSelector = "btnCaptureStart";
 
@@ -53,6 +54,7 @@ $(function() {
             <div class="col-lg-6">
                 <p class=""><strong>Manage Captures</strong></p>
                 <hr />
+                ${createTextInputPlaceholder("Capture Filter:", searchSelector, "Search for capture")}
                 ${insertLoadingSpinner("manageCapturesLoadingIcon")}
                 <ul id="CaptureList" class="list-group"></ul>
             </div>
@@ -93,6 +95,19 @@ $(function() {
 
             startCapture(capture);
         }
+    });
+
+    $(`.${searchSelector}`).on("input", function() {
+        var value = $(this).val();
+
+        $("#CaptureList > li").each(function() {
+            if (value == '' || $(this).attr('id').slice(5).includes(value)) {
+                $(this).show();
+            }
+            else {
+                $(this).hide();
+            }
+        });
     });
 });
 
@@ -580,6 +595,14 @@ function createTextInputValue(label, id, value) {
     <div class="form-group">
         <label class="input-label">${label}</label>
         <input id="" class="${id} form-control" type="text" value="${value}">
+    </div>`;
+}
+
+function createTextInputPlaceholder(label, id, value) {
+    return `
+    <div class="form-group">
+        <label class="input-label">${label}</label>
+        <input id="" class="${id} form-control" type="text" placeholder="${value}">
     </div>`;
 }
 

@@ -19,6 +19,7 @@ $(function() {
     var passwordSelector = "passwordSelector";
 
     var startBtnSelector = "btnReplayStart";
+    var searchSelector = "searchSelector";
 
     $("div.content-placeholder").replaceWith(`
     <div class="container">
@@ -65,6 +66,7 @@ $(function() {
             <div class="col-lg-6">
                 <p class=""><strong>Manage Replays</strong></p>
                 <hr />
+                ${createTextInputPlaceholder("Replay Filter:", searchSelector, "Search for replay")}
                 ${insertLoadingSpinner("manageReplaysLoadingIcon")}
                 <ul id="ReplayList" class="list-group"></ul>
             </div>
@@ -134,6 +136,19 @@ $(function() {
             // };
             startReplay(replayInner);
         }
+    });
+
+    $(`.${searchSelector}`).on("input", function() {
+        var value = $(this).val();
+
+        $("#ReplayList > li").each(function() {
+            if (value == '' || $(this).attr('id').slice(5).includes(value)) {
+                $(this).show();
+            }
+            else {
+                $(this).hide();
+            }
+        });
     });
 });
 
@@ -646,6 +661,14 @@ function createTextInputValue(label, id, value) {
     <div class="form-group">
         <label class="input-label">${label}</label>
         <input class="${id} form-control" type="text" value="${value}">
+    </div>`;
+}
+
+function createTextInputPlaceholder(label, id, value) {
+    return `
+    <div class="form-group">
+        <label class="input-label">${label}</label>
+        <input id="" class="${id} form-control" type="text" placeholder="${value}">
     </div>`;
 }
 
