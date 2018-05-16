@@ -21,8 +21,8 @@ import java.util.ListIterator;
 public class CLI {
 
     protected static final String USER_AGENT = "Mozilla/5.0";
-    //protected static final String urlString = "http://localhost:8080/";
-    protected static final String urlString = "http://54.176.147.59:8080/";
+    protected static final String urlString = "http://localhost:8080/";
+    //protected static final String urlString = "http://54.176.147.59:8080/";
 
     protected static void presentListOptions(List<String> options) {
         ListIterator<String> it = options.listIterator();
