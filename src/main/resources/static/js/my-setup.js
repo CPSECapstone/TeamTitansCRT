@@ -56,7 +56,7 @@ function createInstanceProfHelpModal(selector) {
                                 <li>Click Policies in the sidebar</li>
                                 <li>Click Create Policy</li>
                                 <li>Click the JSON tab and replace “Statement: []” with the text from the Policy JSON document 
-                                    <a href="https://github.com/CPSECapstone/TeamTitansCRT/wiki/Policy-Statement">HERE</a>
+                                    <a href="https://teamtitans.gitbook.io/project/installation-instructions/json-policy">HERE</a>
                                 </li>
                                 <li>Click Review Policy</li>
                                 <li>Name the policy mycrt</li>
