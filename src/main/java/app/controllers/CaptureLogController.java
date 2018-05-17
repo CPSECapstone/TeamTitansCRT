@@ -16,8 +16,8 @@ import java.util.stream.Collectors;
 
 public class CaptureLogController extends LogController
 {
-    public static final int HOURLY = 0;
-    public static final int END = 1;
+    public static final boolean HOURLY = false;
+    public static final boolean END = true;
 
     public static final String GeneralLogFileName = "general/mysql-general.log";
 
@@ -42,7 +42,7 @@ public class CaptureLogController extends LogController
         return rdsManager.downloadLog(resourceName, fileName);
     }
 
-    public void processData(Session capture, int type)
+    public void processData(Session capture, boolean type)
     {
         String fileName = null;
         boolean isFinalWrite = true;
@@ -72,7 +72,7 @@ public class CaptureLogController extends LogController
         {
             writeToFile(filteredLogDataList, isFinalWrite);
             //writeToFile(filteredLogData, isFinalWrite);
-            if (type == HOURLY)
+            if (!type)
             {
                 updateSessionController();
             }
@@ -87,6 +87,9 @@ public class CaptureLogController extends LogController
 
     private void writeToFile(List<String> filteredLogData, boolean isFinalWrite)
     {
+        if (limitFlag) {
+            return;
+        }
         BufferedWriter out = null;
 
         boolean isFirstWrite = getFile() == null;
@@ -105,16 +108,15 @@ public class CaptureLogController extends LogController
             for (int i = 0; i < filteredLogData.size(); i++)
             {
                 String statement = filteredLogData.get(i);
-                long tempFileSize = fileSize + statement.length() + 2; // +1 accounts for ",\n"
+                long tempFileSize = fileSize + statement.length() + 2; // +2 accounts for ",\n"
                 if (fileSizeLimit > 0 && (tempFileSize / 1000.0) >= fileSizeLimit)
                 {
-                    isFinalWrite = true;
                     limitFlag = true;
                     out.write("\n]");
                     out.flush();
                     updateSessionController(true);
                     CaptureController.stopCapture(sessionID);
-                    break;
+                    return;
                 }
                 else if (i != 0)
                 {
@@ -125,17 +127,27 @@ public class CaptureLogController extends LogController
                 fileSize += statement.length();
                 out.flush();
             }
-            if (isFinalWrite && !limitFlag)
+            if (isFinalWrite)
             {
                 out.write("\n]");
                 out.flush();
-                CaptureController.stopCapture(sessionID);
             }
-            out.close();
         }
         catch (Exception e)
         {
             e.printStackTrace();
+            //TODO: Fail flag and upload files only if "Finished"
+        }
+        finally {
+            try {
+                if (out != null) {
+                    out.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+
         }
     }
 /*
@@ -209,6 +221,9 @@ public class CaptureLogController extends LogController
     @Override
     public void uploadAllFiles(Session capture)
     {
+        if (capture.getStatus() != "Finished")  {
+            return;
+        }
         uploadMetrics(capture);
         if (getFile() == null)
         {

@@ -34,7 +34,7 @@ public abstract class LogController
         return logFilter.filterLogData(logData);
     }
 
-    public abstract void processData(Session session, int type);
+    public abstract void processData(Session session, boolean type);
 
     public abstract void updateSessionController();
 
