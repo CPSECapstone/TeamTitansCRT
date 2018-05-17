@@ -56,7 +56,7 @@ function createCaptureDashboard(data) {
                 }
                 else if (capture["status"] == "Queued") {
                     queuedRows.push(createTableRow(capture));
-                    queuedRows.push(`<tr class="collapse" id="${selectorCloudwatch(id)}"></tr>`);
+                    // queuedRows.push(`<tr class="collapse" id="${selectorCloudwatch(id)}"></tr>`);
                 }
 
                 // async adds cloudwatch data
