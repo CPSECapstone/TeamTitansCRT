@@ -15,8 +15,8 @@ import java.util.Date;
 import java.util.List;
 
 public class ReplayLogController extends LogController {
-    public static final int FAST_MODE = 0;
-    public static final int TIME_SENSITIVE = 1;
+    public static final boolean FAST_MODE = false;
+    public static final boolean TIME_SENSITIVE = true;
 
     public ReplayLogController(Replay replay) {
         this.logFilter = new ReplayFilter(replay);
@@ -27,7 +27,7 @@ public class ReplayLogController extends LogController {
         return getMetricsFromS3(resourceName, region, fileName);
     }
 
-    public void processData(Session session, int type) {
+    public void processData(Session session, boolean type) {
         Replay replay = (Replay) session;
         Capture associatedCapture = DBUtil.getInstance().loadCapture(replay.getCaptureId());
         String logData = getLogData(associatedCapture.getS3(), associatedCapture.getS3Region(), replay.getCaptureLogFileName());

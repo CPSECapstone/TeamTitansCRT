@@ -23,8 +23,8 @@ public class ErrorsUtil {
         return "Error: Negative numbers are not allowed";
     }
 
-    public static String CaptureIDContainsSpaces() {
-        return "Error: Capture ID contains spaces";
+    public static String idContainsNonAlphaNumeric() {
+        return "Error: Capture ID can only contain alphanumeric characters";
     }
 
 }

@@ -25,8 +25,8 @@ public class CaptureServlet {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        if (capture.getId().contains(" ")) {
-            return new ResponseEntity<>(ErrorsUtil.CaptureIDContainsSpaces(), HttpStatus.BAD_REQUEST);
+        if (!capture.getId().matches("[A-Za-z0-9]+")) {
+            return new ResponseEntity<>(ErrorsUtil.idContainsNonAlphaNumeric(), HttpStatus.BAD_REQUEST);
         }
 
         if (CaptureController.isCaptureIdDuplicate(capture)) {

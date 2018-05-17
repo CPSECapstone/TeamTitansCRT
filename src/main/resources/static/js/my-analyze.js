@@ -97,6 +97,7 @@ function testCaptureList() {
     addAllToCaptureList(data);
 }
 
+//TODO: if no data stop loading
 function insertLoadingSpinner(selector) {
     return `
     <div class="${selector}" tabindex="-1" role="dialog">
@@ -552,14 +553,14 @@ $('body').on('change', '.captureCheckbox', function() {
     var checkedCaptures = $('.captureCheckbox:checkbox:checked').map(function () {return this.value;});
 
     $("#replayTable tr td:nth-child(3)").each(function() {
-        if(jQuery.inArray($(this).text(), checkedCaptures) !== -1 || checkedCaptures.length == 0) {
+        if(jQuery.inArray($(this).contents().filter(function() {return this.nodeType == 3}).text(), checkedCaptures) !== -1 || checkedCaptures.length == 0) {
             $(this).parent('tr').show();
         } else {
             $(this).parent('tr').hide();
             $(this).parent('tr').find('.replayCheckbox').prop('checked', false);
         }
     });
-    
+
     $("#captureTable tr td:nth-child(2)").each(function() {
         if(jQuery.inArray($(this).text(), checkedCaptures) !== -1 || checkedCaptures.length == 0) {
             $(this).parent('tr').show();

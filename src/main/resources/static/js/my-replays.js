@@ -19,6 +19,7 @@ $(function() {
     var passwordSelector = "passwordSelector";
 
     var startBtnSelector = "btnReplayStart";
+    var searchSelector = "searchSelector";
 
     $("div.content-placeholder").replaceWith(`
     <div class="container">
@@ -65,6 +66,7 @@ $(function() {
             <div class="col-lg-6">
                 <p class=""><strong>Manage Replays</strong></p>
                 <hr />
+                ${createTextInputPlaceholder("Replay Filter:", searchSelector, "Search for replay")}
                 ${insertLoadingSpinner("manageReplaysLoadingIcon")}
                 <ul id="ReplayList" class="list-group"></ul>
             </div>
@@ -89,8 +91,10 @@ $(function() {
             endTime = new Date(String($(`.${endTimeSelector}`).val()));
         }
 
-        // Only start capture if rds and s3 selected
-        if ($(`.${captureSelector}`).val() != null && $(`.${rdsSelector}`).val() != '' && $(`.${s3Selector}`).val() != '') {
+        // Only start capture if rds and s3 selected and a username and password have been entered
+        if ($(`.${captureSelector}`).val() != null && $(`.${rdsSelector}`).val() != '' && $(`.${s3Selector}`).val() != '' &&
+        $(`.${usernameSelector}`).val() != '' &&
+        $(`.${passwordSelector}`).val() != '') {
             var replayInner = {
                 databaseInfo: {
                     //dbUrl: "testdb.cgtpml3lsh3i.us-west-1.rds.amazonaws.com:3306",
@@ -134,6 +138,23 @@ $(function() {
             // };
             startReplay(replayInner);
         }
+        else {
+            $("#exampleModal").html(createStartReplayModal("Failure", "Your replay failed to start. Verify all fields are correct."));
+            $("#exampleModal").modal("show");
+        }
+    });
+
+    $(`.${searchSelector}`).on("input", function() {
+        var value = $(this).val();
+
+        $("#ReplayList > li").each(function() {
+            if (value == '' || $(this).attr('id').slice(5).includes(value)) {
+                $(this).show();
+            }
+            else {
+                $(this).hide();
+            }
+        });
     });
 });
 
@@ -646,6 +667,14 @@ function createTextInputValue(label, id, value) {
     <div class="form-group">
         <label class="input-label">${label}</label>
         <input class="${id} form-control" type="text" value="${value}">
+    </div>`;
+}
+
+function createTextInputPlaceholder(label, id, value) {
+    return `
+    <div class="form-group">
+        <label class="input-label">${label}</label>
+        <input id="" class="${id} form-control" type="text" placeholder="${value}">
     </div>`;
 }
 
