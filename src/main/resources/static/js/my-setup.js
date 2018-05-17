@@ -1,4 +1,8 @@
 $(function() {
+    localStorage.setItem("visitedLandingPage", true);
+});
+
+$(function() {
     var instProfHelpSelector = "InstProfModal";
     
     $("div.content-placeholder").replaceWith(`
