@@ -1,11 +1,11 @@
 $(function() {
-    $("div.content-placeholder").replaceWith(mainTemplate());
+    $(".content-placeholder").replaceWith(mainTemplate());
     $("#toggle-btn").on("click", function() {
         toggleDashboard();
     });
     // testDashboardTable();
     updateStatus();
-    $("div.replay-row").hide();
+    $(".replay-row").hide();
 });
 
 /* ----------------------- Main Functions ------------------------------------ */
@@ -37,19 +37,27 @@ function createCaptureDashboard(data) {
     setTimeout(function()
     {
         if (data.length > 0) {
-            $("div.capture-dashboard").replaceWith(captureDashboardTemplate());    
-            $("tbody.capture-table").empty();
+            $(".capture-dashboard").replaceWith(captureDashboardTemplate());    
+            $(".capture-table-body-running").empty();
+            $(".capture-table-body-queued").empty();
 
             // sort running captures first
             data.sort(sortRunningFirst);
 
-            var rows = "";
+            var runningRows = [];
+            var queuedRows = [];
             for(let i = 0; i < data.length; i++) {
                 var capture = data[i];
                 var id = capture["id"];
 
-                rows += createTableRow(capture);
-                rows += `<tr class="collapse" id="${selectorCloudwatch(id)}"></tr>`;
+                if (capture["status"] == "Running") {
+                    runningRows.push(createTableRow(capture));
+                    runningRows.push(`<tr class="collapse" id="${selectorCloudwatch(id)}"></tr>`);
+                }
+                else if (capture["status"] == "Queued") {
+                    queuedRows.push(createTableRow(capture));
+                    // queuedRows.push(`<tr class="collapse" id="${selectorCloudwatch(id)}"></tr>`);
+                }
 
                 // async adds cloudwatch data
                 getMetrics(capture)
@@ -62,7 +70,8 @@ function createCaptureDashboard(data) {
                 });
             }
 
-            $("tbody.capture-table").append(rows);
+            $(".capture-table-body-running").append(runningRows.join(''));
+            $(".capture-table-body-queued").append(queuedRows.join(''));
 
             // add event handlers to each row
             $.each(data, function(index, capture) {
@@ -86,7 +95,7 @@ function createCaptureDashboard(data) {
             });
         }
         else {
-            $("div.capture-dashboard").replaceWith(captureDashboardEmptyTemplate());
+            $(".capture-dashboard").replaceWith(captureDashboardEmptyTemplate());
         }
     },
     500);
@@ -96,18 +105,41 @@ function createReplayDashboard(data) {
     setTimeout(function()
     {
         if (data.length > 0) {
-            $("div.replay-dashboard").replaceWith(replayDashboardTemplate());    
-            $("tbody.replay-table").empty();
+            $(".replay-dashboard").replaceWith(replayDashboardTemplate());    
+            $(".replay-table-body-running").empty();
+            $(".replay-table-body-queued").empty();
 
             // sort running replays first
             data.sort(sortRunningFirst);
 
-            var rows = "";
+            var runningRows = [];
+            var queuedRows = [];
             for(let i = 0; i < data.length; i++) {
-                rows += createTableRow(data[i]);
+                var replay = data[i];
+                var id = replay["id"];
+
+                if (replay["status"] == "Running") {
+                    runningRows.push(createTableRow(replay));
+                    runningRows.push(`<tr class="collapse" id="${selectorCloudwatch(id)}"></tr>`);
+                }
+                else if (replay["status"] == "Queued") {
+                    queuedRows.push(createTableRow(replay));
+                    queuedRows.push(`<tr class="collapse" id="${selectorCloudwatch(id)}"></tr>`);
+                }
+
+                // async adds cloudwatch data
+                getMetrics(replay)
+                .done(function(metrics) {
+                    console.log('adding cloudwatch data');
+                    $(`#${selectorCloudwatch(id)}`).html(metricsTemplate(metrics));
+                })
+                .fail(function(err) {
+                    console.log('cloudwatch failed');
+                });
             }
 
-            $("tbody.replay-table").append(rows);
+            $(".replay-table-body-running").append(runningRows.join(''));
+            $(".replay-table-body-queued").append(queuedRows.join(''));
 
             $.each(data, function(index, replay) {
                 var id = replay["id"];
@@ -130,7 +162,7 @@ function createReplayDashboard(data) {
             });
         }
         else {
-            $("div.replay-dashboard").replaceWith(replayDashboardEmptyTemplate());
+            $(".replay-dashboard").replaceWith(replayDashboardEmptyTemplate());
         }
     },
     500);
@@ -162,42 +194,42 @@ function createTableRow(capture) {
 
     if (status == "Running") {
         btn = `<a href="javascript:void(0)" id="${selectorStop(id)}" class="defaultLinkColor">Stop Capture</a>`;
-        icon = `<img src="../img/running.png" alt="running">`;
+        icon = getRunningImageTemplate();
     }                
     else if (status == "Finished") {
         btn = `<a href="analyze" id="${selectorAnalyze(id)}" class="defaultLinkColor">Analyze</a>`;
-        icon = `<img src="../img/finished.png" alt="finished">`;
+        icon = getFinishedImageTemplate();
     }
     else if (status == "Queued") {
-        icon = `<img src="../img/queued.png" alt="queued">`;
+        icon = getQueuedImageTemplate();
     }
     else {
-        icon = `<img src="../img/failed.png" alt="failed">`;
+        icon = getFailedImageTemplate();
     }
 
     var row = `
     <tr data-toggle="collapse" data-target="#${selectorCloudwatch(id)}" class="clickable">
-        <td width="(100/12)%">${icon}</td>
-        <td width="(100/4)%">${id}</td>
-        <td width="(100/6)%">${status}</td>
-        <td width="(100/6)%">${startTime}</td>
-        <td width="(100/6)%">${endTime}</td>
-        <td width="(100/6)%">${btn}</td>
+        <td>${icon}</td>
+        <td>${id}</td>
+        <td>${status}</td>
+        <td>${startTime}</td>
+        <td>${endTime}</td>
+        <td>${btn}</td>
     </tr>`;
 
     return row;
 }
 
 function toggleDashboard() {
-    replayShown = $("div.replay-row").is(":visible");
+    replayShown = $(".replay-row").is(":visible");
     if (replayShown) {
-        $("div.replay-row").hide();
-        $("div.capture-row").show();
+        $(".replay-row").hide();
+        $(".capture-row").show();
         $("#toggle-btn").html("Show Replays");
     }
     else {
-        $("div.replay-row").show();
-        $("div.capture-row").hide();
+        $(".replay-row").show();
+        $(".capture-row").hide();
         $("#toggle-btn").html("Show Captures");
     }
 }
@@ -218,11 +250,12 @@ function selectorAnalyze(id) {
 /* ----------------------- Template Functions -------------------------------- */
 function mainTemplate() {
     return `
-    <div class="container">
+    <div class="container main-dashboard">
         <a id="toggle-btn" class="btn btn-default pull-right">Show Replays</a>
         <div class="row capture-row">
             <div class="col-lg-6 col-lg-offset-3">
                 <h4 class="text-center">Capture Dashboard</h4>
+                <hr>
             </div>
             <div class="col-lg-12">
                 <div class="capture-dashboard"></div>
@@ -235,6 +268,7 @@ function mainTemplate() {
         <div class="row replay-row">
             <div class="col-lg-6 col-lg-offset-3">
                 <h4 class="text-center">Replay Dashboard</h4>
+                <hr>
             </div>
             <div class="col-lg-12">
                 <div class="replay-dashboard"></div>
@@ -249,20 +283,43 @@ function mainTemplate() {
 
 function captureDashboardTemplate() {
     return `
-    <table class="table table-hover" width="100%">
-        <thead class="thead-dark">
-            <tr class="">
-                <th scope="col"> </th> 
-                <th scope="col">Name</th>
-                <th scope="col">Status</th>
-                <th scope="col">Start Time</th>
-                <th scope="col">End Time</th>
-                <th scope="col"> </th>
-            </tr>
-        </thead>
-        <tbody class="capture-table">
-        </tbody>
-    </table>`;
+    <h4>Running</h4>
+    <hr>
+    <div class="margin-top panel z-depth-1">
+        <table class="capture-table table table-hover table-bordered" >
+            <thead class="thead-dark">
+                <tr class="">
+                    <th scope="col"> </th> 
+                    <th scope="col">Name</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Start Time</th>
+                    <th scope="col">End Time</th>
+                    <th scope="col"> </th>
+                </tr>
+            </thead>
+            <tbody class="capture-table-body-running">
+            </tbody>
+        </table>
+    </div>
+    <br>
+    <h4>Queued</h4>
+    <hr>
+    <div class="margin-top panel z-depth-1">
+        <table class="capture-table table table-hover table-bordered" >
+            <thead class="thead-dark">
+                <tr class="">
+                    <th scope="col"> </th> 
+                    <th scope="col">Name</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Start Time</th>
+                    <th scope="col">End Time</th>
+                    <th scope="col"> </th>
+                </tr>
+            </thead>
+            <tbody class="capture-table-body-queued">
+            </tbody>
+        </table>
+    </div>`;
 }
 
 function captureDashboardEmptyTemplate() {
@@ -275,20 +332,43 @@ function captureDashboardEmptyTemplate() {
 
 function replayDashboardTemplate() {
     return `
-    <table class="table table-hover" width="100%">
-        <thead class="thead-dark">
-            <tr class="">
-                <th scope="col"> </th> 
-                <th scope="col">Name</th>
-                <th scope="col">Status</th>
-                <th scope="col">Start Time</th>
-                <th scope="col">End Time</th>
-                <th scope="col"> </th>
-            </tr>
-        </thead>
-        <tbody class="replay-table">
-        </tbody>
-    </table>`;
+    <h4>Running</h4>
+    <hr>
+    <div class="margin-top panel z-depth-1">
+        <table class="replay-table table table-hover table-bordered" >
+            <thead class="thead-dark">
+                <tr class="">
+                    <th scope="col"> </th> 
+                    <th scope="col">Name</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Start Time</th>
+                    <th scope="col">End Time</th>
+                    <th scope="col"> </th>
+                </tr>
+            </thead>
+            <tbody class="replay-table-body-running">
+            </tbody>
+        </table>
+    </div>
+    <br>
+    <h4>Queued</h4>
+    <hr>
+    <div class="margin-top panel z-depth-1">
+        <table class="replay-table table table-hover table-bordered" >
+            <thead class="thead-dark">
+                <tr class="">
+                    <th scope="col"> </th> 
+                    <th scope="col">Name</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Start Time</th>
+                    <th scope="col">End Time</th>
+                    <th scope="col"> </th>
+                </tr>
+            </thead>
+            <tbody class="replay-table-body-queued">
+            </tbody>
+        </table>
+    </div>`;
 }
 
 function replayDashboardEmptyTemplate() {
@@ -312,11 +392,28 @@ function metricsTemplate(metrics) {
     </td>`;
 }
 
+function getRunningImageTemplate() {
+    return `<i class="fa fa-circle-o-notch fa-spin" style="color:rgb(0,0,200);"></i>`;
+    // return `<img src="./img/running.png" alt="running">`;
+}
+
+function getFinishedImageTemplate() {
+    return `<img src="./img/finished.png" alt="finished">`;
+}
+
+function getQueuedImageTemplate() {
+    return `<i class="fa fa-clock-o" style="color:rgb(200,200,0);"></i>`;
+    // return `<img src="./img/queued.png" alt="queued">`;
+}
+
+function getFailedImageTemplate() {
+    return `<img src="./img/failed.png" alt="failed">`;
+}
+
 /* ----------------------- API Calls ----------------------------------------- */
 function getMetrics(capture) {
     // adds required metrics field
     capture["metrics"] = ["CPUUtilization", "FreeStorageSpace", "WriteThroughput"];
-    console.log(capture);
 
     return $.ajax({
         url: "/cloudwatch/average",
