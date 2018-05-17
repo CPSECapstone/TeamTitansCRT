@@ -23,7 +23,7 @@ public class AnalysisCLI extends CLI{
         //format output
         String output = "";
         for(int i = 0; i < metrics.length; i++) {
-            String line = String.format("%-20s| %-10f \n", metrics[i], dataList.getBody().get(i));
+            String line = String.format("%-20s= %-10f \n", metrics[i], dataList.getBody().get(i));
             output = output + line;
         }
         return output;
@@ -31,13 +31,14 @@ public class AnalysisCLI extends CLI{
 
     public static void main(String[] args) {
         try {
+            String[] metrics = {"CPUUtilization", "WriteThroughput"};
             Capture capture = new Capture();
             capture.setRds("testdb");
             capture.setRdsRegion("US_WEST_1");
             Date startTime = new Date(System.currentTimeMillis());
             startTime.setTime(startTime.getTime()-3600*200);
             capture.setStartTime(startTime);
-            System.out.println(average(capture, "CPUUtilization", "WriteThroughput"));
+            System.out.println(average(capture, metrics));
         } catch (IOException e) {
             e.printStackTrace();
         }

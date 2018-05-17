@@ -2,6 +2,7 @@ package app.cli;
 
 import app.models.Capture;
 import app.models.Replay;
+import app.servlets.AnalysisServlet;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -26,6 +27,7 @@ public class Driver {
     public static final String END_REPLAY = "endrp";
     public static final String STATUS = "status";
     public static final String GET_LIST = "get";
+    public static final String METRICS = "metrics";
     public static final String HELP = "help";
 
     // returns the index the user selected
@@ -152,6 +154,9 @@ public class Driver {
                 break;
             case GET_LIST:
                 getList(line);
+                break;
+            case METRICS:
+                getMetrics(line);
                 break;
             case HELP:
                 printCommandsList();
@@ -618,6 +623,35 @@ public class Driver {
         }
     }
 
+    private void getMetrics(String[] line) {
+        if(line.length >= 3) {
+            try {
+                List<Capture> captureList = ResourceCLI.captures();
+                String captureName = line[1];
+                String[] metricsList = Arrays.copyOfRange(line, 2, line.length);
+                Capture capture = null;
+                for (Capture c : captureList){
+                    if(captureName.equals(c.getId()) && "Running".equals(c.getStatus())){
+                        capture = c;
+                        break;
+                    }
+                }
+                if(capture == null) {
+                    System.out.println("This capture has already ended or does not exist.");
+                }
+                else {
+                    System.out.println(AnalysisCLI.average(capture, metricsList));
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        else {
+            commandError(line[0]);
+        }
+    }
+
     private void getList(String[] line) {
         if (line.length == 2 && line[1].equals("help")) {
             return;
@@ -698,6 +732,7 @@ public class Driver {
         System.out.println("\tendrp [replay_name]");
         System.out.println("\tget -replays -captures -rds -s3 -regions");
         System.out.println("\tstatus -replay -capture");
+        System.out.println("\tmetrics [capture_name] [metric_name]");
         System.out.println("\thelp");
         System.out.println("");
     }
