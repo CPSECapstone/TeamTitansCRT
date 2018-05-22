@@ -263,6 +263,7 @@ function createMetricsModal(selector) {
 // Requests capture metrics on button click
 $(function() {
     $("#btnGetMetrics").on("click", function() {
+        $(this).prop('disabled', true);
 
         metricData = {}; // Clears metric data
 
@@ -293,6 +294,9 @@ $(function() {
         $(".manageCapturesLoadingIcon").show();
         
         if (checkedCaptures.length > 0 || checkedReplays.length > 0) {
+
+            $(`#${metricsSelector}`).modal("show");
+
             // Draw the graph after all ajax calls complete
             $.when.apply(this, requests).done(function() {
                 
@@ -303,11 +307,12 @@ $(function() {
                 } else {
                     $('#container').html('<p>No metric data available for selected Capture(s)/Replay(s)</p>');
                 }
+                $(this).prop('disabled', false);
             });
         } else {
             $('#container').html('')
+            $(this).prop('disabled', false);
         }
-        $(`#${metricsSelector}`).modal("show");
         return false; // Stops page from jumping to top
     });
 });
