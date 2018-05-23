@@ -651,6 +651,7 @@ public class Driver {
 
     private void end_replay(String[] line) {
         if (line.length == 2 && line[1].equals("help")) {
+            printEndReplayHelp();
             return;
         }
 
@@ -817,19 +818,50 @@ public class Driver {
     private void printGetHelp() {
         System.out.println("\nget");
         System.out.println("\t-replays\t\t\tList all replays.");
-        System.out.println("\t-captures\t\tList all captures.");
+        System.out.println("\t-captures\t\t\tList all captures.");
         System.out.println("\t-rds -region\t\tList all rds instances. -rds is a flag.");
-        System.out.println("\t-s3 -region\t\tList all s3 buckets. -s3 is a flag.");
+        System.out.println("\t-s3 -region\t\t\tList all s3 buckets. -s3 is a flag.");
         System.out.println();
     }
 
     private void printEndCaptureHelp() {
-        System.out.println("endcp instructions");
+        System.out.println("\nendcp");
+        System.out.println("\tcapture_name\t\t\t\tThe name of the capture.");
+        System.out.println();
+    }
+
+    private void printEndReplayHelp() {
+        System.out.println("\nendrp");
+        System.out.println("\treplay_name\t\t\t\tThe name of the replay.");
+        System.out.println();
     }
 
     private void printRunReplayHelp() {
-        System.out.println("runrp instructions");
+        System.out.println("\nrunrp");
+        System.out.println("\treplay_name\t\t\t\t\tThe name of the replay.");
+        System.out.println("\tcapture_name\t\t\t\tThe name of the capture.");
+        System.out.println("\trds_endpoint\t\t\t\tThe name of your rds database.");
+        System.out.println("\trds_region\t\t\t\t\tThe region your database is in.");
+        System.out.println("\tS3_bucket\t\t\t\t\tThe S3 bucket to store the capture metrics in");
+        System.out.println("\tS3_region\t\t\t\t\tThe region your S3 bucket is in");
+        System.out.println("\tmode\t\t\t\t\t\tThe mode");
+        System.out.println("\tdbUsername\t\t\t\t\tThe RDS username");
+        System.out.println("\tdbPassword\t\t\t\t\tThe password for the RDS");
         System.out.println("\t(optional) -i\t\t\t\tStart in interactive mode. Other optional flags allowed.");
+        System.out.println("\t(optional) -start\t\t\tmonth/day/year-hour:minuteAM/PM");
+        System.out.println("\t(optional) -end\t\t\t\tmonth/day/year-hour:minuteAM/PM");
+        System.out.println("\t(optional) -filesize\t\tSize of the capture file");
+        System.out.println("\t(optional) -transnum\t\tNumber of transactions to capture");
+        System.out.println("\t(optional) -dbcomignore\t\tDatabase commands to ignore separated by a space, ending with a ' ! '");
+        System.out.println("\t(optional) -dbuserignore\tDatabase users to ignore separated by a space, ending with a ' ! '");
+        System.out.println();
+    }
+
+    private void printMetricsHelp() {
+        System.out.println("\nrunrp");
+        System.out.println("\treplay_name\t\t\t\t\tThe name of the replay.");
+        System.out.println("\tcapture_name\t\t\t\tThe name of the capture.");
+        System.out.println();
     }
 
 

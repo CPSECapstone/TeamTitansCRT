@@ -2,6 +2,7 @@ package app.servlets;
 
 import app.models.Session;
 import com.amazonaws.services.cloudwatch.model.Datapoint;
+import com.amazonaws.services.cloudwatch.model.GetMetricStatisticsResult;
 import com.amazonaws.util.IOUtils;
 import app.controllers.LogController;
 import app.managers.CloudWatchManager;
@@ -99,57 +100,33 @@ public class AnalysisServlet {
      */
     @RequestMapping(value = "/cloudwatch/average", method = RequestMethod.POST)
     public ResponseEntity<List<Double>> calculateAverages(@RequestBody MetricRequest request){
+        CloudWatchManager cloudWatchManager = new CloudWatchManager(request.getRdsRegion());
         List<Double> averages = new ArrayList<Double>();
 
+        //set end time to now if it isn't given
         if(request.getEndTime() == null) {
             request.setEndTime(new Date(System.currentTimeMillis()));
         }
 
-        //Iterate through list of metrics.
-        for(String metric : request.getMetrics()) {
-            averages.add(calculateAverage(request.getRDS(), request.getRdsRegion(), request.getStartTime(), request.getEndTime(), metric));
-        }
+        ArrayList<GetMetricStatisticsResult> resultList =
+                cloudWatchManager.getMetricStatistics(request.getRDS(),
+                    request.getStartTime(),
+                    request.getEndTime(),
+                    request.getMetrics());
 
-        return new ResponseEntity<List<Double>>(averages, HttpStatus.OK);
-    }
-
-    /**
-     * Calculate the average of a metric for a time span. Long timespans are split into intervals to by pass the datapoint limit.
-     * @param  rds    Database to get data from.
-     * @param  start  Capture's Start time.
-     * @param  end    Capture's end time. For current time use (new Date(System.currentTimeMillis())).
-     * @param  metric Metric name to request ex. "CPUUtilization".
-     * @return        Average of a single metric.
-     */
-    public double calculateAverage(String rds, String rdsRegion, Date start, Date end, String metric){
-        CloudWatchManager cloudWatchManager = new CloudWatchManager(rdsRegion);
-        List<Datapoint> dataPoints = new ArrayList<>();
-        //10 hour intervals
-        long hour = 3600 * 1000 * 10;
-        Double averageSum = 0.0;
-        Date current = start;
-        Date next;
-        
-        while(current.before(end)){
-
-            next = new Date(current.getTime() + hour);
-
-            if(end.getTime() - current.getTime() < hour) {
-                next = end;
+        for(GetMetricStatisticsResult result: resultList) {
+            Double average = 0.0;
+            Double sum = 0.0;
+            int size = result.getDatapoints().size();
+            if(size != 0) {
+                for (Datapoint datapoint : result.getDatapoints()) {
+                    sum += datapoint.getAverage();
+                }
+                average = sum/size;
             }
-
-            //append datapoints from the current interval
-            dataPoints.addAll(cloudWatchManager.getMetricStatistics(rds, current, next, metric).getDatapoints());
-            current = next;
+            averages.add(average);
         }
-
-        if(dataPoints.isEmpty()){
-            return averageSum;
-        }
-        for(Datapoint point: dataPoints) {
-            averageSum += point.getAverage();
-        }
-        return averageSum/dataPoints.size();
+        return new ResponseEntity<List<Double>>(averages, HttpStatus.OK);
     }
 
     /**
