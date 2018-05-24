@@ -28,6 +28,10 @@ public class ReplayServlet {
             return new ResponseEntity<>(ErrorsUtil.idContainsNonAlphaNumeric(), HttpStatus.BAD_REQUEST);
         }
 
+        if (replay.getId().length() > 50) {
+            return new ResponseEntity<>(ErrorsUtil.idTooLong(50), HttpStatus.BAD_REQUEST);
+        }
+
         if (replay.getStartTime() == null) {
             replay.setStartTime(new Date());
         }
@@ -68,7 +72,7 @@ public class ReplayServlet {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/replay/delete", method = RequestMethod.GET)
+    @RequestMapping(value = "/replay/delete", method = RequestMethod.POST)
     public ResponseEntity<String> deleteReplay(Replay replay) {
         if (replay.getId() == null || replay.getS3() == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

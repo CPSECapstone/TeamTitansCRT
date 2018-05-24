@@ -56,7 +56,6 @@ public class CaptureCLI extends CLI {
         return convertToListCaptures(captureListString);
     }
 
-    // TODO: Update servlet to reflect POST, take in ID, and grab capture from capture list
     public static String delete(String id) throws IOException, RuntimeException {
         String captureDeleteURL = urlString + "capture/stop";
         JSONObject object = new JSONObject();
