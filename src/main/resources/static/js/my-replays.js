@@ -145,10 +145,10 @@ $(function() {
     });
 
     $(`.${searchSelector}`).on("input", function() {
-        var value = $(this).val();
+        var value = $(this).val().toLowerCase();
 
         $("#ReplayList > li").each(function() {
-            if (value == '' || $(this).attr('id').slice(5).includes(value)) {
+            if (value == '' || $(this).attr('id').slice(5).toLowerCase().includes(value)) {
                 $(this).show();
             }
             else {
