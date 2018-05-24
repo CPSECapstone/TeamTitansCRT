@@ -56,7 +56,6 @@ public class ReplayCLI extends CLI {
         return completePOST(captureStopURL, object.toString());
     }
 
-    // TODO: Update servlet to reflect POST method, take in ID, and grab replay from replay list
     public static String delete(String id) throws IOException, RuntimeException {
         String captureStopURL = urlString + "replay/delete";
         JSONObject object = new JSONObject();

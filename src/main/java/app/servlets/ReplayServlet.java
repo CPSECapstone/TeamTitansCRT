@@ -28,6 +28,10 @@ public class ReplayServlet {
             return new ResponseEntity<>(ErrorsUtil.idContainsNonAlphaNumeric(), HttpStatus.BAD_REQUEST);
         }
 
+        if (replay.getId().length() > 50) {
+            return new ResponseEntity<>(ErrorsUtil.idTooLong(50), HttpStatus.BAD_REQUEST);
+        }
+
         if (replay.getStartTime() == null) {
             replay.setStartTime(new Date());
         }

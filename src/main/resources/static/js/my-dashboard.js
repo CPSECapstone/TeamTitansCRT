@@ -78,8 +78,8 @@ function createCaptureDashboard(data) {
                 var id = capture["id"];
                 $(`#${selectorStop(id)}`).on("click", function() {
                     stopCapture(id)
-                    .done(function() {
-                        console.log(`Stopped capture ${id}`);
+                    .done(function() {                            
+                        console.log(`Stopped capture ${id}`);                        
                     })
                     .fail(function(err) {
                         console.log(err);
@@ -87,6 +87,7 @@ function createCaptureDashboard(data) {
                     })
                     .always(function() {
                         updateStatus();
+                       
                     });
                 });
                 $(`#${selectorAnalyze(id)}`).on("click", function() {
@@ -427,13 +428,21 @@ function getMetrics(capture) {
 function stopCapture(id) {
     var body = {
         id: id
-    };
-    
+    };    
+    $(".capture-table-body-running").hide();
+    $(".capture-table-body-queued").hide();
+    $(".captureLoadingIcon").show();
     return $.ajax({
         url: "/capture/stop",
         type: "POST",
         headers: {
             "Content-Type": "application/json",
+        },
+        success: function(data) {            
+            location.reload();
+        },
+        error: function(err) {
+            location.reload();
         },
         data: JSON.stringify(body)
     });
@@ -443,12 +452,20 @@ function stopReplay(id) {
     var body = {
         id: id
     };
-    
+    $(".replay-table-body-running").hide();
+    $(".replay-table-body-queued").hide();
+    $(".captureLoadingIcon").show();
     return $.ajax({
         url: "/replay/stop",
         type: "POST",
         headers: {
             "Content-Type": "application/json",
+        },
+        success: function(data) {            
+            location.reload();
+        },
+        error: function(err) {
+            location.reload();
         },
         data: JSON.stringify(body)
     });

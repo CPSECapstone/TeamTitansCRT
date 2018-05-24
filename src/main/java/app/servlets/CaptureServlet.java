@@ -29,6 +29,10 @@ public class CaptureServlet {
             return new ResponseEntity<>(ErrorsUtil.idContainsNonAlphaNumeric(), HttpStatus.BAD_REQUEST);
         }
 
+        if (capture.getId().length() > 50) {
+            return new ResponseEntity<>(ErrorsUtil.idTooLong(50), HttpStatus.BAD_REQUEST);
+        }
+
         if (CaptureController.isCaptureIdDuplicate(capture)) {
             return new ResponseEntity<>(ErrorsUtil.DuplicateCaptureIDError(), HttpStatus.BAD_REQUEST);
         }

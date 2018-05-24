@@ -27,4 +27,9 @@ public class ErrorsUtil {
         return "Error: Capture ID can only contain alphanumeric characters";
     }
 
+    public static String idTooLong(int length) {
+        return "Error: Id cannot exceed " + length + " characters";
+    }
+
+
 }
