@@ -539,11 +539,11 @@ public class DBUtil {
         }
     }
 
-    public Replay loadReplaysOfCaptureID(String id)
+    public ArrayList<Replay> loadReplaysOfCaptureID(String id)
     {
         try
         {
-            Replay replay = new Replay();
+            ArrayList<Replay> replays = new ArrayList<>();
             ResultSet rs;
 
             String sql = "SELECT * FROM replays WHERE captureId = ?";
@@ -553,24 +553,23 @@ public class DBUtil {
 
             rs = pstmt.getResultSet();
 
-            if (!rs.next()) {
-                rs.close();
-                pstmt.close();
-                return null;
+            while (rs.next()) {
+                Replay replay = new Replay();
+                replay.setCaptureId(getCaptureName(rs.getInt(2)));
+                replay.setId(rs.getString(3));
+                replay.setRds(rs.getString(4));
+                replay.setRdsRegion(rs.getString(5));
+                replay.setS3(rs.getString(6));
+                replay.setS3Region(rs.getString(7));
+                replay.setStartTime(rs.getDate(8));
+                replay.setEndTime(rs.getDate(9));
+                replay.setStatus(rs.getString(10));
+                replay.setReplayType(rs.getString(11));
+
+                replays.add(replay);
             }
 
-            replay.setCaptureId(getCaptureName(rs.getInt(2)));
-            replay.setId(rs.getString(3));
-            replay.setRds(rs.getString(4));
-            replay.setRdsRegion(rs.getString(5));
-            replay.setS3(rs.getString(6));
-            replay.setS3Region(rs.getString(7));
-            replay.setStartTime(rs.getDate(8));
-            replay.setEndTime(rs.getDate(9));
-            replay.setStatus(rs.getString(10));
-            replay.setReplayType(rs.getString(11));
-
-            return replay;
+            return replays;
         }
 
         catch (SQLException e)
@@ -615,7 +614,9 @@ public class DBUtil {
 
         catch (SQLException e)
         {
+            System.out.println("1");
             System.err.println(e.getMessage());
+            System.out.println("2");
             return null;
         }
     }
@@ -709,6 +710,10 @@ public class DBUtil {
     {
         try
         {
+            ArrayList<Replay> replays = loadReplaysOfCaptureID(id);
+            for (Replay replay : replays) {
+                deleteReplay(replay.getId());                
+            }
             String sql = "DELETE FROM captures WHERE id = ?";
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, id);

@@ -326,7 +326,7 @@ function createEditCaptureModal(capture) {
                     <h5 class="modal-title">Delete Capture: ${id}</h5>
                 </div>
                 <div class="modal-body">
-                    <p>Are sure you want to delete capture?</p>
+                    <p>Are sure you want to delete capture? Please note this will delete all associated replays.</p>
                 </div>
                 <div class="modal-footer">
                     ${footerDelete}

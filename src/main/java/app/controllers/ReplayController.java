@@ -2,6 +2,7 @@ package app.controllers;
 
 
 import app.managers.ReplayTimerManager;
+import app.managers.S3Manager;
 import app.util.DBUtil;
 import app.models.Replay;
 
@@ -89,11 +90,17 @@ public class ReplayController {
         return replays.get(id);
     }
 
-    public static boolean deleteReplay(Replay replay) {
-        replays.remove(replay.getId());
-        logControllers.remove(replay.getId());
-        timers.remove(replay.getId());
+    public static boolean deleteReplay(Replay tempReplay) {
+        replays.remove(tempReplay.getId());
+        logControllers.remove(tempReplay.getId());
+        timers.remove(tempReplay.getId());
+        
+        Replay replay = DBUtil.getInstance().loadReplay(tempReplay.getId());
+        
         DBUtil.getInstance().deleteReplay(replay.getId());
+        
+        S3Manager s3Manager = new S3Manager(replay.getS3Region());
+        s3Manager.deleteFile(replay.getS3(), replay.getId() + "-Performance.log");
 
         return true;
     }
