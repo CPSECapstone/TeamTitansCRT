@@ -339,6 +339,10 @@ function createEditReplayModal(replay) {
 
     var fileSizeLimit = replay["fileSizeLimit"];
     var transactionLimit = replay["transactionLimit"];
+    
+    footerDelete = `<a id="${id}-delete-link" class="btn btn-primary" data-dismiss="modal">Delete</a>`;
+    footerDelete += `<a class="btn btn-secondary" data-dismiss="modal">Close</a>`;
+    
     return `
     ${createReplayListItem(id, status, `${id}-modal`)}
     <div class="modal fade" id="${id}-modal" tabindex="-1" role="dialog">
@@ -361,6 +365,21 @@ function createEditReplayModal(replay) {
                     ${status == "Finished" ? 
                         `<a class="btn btn-secondary" data-dismiss="modal">Close</a>` : 
                         `<a id="${id}-save" class="btn btn-primary" data-dismiss="modal">Save</a>`}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="${id}-modal-delete" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete Replay: ${id}</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Are sure you want to delete replay? Please note this will NOT delete the associated capture.</p>
+                </div>
+                <div class="modal-footer">
+                    ${footerDelete}
                 </div>
             </div>
         </div>

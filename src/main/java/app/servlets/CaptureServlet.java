@@ -102,7 +102,7 @@ public class CaptureServlet {
 
     @RequestMapping(value = "/capture/delete", method = RequestMethod.POST)
     public ResponseEntity<String> captureDelete(@RequestBody Capture capture) {
-        if (capture.getId() == null || capture.getS3() == null) {
+        if (capture.getId() == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 

@@ -73,11 +73,10 @@ public class ReplayServlet {
     }
 
     @RequestMapping(value = "/replay/delete", method = RequestMethod.POST)
-    public ResponseEntity<String> deleteReplay(Replay replay) {
-        if (replay.getId() == null || replay.getS3() == null) {
+    public ResponseEntity<String> deleteReplay(@RequestBody Replay replay) {
+        if (replay.getId() == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-
         ReplayController.deleteReplay(replay);
 
         return new ResponseEntity<>(HttpStatus.OK);
