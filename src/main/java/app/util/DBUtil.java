@@ -614,9 +614,7 @@ public class DBUtil {
 
         catch (SQLException e)
         {
-            System.out.println("1");
             System.err.println(e.getMessage());
-            System.out.println("2");
             return null;
         }
     }
