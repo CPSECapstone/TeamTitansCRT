@@ -549,11 +549,20 @@ $(function() {
     });
 });
 
-$('body').on('change', '.captureCheckbox', function() {
+function filterTables() {
     var checkedCaptures = $('.captureCheckbox:checkbox:checked').map(function () {return this.value;});
+    var checkedReplays = $('.replayCheckbox:checkbox:checked').map(function () {return $(this).closest('tr').children().eq(2).find("span").text();});
+
+    var checked = checkedCaptures
+
+    for (var i = 0; i < checkedReplays.length; i++) {
+        if(jQuery.inArray(checkedReplays[i], checked) === -1) {
+            checked.push(checkedReplays[i])
+        }
+    }
 
     $("#replayTable tr td:nth-child(3)").each(function() {
-        if(jQuery.inArray($(this).contents().filter(function() {return this.nodeType == 3}).text(), checkedCaptures) !== -1 || checkedCaptures.length == 0) {
+        if(jQuery.inArray($(this).find("span").text(), checked) !== -1 || checked.length == 0) {
             $(this).parent('tr').show();
         } else {
             $(this).parent('tr').hide();
@@ -562,11 +571,19 @@ $('body').on('change', '.captureCheckbox', function() {
     });
 
     $("#captureTable tr td:nth-child(2)").each(function() {
-        if(jQuery.inArray($(this).text(), checkedCaptures) !== -1 || checkedCaptures.length == 0) {
+        if(jQuery.inArray($(this).text(), checked) !== -1 || checked.length == 0) {
             $(this).parent('tr').show();
         } else {
             $(this).parent('tr').hide();
             $(this).parent('tr').find('.captureCheckbox').prop('checked', false);
         }
     });
+}
+
+$('body').on('change', '.captureCheckbox', function() {
+    filterTables()
+});
+
+$('body').on('change', '.replayCheckbox', function() {
+    filterTables()
 });
