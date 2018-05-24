@@ -29,7 +29,7 @@ public class DBUtil {
      *
      * @param databaseFile the database file name
      */
-    private DBUtil(String databaseFile)
+    protected DBUtil(String databaseFile)
     {
         this.conn = connectSqlite(databaseFile);
         createNewCaptureTable(databaseFile);
@@ -37,6 +37,11 @@ public class DBUtil {
         checkForFailedCaptures();
         checkForFailedReplays();
     }
+
+    public static void setTestingInstance(DBUtil newInstance) {
+        instance = newInstance;
+    }
+
 
     private static Connection connectSqlite(String databaseFile)
     {
