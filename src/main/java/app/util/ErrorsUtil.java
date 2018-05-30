@@ -23,6 +23,8 @@ public class ErrorsUtil {
         return "Error: Negative numbers are not allowed";
     }
 
+    public static String InvalidCredentialsError() { return "Error: Invalid RDS credentials"; }
+
     public static String idContainsNonAlphaNumeric() {
         return "Error: Capture ID can only contain alphanumeric characters";
     }
@@ -30,6 +32,4 @@ public class ErrorsUtil {
     public static String idTooLong(int length) {
         return "Error: Id cannot exceed " + length + " characters";
     }
-
-
 }

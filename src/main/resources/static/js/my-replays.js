@@ -99,6 +99,7 @@ $(function() {
                 databaseInfo: {
                     //dbUrl: "testdb.cgtpml3lsh3i.us-west-1.rds.amazonaws.com:3306",
                     database: $(`.${rdsSelector}`).val(),
+                    region: $(`.${rdsRegionSelector}`).val(),
                     username: $(`.${usernameSelector}`).val(),
                     password: $(`.${passwordSelector}`).val()
                 },
