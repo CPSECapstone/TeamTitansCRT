@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class CloudWatchManager {
 
@@ -86,41 +87,62 @@ public class CloudWatchManager {
 
     /**
      *
-     * @param dbID      The database to get data from
+     * @param rds      The database to get data from
      * @param start     The start time
      * @param end       The end time
      * @param metrics   One or more metric names to request
      * @return          A list of metric results listed in the same order as received
      */
-    public ArrayList<GetMetricStatisticsResult> getMetricStatistics(String dbID, Date start, Date end, String... metrics) {
+    public ArrayList<GetMetricStatisticsResult> getMetricStatistics(String rds, Date start, Date end, String... metrics) {
         ArrayList<GetMetricStatisticsResult> results = new ArrayList<>();
         for (String metric : metrics) {
-            results.add(getMetricStatistics(dbID, start, end, metric));
+            results.add(getMetricStatistics(rds, start, end, metric));
         }
-
         return results;
     }
 
     /**
      *
-     * @param dbID      The database to get data from
+     * @param rds    The database to get data from
      * @param start  The start time
      * @param end    The end time
      * @param metric The name of the metric of interest
      * @return       Returns GetMetricStatisticsResult - for more information see http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/cloudwatch/model/GetMetricStatisticsResult.html
      */
-    public GetMetricStatisticsResult getMetricStatistics(String dbID, Date start, Date end, String metric) {
+    public GetMetricStatisticsResult getMetricStatistics(String rds, Date start, Date end, String metric) {
+        GetMetricStatisticsResult result = new GetMetricStatisticsResult();
+        result.setLabel(metric);
+        List<Datapoint> dataPoints = new ArrayList<>();
+
+        //3 hour intervals
+        long interval = 3600 * 1000 * 3;
+        Date current = start;
+        Date next;
+        //append data for every passing interval
+        while(current.before(end)){
+            next = new Date(current.getTime() + interval);
+            if(end.getTime() - current.getTime() < interval) {
+                next = end;
+            }
+            GetMetricStatisticsRequest request = createMetricRequest(rds, current, next, metric);
+            dataPoints.addAll(cwClient.getMetricStatistics(request).getDatapoints());
+            current = next;
+        }
+        result.setDatapoints(dataPoints);
+        System.out.println(result.toString());
+        return result;
+    }
+
+    public GetMetricStatisticsRequest createMetricRequest(String rds, Date start, Date end, String metric) {
         GetMetricStatisticsRequest request = new GetMetricStatisticsRequest()
                 .withNamespace("AWS/RDS")
-                .withDimensions(new Dimension().withName("DBInstanceIdentifier").withValue(dbID))
+                .withDimensions(new Dimension().withName("DBInstanceIdentifier").withValue(rds))
                 .withMetricName(metric)
                 .withStartTime(start)
                 .withEndTime(end)
                 .withStatistics(Statistic.Sum, Statistic.Average)
                 .withPeriod(60);
-
-
-        return cwClient.getMetricStatistics(request);
+        return request;
     }
 
     /**

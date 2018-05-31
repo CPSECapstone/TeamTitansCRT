@@ -322,7 +322,60 @@ public class Driver {
         String s3 = line[4];
         String s3Region = line[5];
 
+        //checks if the user input is actually correct
 
+        //get regions
+        List<String> regions;
+        try {
+            regions = ResourceCLI.regions();
+        } catch (IOException e) {
+            System.out.println("An error occurred when attempting to retrieve regions. Please try again.");
+            return;
+        }
+
+        //check if rds region is valid
+        if(!regions.contains(rdsRegion)) {
+            System.out.println("Could not find rds region: " + rdsRegion);
+            return;
+        }
+        else {
+            //get rdsInstances
+            List<String> rdsInstances;
+            try {
+                rdsInstances = ResourceCLI.rds(rdsRegion);
+                //check if rds instance is valid
+                if(!rdsInstances.contains(rds)) {
+                    System.out.println("Could not find rds instance: " + rds);
+                    return;
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred when attempting to retrieve RDS instances at " + rdsRegion
+                        + " region");
+                return;
+            }
+        }
+        //check if s3 region is valid
+        if(!regions.contains(s3Region)) {
+            System.out.println("Could not find S3 region: " + s3Region);
+            return;
+        }
+        else {
+            //get s3 buckets
+            List<String> s3Buckets;
+            try {
+                s3Buckets = ResourceCLI.s3(s3Region);
+                //check if s3 bucket is valid
+                if(!s3Buckets.contains(s3)) {
+                    System.out.println("Could not find S3 bucket: " + s3);
+                    return;
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred when attempting to retrieve S3 buckets at " + s3Region
+                        + " region");
+                return;
+            }
+        }
+        //all inputs are valid
         handleCaptureOptionals(line, 6, id, rds, rdsRegion, s3, s3Region);
     }
 
@@ -390,7 +443,7 @@ public class Driver {
         try {
             s3Buckets = ResourceCLI.s3(s3Region);
         } catch (IOException e) {
-            System.out.println("An error occurred when attempting to retrieve S3 buckets at " + rdsRegion
+            System.out.println("An error occurred when attempting to retrieve S3 buckets at " + s3Region
                     + " region");
             return;
         }
@@ -568,11 +621,11 @@ public class Driver {
         try {
             s3Buckets = ResourceCLI.s3(s3Region);
             if (s3Buckets.size() == 0) {
-                System.out.println("There are no rds instances at the selected region: "  + s3Region);
+                System.out.println("There are no S3 at the selected region: "  + s3Region);
                 return;
             }
         } catch (IOException e) {
-            System.out.println("An error occurred when attempting to retrieve S3 buckets at " + rdsRegion
+            System.out.println("An error occurred when attempting to retrieve S3 buckets at " + s3Region
                     + " region");
             return;
         }
@@ -598,6 +651,7 @@ public class Driver {
 
     private void end_replay(String[] line) {
         if (line.length == 2 && line[1].equals("help")) {
+            printEndReplayHelp();
             return;
         }
 
@@ -653,10 +707,14 @@ public class Driver {
     }
 
     private void getList(String[] line) {
-        if (line.length == 2 && line[1].equals("help")) {
+        if(line.length < 2 || line.length > 3) {
+            System.out.println("Error - Incorrect input. See 'get help' for details on get");
             return;
         }
-
+        else if (line[1].equals("help")) {
+            printGetHelp();
+            return;
+        }
 
         switch (line[1]) {
             case "-rds":
@@ -719,6 +777,9 @@ public class Driver {
                     e.printStackTrace();
                 }
                 break;
+            default:
+                System.out.println("Error - Incorrect input. See 'get help' for details on get");
+                break;
         }
 
     }
@@ -754,13 +815,53 @@ public class Driver {
         System.out.println();
     }
 
+    private void printGetHelp() {
+        System.out.println("\nget");
+        System.out.println("\t-replays\t\t\tList all replays.");
+        System.out.println("\t-captures\t\t\tList all captures.");
+        System.out.println("\t-rds -region\t\tList all rds instances. -rds is a flag.");
+        System.out.println("\t-s3 -region\t\t\tList all s3 buckets. -s3 is a flag.");
+        System.out.println();
+    }
+
     private void printEndCaptureHelp() {
-        System.out.println("endcp instructions");
+        System.out.println("\nendcp");
+        System.out.println("\tcapture_name\t\t\t\tThe name of the capture.");
+        System.out.println();
+    }
+
+    private void printEndReplayHelp() {
+        System.out.println("\nendrp");
+        System.out.println("\treplay_name\t\t\t\tThe name of the replay.");
+        System.out.println();
     }
 
     private void printRunReplayHelp() {
-        System.out.println("runrp instructions");
+        System.out.println("\nrunrp");
+        System.out.println("\treplay_name\t\t\t\t\tThe name of the replay.");
+        System.out.println("\tcapture_name\t\t\t\tThe name of the capture.");
+        System.out.println("\trds_endpoint\t\t\t\tThe name of your rds database.");
+        System.out.println("\trds_region\t\t\t\t\tThe region your database is in.");
+        System.out.println("\tS3_bucket\t\t\t\t\tThe S3 bucket to store the capture metrics in");
+        System.out.println("\tS3_region\t\t\t\t\tThe region your S3 bucket is in");
+        System.out.println("\tmode\t\t\t\t\t\tThe mode");
+        System.out.println("\tdbUsername\t\t\t\t\tThe RDS username");
+        System.out.println("\tdbPassword\t\t\t\t\tThe password for the RDS");
         System.out.println("\t(optional) -i\t\t\t\tStart in interactive mode. Other optional flags allowed.");
+        System.out.println("\t(optional) -start\t\t\tmonth/day/year-hour:minuteAM/PM");
+        System.out.println("\t(optional) -end\t\t\t\tmonth/day/year-hour:minuteAM/PM");
+        System.out.println("\t(optional) -filesize\t\tSize of the capture file");
+        System.out.println("\t(optional) -transnum\t\tNumber of transactions to capture");
+        System.out.println("\t(optional) -dbcomignore\t\tDatabase commands to ignore separated by a space, ending with a ' ! '");
+        System.out.println("\t(optional) -dbuserignore\tDatabase users to ignore separated by a space, ending with a ' ! '");
+        System.out.println();
+    }
+
+    private void printMetricsHelp() {
+        System.out.println("\nrunrp");
+        System.out.println("\treplay_name\t\t\t\t\tThe name of the replay.");
+        System.out.println("\tcapture_name\t\t\t\tThe name of the capture.");
+        System.out.println();
     }
 
 
