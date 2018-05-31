@@ -276,9 +276,7 @@ function createEditCaptureModal(capture) {
     var endTime = capture["endTime"];
     if (endTime != null) {
         endTime = new Date(endTime);
-        // endTime.setHours(endTime.getHours() - 7); // daylight savings lol
-        endTime.setHours(endTime.getHours());
-        endTime = endTime.toISOString().replace("Z", "");
+        endTime = (new Date(endTime - tzoffset)).toISOString().slice(0, -1);
     }
     else {
         endTime = "";
