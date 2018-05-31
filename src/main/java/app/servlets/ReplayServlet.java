@@ -1,8 +1,8 @@
 package app.servlets;
 
-import app.controllers.CaptureController;
 import app.controllers.LogController;
 import app.controllers.ReplayLogController;
+import app.managers.MySQLManager;
 import app.util.ErrorsUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,6 +48,12 @@ public class ReplayServlet {
             return new ResponseEntity<>(ErrorsUtil.NegativeNumbersError(), HttpStatus.BAD_REQUEST);
         }
 
+        if (!new MySQLManager(replay.getDBUrl(),
+                replay.getDatabase(),
+                replay.getDBUsername(),
+                replay.getDBPassword()).checkConnection()) {
+            return new ResponseEntity<>(ErrorsUtil.InvalidCredentialsError(), HttpStatus.BAD_REQUEST);
+        }
 
         if (replay.getStartTime() == null)
         {
