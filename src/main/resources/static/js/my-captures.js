@@ -267,14 +267,16 @@ function createEditCaptureModal(capture) {
     // to be fixed with user set timezone
     var startTime = new Date(capture["startTime"]);
     // startTime.setHours(startTime.getHours() - 7); // daylight savings lol
-    startTime.setHours(startTime.getHours());
-    startTime = startTime.toISOString().replace("Z", "");
+    console.log(startTime);
+    //startTime.setHours(startTime.getHours());
+    var tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
+    startTime = (new Date(startTime - tzoffset)).toISOString().slice(0, -1);
+    //startTime = startTime.toISOString().replace("Z", "");
+    console.log(startTime);
     var endTime = capture["endTime"];
     if (endTime != null) {
         endTime = new Date(endTime);
-        // endTime.setHours(endTime.getHours() - 7); // daylight savings lol
-        endTime.setHours(endTime.getHours());
-        endTime = endTime.toISOString().replace("Z", "");
+        endTime = (new Date(endTime - tzoffset)).toISOString().slice(0, -1);
     }
     else {
         endTime = "";
