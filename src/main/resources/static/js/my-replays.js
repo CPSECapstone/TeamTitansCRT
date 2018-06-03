@@ -542,8 +542,10 @@ function populateResourceDropdowns(rdsRegion, rdsSelector, s3Region, s3Selector)
             $(".startReplayLoadingIcon").hide();
         },
         success: function(data) {
-            $(`div.${rdsRegion}`).replaceWith(createDropdown("Select RDS Region", rdsRegion, data));
-            $(`div.${s3Region}`).replaceWith(createDropdown("Select S3 Region", s3Region, data));
+            var defaultVal = "US_WEST_1"
+
+            $(`div.${rdsRegion}`).replaceWith(createDropdownWithDefault("Select RDS Region", rdsRegion, data, defaultVal));
+            $(`div.${s3Region}`).replaceWith(createDropdownWithDefault("Select S3 Region", s3Region, data, defaultVal));
 
             $(`.${rdsRegion}`).on("change", function() {
                 updateRDSDropdown(rdsSelector, rdsRegion);
@@ -716,6 +718,24 @@ function createDropdown(label, id, options) {
     </div>`;
 }
 
+function createDropdownWithDefault(label, id, options, defaultVal) {
+    return `
+    <div class="form-group">
+        <label class="input-label">${label}</label>
+        <select class="${id} form-control" id="">
+            ${options.map(function(x) { return createOptionWithDefault(x, defaultVal);}).join('')}
+        </select>
+    </div>`;
+}
+
 function createOption(option) {
+    return `<option value="${option}">${option}</option>`;
+}
+
+function createOptionWithDefault(option, defaultVal) {
+    if (option == defaultVal) {
+        return `<option value="${option}" selected="selected">${option}</option>`;
+    }
+
     return `<option value="${option}">${option}</option>`;
 }
