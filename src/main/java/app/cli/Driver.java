@@ -234,13 +234,8 @@ public class Driver {
 
         }
 
-        try {
-            CaptureCLI.start(id, rdsRegion, rds, s3Region, s3, startTime, endTime, transactionSize,
+        CaptureCLI.start(id, rdsRegion, rds, s3Region, s3, startTime, endTime, transactionSize,
                     fileSize, filterStatements, filterUsers);
-        } catch (IOException e) {
-            System.out.println("An error occurred sending your capture. Please try again.");
-            return;
-        }
     }
 
     private void handleReplayOptionals(String[] line, int startIndex, String capture_id, String id, String rds, String rdsRegion,
@@ -252,7 +247,7 @@ public class Driver {
         ArrayList<String> filterStatements = null;
         ArrayList<String> filterUsers = null;
 
-        for (int i = startIndex; i < line.length; i++) {
+        for (int i = startIndex; i < line.length; i += 2) {
             if (i + 1 >= line.length) {
                 commandError(line[0]);
                 return;
@@ -287,13 +282,9 @@ public class Driver {
             }
 
         }
-
-        try {
-            ReplayCLI.start(id, rdsRegion, rds, s3Region, s3, mode, capture_id, startTime, endTime,
+        ReplayCLI.start(id, rdsRegion, rds, s3Region, s3, mode, capture_id, startTime, endTime,
                     transactionSize, filterStatements, filterUsers, dbUsername, dbPassword);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
     }
 
     private void runCapture(String[] line) {
@@ -465,11 +456,7 @@ public class Driver {
 
         if (line.length == 2) {
             String captureIDString = line[1];
-            try {
-                CaptureCLI.stop(captureIDString);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            CaptureCLI.stop(captureIDString);
         } else {
             System.out.println("Error - Too many arguments");
         }
@@ -489,7 +476,6 @@ public class Driver {
             commandError(line[0]);
             return;
         }
-
 
         String id = line[1];
         if (!id.matches("[A-Za-z0-9]+")) {
@@ -657,11 +643,7 @@ public class Driver {
 
         if (line.length == 2) {
             String replayIDString = line[1];
-            try {
-                ReplayCLI.stop(replayIDString);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            ReplayCLI.stop(replayIDString);
         } else {
             System.out.println("Error - Too many arguments");
         }
