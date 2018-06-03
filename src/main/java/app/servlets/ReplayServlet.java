@@ -1,8 +1,8 @@
 package app.servlets;
 
-import app.controllers.CaptureController;
 import app.controllers.LogController;
 import app.controllers.ReplayLogController;
+import app.managers.MySQLManager;
 import app.util.ErrorsUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +11,7 @@ import app.models.Replay;
 import app.controllers.ReplayController;
 import app.managers.ReplayTimerManager;
 
+import java.util.Collection;
 import java.util.Date;
 
 @RestController
@@ -25,6 +26,10 @@ public class ReplayServlet {
 
         if (!replay.getId().matches("[A-Za-z0-9]+")) {
             return new ResponseEntity<>(ErrorsUtil.idContainsNonAlphaNumeric(), HttpStatus.BAD_REQUEST);
+        }
+
+        if (replay.getId().length() > 50) {
+            return new ResponseEntity<>(ErrorsUtil.idTooLong(50), HttpStatus.BAD_REQUEST);
         }
 
         if (replay.getStartTime() == null) {
@@ -43,6 +48,12 @@ public class ReplayServlet {
             return new ResponseEntity<>(ErrorsUtil.NegativeNumbersError(), HttpStatus.BAD_REQUEST);
         }
 
+        if (!new MySQLManager(replay.getDBUrl(),
+                replay.getDatabase(),
+                replay.getDBUsername(),
+                replay.getDBPassword()).checkConnection()) {
+            return new ResponseEntity<>(ErrorsUtil.InvalidCredentialsError(), HttpStatus.BAD_REQUEST);
+        }
 
         if (replay.getStartTime() == null)
         {
@@ -67,15 +78,19 @@ public class ReplayServlet {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/replay/delete", method = RequestMethod.GET)
-    public ResponseEntity<String> deleteReplay(Replay replay) {
-        if (replay.getId() == null || replay.getS3() == null) {
+    @RequestMapping(value = "/replay/delete", method = RequestMethod.POST)
+    public ResponseEntity<String> deleteReplay(@RequestBody Replay replay) {
+        if (replay.getId() == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-
         ReplayController.deleteReplay(replay);
 
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/replay/status", method = RequestMethod.GET)
+    public ResponseEntity<Collection<Replay>> replayStatus() {
+        return new ResponseEntity<>(ReplayController.getAllReplayValues(), HttpStatus.OK);
     }
 
     // Add the ability to support editing scheduled replays

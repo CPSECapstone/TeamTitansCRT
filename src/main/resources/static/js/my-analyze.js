@@ -97,6 +97,7 @@ function testCaptureList() {
     addAllToCaptureList(data);
 }
 
+//TODO: if no data stop loading
 function insertLoadingSpinner(selector) {
     return `
     <div class="${selector}" tabindex="-1" role="dialog">
@@ -262,6 +263,7 @@ function createMetricsModal(selector) {
 // Requests capture metrics on button click
 $(function() {
     $("#btnGetMetrics").on("click", function() {
+        $(this).prop('disabled', true);
 
         metricData = {}; // Clears metric data
 
@@ -292,6 +294,9 @@ $(function() {
         $(".manageCapturesLoadingIcon").show();
         
         if (checkedCaptures.length > 0 || checkedReplays.length > 0) {
+
+            $(`#${metricsSelector}`).modal("show");
+
             // Draw the graph after all ajax calls complete
             $.when.apply(this, requests).done(function() {
                 
@@ -302,11 +307,12 @@ $(function() {
                 } else {
                     $('#container').html('<p>No metric data available for selected Capture(s)/Replay(s)</p>');
                 }
+                $(this).prop('disabled', false);
             });
         } else {
             $('#container').html('')
+            $(this).prop('disabled', false);
         }
-        $(`#${metricsSelector}`).modal("show");
         return false; // Stops page from jumping to top
     });
 });
@@ -548,24 +554,41 @@ $(function() {
     });
 });
 
-$('body').on('change', '.captureCheckbox', function() {
+function filterTables() {
     var checkedCaptures = $('.captureCheckbox:checkbox:checked').map(function () {return this.value;});
+    var checkedReplays = $('.replayCheckbox:checkbox:checked').map(function () {return $(this).closest('tr').children().eq(2).find("span").text();});
+
+    var checked = checkedCaptures
+
+    for (var i = 0; i < checkedReplays.length; i++) {
+        if(jQuery.inArray(checkedReplays[i], checked) === -1) {
+            checked.push(checkedReplays[i])
+        }
+    }
 
     $("#replayTable tr td:nth-child(3)").each(function() {
-        if(jQuery.inArray($(this).text(), checkedCaptures) !== -1 || checkedCaptures.length == 0) {
+        if(jQuery.inArray($(this).find("span").text(), checked) !== -1 || checked.length == 0) {
             $(this).parent('tr').show();
         } else {
             $(this).parent('tr').hide();
             $(this).parent('tr').find('.replayCheckbox').prop('checked', false);
         }
     });
-    
+
     $("#captureTable tr td:nth-child(2)").each(function() {
-        if(jQuery.inArray($(this).text(), checkedCaptures) !== -1 || checkedCaptures.length == 0) {
+        if(jQuery.inArray($(this).text(), checked) !== -1 || checked.length == 0) {
             $(this).parent('tr').show();
         } else {
             $(this).parent('tr').hide();
             $(this).parent('tr').find('.captureCheckbox').prop('checked', false);
         }
     });
+}
+
+$('body').on('change', '.captureCheckbox', function() {
+    filterTables()
+});
+
+$('body').on('change', '.replayCheckbox', function() {
+    filterTables()
 });

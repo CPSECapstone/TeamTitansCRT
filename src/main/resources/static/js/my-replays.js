@@ -19,6 +19,7 @@ $(function() {
     var passwordSelector = "passwordSelector";
 
     var startBtnSelector = "btnReplayStart";
+    var searchSelector = "searchSelector";
 
     $("div.content-placeholder").replaceWith(`
     <div class="container">
@@ -65,6 +66,7 @@ $(function() {
             <div class="col-lg-6">
                 <p class=""><strong>Manage Replays</strong></p>
                 <hr />
+                ${createTextInputPlaceholder("Replay Filter:", searchSelector, "Search for replay")}
                 ${insertLoadingSpinner("manageReplaysLoadingIcon")}
                 <ul id="ReplayList" class="list-group"></ul>
             </div>
@@ -89,12 +91,15 @@ $(function() {
             endTime = new Date(String($(`.${endTimeSelector}`).val()));
         }
 
-        // Only start capture if rds and s3 selected
-        if ($(`.${captureSelector}`).val() != null && $(`.${rdsSelector}`).val() != '' && $(`.${s3Selector}`).val() != '') {
+        // Only start capture if rds and s3 selected and a username and password have been entered
+        if ($(`.${captureSelector}`).val() != null && $(`.${rdsSelector}`).val() != '' && $(`.${s3Selector}`).val() != '' &&
+        $(`.${usernameSelector}`).val() != '' &&
+        $(`.${passwordSelector}`).val() != '') {
             var replayInner = {
                 databaseInfo: {
                     //dbUrl: "testdb.cgtpml3lsh3i.us-west-1.rds.amazonaws.com:3306",
                     database: $(`.${rdsSelector}`).val(),
+                    region: $(`.${rdsRegionSelector}`).val(),
                     username: $(`.${usernameSelector}`).val(),
                     password: $(`.${passwordSelector}`).val()
                 },
@@ -134,6 +139,23 @@ $(function() {
             // };
             startReplay(replayInner);
         }
+        else {
+            $("#exampleModal").html(createStartReplayModal("Failure", "Your replay failed to start. Verify all fields are correct."));
+            $("#exampleModal").modal("show");
+        }
+    });
+
+    $(`.${searchSelector}`).on("input", function() {
+        var value = $(this).val().toLowerCase();
+
+        $("#ReplayList > li").each(function() {
+            if (value == '' || $(this).attr('id').slice(5).toLowerCase().includes(value)) {
+                $(this).show();
+            }
+            else {
+                $(this).hide();
+            }
+        });
     });
 });
 
@@ -240,6 +262,57 @@ function addToReplayList(replay) {
     $(`#${id}-save`).on("click", function() {
         updateReplay(id);
     });
+
+    // link delete button to modal
+    $(`#${id}-delete-link`).on("click", function() {
+        deleteReplay(replay);
+    });
+}
+
+function deleteReplay(replay) {
+    var id = replay["id"];
+    console.log(`deleting ${id}`);
+
+    // sends request to backend
+    $.ajax({
+        url: "/replay/delete",
+        type: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        data: JSON.stringify(replay),
+        success: function() {
+            $("#exampleModal").html(createDeleteReplayModal("Successful", `Replay ${id} was deleted.`));
+            $('#exampleModal').on('hidden.bs.modal', function () {
+                updateReplayList();
+            });
+            $("#exampleModal").modal("show");
+        },
+        error: function(err) {
+            $("#exampleModal").html(createDeleteReplayModal("Failure", "Deletion failed."));
+            $("#exampleModal").modal("show");
+
+            console.log("Error deleting replay");
+            console.log(err.responseText);
+        }
+    });
+}
+
+function createDeleteReplayModal(result, message) {
+    return `
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete ${result}</h5>
+            </div>
+            <div class="modal-body">
+                <p>${message}</p>
+            </div>
+            <div class="modal-footer">
+                <a class="btn btn-secondary" data-dismiss="modal">Close</a>
+            </div>
+        </div>
+    </div>`;
 }
 
 /**
@@ -267,6 +340,10 @@ function createEditReplayModal(replay) {
 
     var fileSizeLimit = replay["fileSizeLimit"];
     var transactionLimit = replay["transactionLimit"];
+    
+    footerDelete = `<a id="${id}-delete-link" class="btn btn-primary" data-dismiss="modal">Delete</a>`;
+    footerDelete += `<a class="btn btn-secondary" data-dismiss="modal">Close</a>`;
+    
     return `
     ${createReplayListItem(id, status, `${id}-modal`)}
     <div class="modal fade" id="${id}-modal" tabindex="-1" role="dialog">
@@ -289,6 +366,21 @@ function createEditReplayModal(replay) {
                     ${status == "Finished" ? 
                         `<a class="btn btn-secondary" data-dismiss="modal">Close</a>` : 
                         `<a id="${id}-save" class="btn btn-primary" data-dismiss="modal">Save</a>`}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="${id}-modal-delete" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete Replay: ${id}</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Are sure you want to delete replay? Please note this will NOT delete the associated capture.</p>
+                </div>
+                <div class="modal-footer">
+                    ${footerDelete}
                 </div>
             </div>
         </div>
@@ -595,6 +687,14 @@ function createTextInputValue(label, id, value) {
     <div class="form-group">
         <label class="input-label">${label}</label>
         <input class="${id} form-control" type="text" value="${value}">
+    </div>`;
+}
+
+function createTextInputPlaceholder(label, id, value) {
+    return `
+    <div class="form-group">
+        <label class="input-label">${label}</label>
+        <input id="" class="${id} form-control" type="text" placeholder="${value}">
     </div>`;
 }
 

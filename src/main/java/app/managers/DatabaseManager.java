@@ -39,10 +39,12 @@ public abstract class DatabaseManager {
         catch (ClassNotFoundException e)
         {
             e.printStackTrace();
+            conn = null;
         }
         catch (SQLException se)
         {
             se.printStackTrace();
+            conn = null;
         }
         return conn;
     }
@@ -86,4 +88,11 @@ public abstract class DatabaseManager {
         return true;
     }
 
+    public boolean checkConnection() {
+        try {
+            return getConnection() != null;
+        } finally {
+            closeConnection();
+        }
+    }
 }

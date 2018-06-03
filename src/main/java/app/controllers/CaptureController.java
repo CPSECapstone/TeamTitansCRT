@@ -207,10 +207,12 @@ public class CaptureController {
         }
     }
 
-    public static boolean deleteCapture(Capture capture) {
-        captures.remove(capture.getId());
-        logControllers.remove(capture.getId());
-        timers.remove(capture.getId());
+    public static boolean deleteCapture(Capture tempCapture) {
+        captures.remove(tempCapture.getId());
+        logControllers.remove(tempCapture.getId());
+        timers.remove(tempCapture.getId());
+        
+        Capture capture = DBUtil.getInstance().loadCapture(tempCapture.getId());
         DBUtil.getInstance().deleteCapture(capture.getId());
         S3Manager s3Manager = new S3Manager(capture.getS3Region());
         s3Manager.deleteFile(capture.getS3(), capture.getId() + "-Workload.log");

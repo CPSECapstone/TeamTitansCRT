@@ -29,6 +29,10 @@ public class CaptureServlet {
             return new ResponseEntity<>(ErrorsUtil.idContainsNonAlphaNumeric(), HttpStatus.BAD_REQUEST);
         }
 
+        if (capture.getId().length() > 50) {
+            return new ResponseEntity<>(ErrorsUtil.idTooLong(50), HttpStatus.BAD_REQUEST);
+        }
+
         if (CaptureController.isCaptureIdDuplicate(capture)) {
             return new ResponseEntity<>(ErrorsUtil.DuplicateCaptureIDError(), HttpStatus.BAD_REQUEST);
         }
@@ -98,7 +102,7 @@ public class CaptureServlet {
 
     @RequestMapping(value = "/capture/delete", method = RequestMethod.POST)
     public ResponseEntity<String> captureDelete(@RequestBody Capture capture) {
-        if (capture.getId() == null || capture.getS3() == null) {
+        if (capture.getId() == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 

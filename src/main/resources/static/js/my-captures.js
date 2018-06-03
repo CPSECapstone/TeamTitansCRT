@@ -10,6 +10,7 @@ $(function() {
     var transactionLimitSelector = "transactionLimitSelector";
     var filterStatementsSelector = "filterStatementsSelector";
     var filterUsersSelector = "filterUsersSelector";
+    var searchSelector = "searchSelector";
 
     var startBtnSelector = "btnCaptureStart";
 
@@ -53,6 +54,7 @@ $(function() {
             <div class="col-lg-6">
                 <p class=""><strong>Manage Captures</strong></p>
                 <hr />
+                ${createTextInputPlaceholder("Capture Filter:", searchSelector, "Search for capture")}
                 ${insertLoadingSpinner("manageCapturesLoadingIcon")}
                 <ul id="CaptureList" class="list-group"></ul>
             </div>
@@ -61,6 +63,7 @@ $(function() {
     `);
     updateCaptureList();
     // testCaptureList();
+    
     populateResourceDropdowns(rdsRegionSelector, rdsSelector, s3RegionSelector, s3Selector);
     $(`.${startBtnSelector}`).on("click", function() {
         var startTime = null;
@@ -92,6 +95,19 @@ $(function() {
 
             startCapture(capture);
         }
+    });
+
+    $(`.${searchSelector}`).on("input", function() {
+        var value = $(this).val().toLowerCase();
+
+        $("#CaptureList > li").each(function() {
+            if (value == '' || $(this).attr('id').slice(5).toLowerCase().includes(value)) {
+                $(this).show();
+            }
+            else {
+                $(this).hide();
+            }
+        });
     });
 });
 
@@ -251,14 +267,16 @@ function createEditCaptureModal(capture) {
     // to be fixed with user set timezone
     var startTime = new Date(capture["startTime"]);
     // startTime.setHours(startTime.getHours() - 7); // daylight savings lol
-    startTime.setHours(startTime.getHours());
-    startTime = startTime.toISOString().replace("Z", "");
+    console.log(startTime);
+    //startTime.setHours(startTime.getHours());
+    var tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
+    startTime = (new Date(startTime - tzoffset)).toISOString().slice(0, -1);
+    //startTime = startTime.toISOString().replace("Z", "");
+    console.log(startTime);
     var endTime = capture["endTime"];
     if (endTime != null) {
         endTime = new Date(endTime);
-        // endTime.setHours(endTime.getHours() - 7); // daylight savings lol
-        endTime.setHours(endTime.getHours());
-        endTime = endTime.toISOString().replace("Z", "");
+        endTime = (new Date(endTime - tzoffset)).toISOString().slice(0, -1);
     }
     else {
         endTime = "";
@@ -310,7 +328,7 @@ function createEditCaptureModal(capture) {
                     <h5 class="modal-title">Delete Capture: ${id}</h5>
                 </div>
                 <div class="modal-body">
-                    <p>Are sure you want to delete capture?</p>
+                    <p>Are sure you want to delete capture? Please note this will delete all associated replays.</p>
                 </div>
                 <div class="modal-footer">
                     ${footerDelete}
@@ -579,6 +597,14 @@ function createTextInputValue(label, id, value) {
     <div class="form-group">
         <label class="input-label">${label}</label>
         <input id="" class="${id} form-control" type="text" value="${value}">
+    </div>`;
+}
+
+function createTextInputPlaceholder(label, id, value) {
+    return `
+    <div class="form-group">
+        <label class="input-label">${label}</label>
+        <input id="" class="${id} form-control" type="text" placeholder="${value}">
     </div>`;
 }
 

@@ -1,350 +1,501 @@
 $(function() {
-    $("div.content-placeholder").replaceWith(`
-    <div class="container">
-        <a id="toggle-btn" class="btn btn-default">Toggle Dashboard</a>
-        <div class="row capture-row">
-            <div class="col-lg-6 col-lg-offset-3">
-                <h4 class="text-center">Capture Dashboard</h4>
-            </div>
-            <div class="col-lg-12">
-                <div class="capture-dashboard"></div>
-                ${insertLoadingSpinner("tableLoadingIcon")}
-            </div>
-        </div>
-        <div class="row replay-row">
-            <div class="col-lg-6 col-lg-offset-3">
-                <h4 class="text-center">Replay Dashboard</h4>
-            </div>
-            <div class="col-lg-12">
-                <div class="replay-dashboard"></div>
-                ${insertLoadingSpinner("tableLoadingIcon")}
-            </div>
-        </div>
-    </div>
-    `);
+    $(".content-placeholder").replaceWith(mainTemplate());
     $("#toggle-btn").on("click", function() {
         toggleDashboard();
     });
-    // updateStatus();
-    testDashboardTable();
+    // testDashboardTable();
+    updateStatus();
+    $(".replay-row").hide();
 });
 
-function testDashboardTable() {
-    var testCaps = [
-        {
-            id: "Test1",
-            startTime: 1520871274784,
-            endTime: null,
-            fileSizeLimit: 420,
-            transactionLimit: 840,
-            status: "Running"
-        },
-        {
-            id: "Test2",
-            startTime: 1520871274784,
-            endTime: 1520881274784,
-            fileSizeLimit: 420,
-            transactionLimit: 840,
-            status: "Finished"
-        }
-    ]
-    var testReps = [
-        {
-            captureId: "test_capture",
-            captureLogFileName: "test_capture-Workload.log",
-            database: null,
-            dbpassword: null,
-            dburl: null,
-            dbusername: null,
-            endTime: "2018-05-03",
-            filterStatements: [],
-            filterUsers: [],
-            id: "MyReplay",
-            rds: "testdb",
-            rdsRegion: "US_WEST_1",
-            replayType: "Fast Mode",
-            s3: "teamtitans-test-mycrt",
-            s3Region: "US_WEST_1",
-            startTime: "2018-05-03",
-            status: "Finished",
-            transactionLimit: 0
-        },
-        {
-            captureId: "test_capture",
-            captureLogFileName: "test_capture-Workload.log",
-            database: null,
-            dbpassword: null,
-            dburl: null,
-            dbusername: null,
-            endTime: "2018-05-03",
-            filterStatements: [],
-            filterUsers: [],
-            id: "MyReplay_2",
-            rds: "testdb",
-            rdsRegion: "US_WEST_1",
-            replayType: "Fast Mode",
-            s3: "teamtitans-test-mycrt",
-            s3Region: "US_WEST_1",
-            startTime: "2018-05-03",
-            status: "Finished",
-            transactionLimit: 0
-        }
-    ]
-    $("div.capture-dashboard").html(captureDashboard(testCaps));
-    fillTable("tbody.capture-table", testCaps);
-    $("div.replay-dashboard").html(replayDashboard(testReps));
-    fillTable("tbody.replay-table", testReps);
-
-    $("div.replay-row").hide();
-    toggleDashboard();
-}
-
-function toggleDashboard() {
-    replayShown = $("div.replay-row").is(":visible");
-    if (replayShown) {
-        $("div.replay-row").hide();
-        $("div.capture-row").show();
-    }
-    else {
-        $("div.replay-row").show();
-        $("div.capture-row").hide();
-    }
-}
-
-function insertLoadingSpinner(selector) {
-    return `
-    <div class="${selector}" style="display: none;" tabindex="-1" role="dialog">
-        <div class="text-center">Loading...</div>
-        <div class="spinner"></div>
-    </div>`;
-}
-
-function emptyDashboard() {
-    return `
-    <p class="text-center">You have no captures or replays currently running! Let's get started!</p>
-    <div class="text-center">
-        <a href="capture" class="btn btn-default">Start new capture</a>
-    </div>`;
-}
-
-/* Updates the table to represent what is actually happening for capture. Only running and queued captures are visible in the table. */
+/* ----------------------- Main Functions ------------------------------------ */
 function updateStatus() {
-    $.ajax({
-        url: "/capture/status",
-        type: "GET",
-        beforeSend: function() {
-            console.log("show");
-            $(".tableLoadingIcon").show();
-        },
-        success: function(data) {
-            setTimeout(function()
-            {
-                console.log("hide");
-                $(".tableLoadingIcon").hide();
-                if (data.length > 0) {
-                    $("div.capture-dashboard").replaceWith(captureDashboard(data));    
-                    fillTable("tbody.capture-table", data);
-                }
-                else {
-                    $("div.capture-dashboard").replaceWith(emptyDashboard());    
-                }
-            },
-            500);
-        },
-        error: function(err) {
-            console.log(err);
-            console.log("Error updating the status.")
-            $(".tableLoadingIcon").hide();
-        }
+    $(".captureLoadingIcon").show();
+    getCaptures()
+    .done(createCaptureDashboard)
+    .fail(function(err) {
+        console.log("Error updating captures.")
+        // console.log(err);
+    })
+    .always(function() {
+        $(".captureLoadingIcon").hide();
+    });
+    
+    $(".replayLoadingIcon").show();
+    getReplays()
+    .done(createReplayDashboard)
+    .fail(function(err) {
+        console.log("Error updating replays.")
+        // console.log(err);
+    })
+    .always(function() {
+        $(".replayLoadingIcon").hide();
     });
 }
 
-function captureDashboard(data) {
-    return `
-    <table class="table table-hover" width="100%">
-        <thead class="thead-dark">
-            <tr class="">
-                <th scope="col"> </th> 
-                <th scope="col">Name</th>
-                <th scope="col">Status</th>
-                <th scope="col">Start Time</th>
-                <th scope="col">End Time</th>
-                <th scope="col"> </th>
-            </tr>
-        </thead>
-        <tbody class="capture-table">
-        </tbody>
-    </table>`;
+function createCaptureDashboard(data) {
+    setTimeout(function()
+    {
+        if (data.length > 0) {
+            $(".capture-dashboard").replaceWith(captureDashboardTemplate());    
+            $(".capture-table-body-running").empty();
+            $(".capture-table-body-queued").empty();
+
+            // sort running captures first
+            data.sort(sortRunningFirst);
+
+            var runningRows = [];
+            var queuedRows = [];
+            for(let i = 0; i < data.length; i++) {
+                var capture = data[i];
+                var id = capture["id"];
+
+                if (capture["status"] == "Running") {
+                    runningRows.push(createTableRow(capture));
+                    runningRows.push(`<tr class="collapse" id="${selectorCloudwatch(id)}"></tr>`);
+                }
+                else if (capture["status"] == "Queued") {
+                    queuedRows.push(createTableRow(capture));
+                    // queuedRows.push(`<tr class="collapse" id="${selectorCloudwatch(id)}"></tr>`);
+                }
+
+                // async adds cloudwatch data
+                getMetrics(capture)
+                .done(function(metrics) {
+                    console.log('adding cloudwatch data');
+                    $(`#${selectorCloudwatch(id)}`).html(metricsTemplate(metrics));
+                })
+                .fail(function(err) {
+                    console.log('cloudwatch failed');
+                });
+            }
+
+            $(".capture-table-body-running").append(runningRows.join(''));
+            $(".capture-table-body-queued").append(queuedRows.join(''));
+
+            // add event handlers to each row
+            $.each(data, function(index, capture) {
+                var id = capture["id"];
+                $(`#${selectorStop(id)}`).on("click", function() {
+                    stopCapture(id)
+                    .done(function() {                            
+                        console.log(`Stopped capture ${id}`);                        
+                    })
+                    .fail(function(err) {
+                        console.log(err);
+                        console.log(`Error stopping capture ${id}`);
+                    })
+                    .always(function() {
+                        updateStatus();
+                       
+                    });
+                });
+                $(`#${selectorAnalyze(id)}`).on("click", function() {
+                    openAnalysis(id);
+                });
+            });
+        }
+        else {
+            $(".capture-dashboard").replaceWith(captureDashboardEmptyTemplate());
+        }
+    },
+    500);
 }
 
-function replayDashboard(data) {
-    return `
-    <table class="table table-hover" width="100%">
-        <thead class="thead-dark">
-            <tr class="">
-                <th scope="col"> </th> 
-                <th scope="col">Name</th>
-                <th scope="col">Status</th>
-                <th scope="col">Start Time</th>
-                <th scope="col">End Time</th>
-                <th scope="col"> </th>
-            </tr>
-        </thead>
-        <tbody class="replay-table">
-        </tbody>
-    </table>`;
+function createReplayDashboard(data) {
+    setTimeout(function()
+    {
+        if (data.length > 0) {
+            $(".replay-dashboard").replaceWith(replayDashboardTemplate());    
+            $(".replay-table-body-running").empty();
+            $(".replay-table-body-queued").empty();
+
+            // sort running replays first
+            data.sort(sortRunningFirst);
+
+            var runningRows = [];
+            var queuedRows = [];
+            for(let i = 0; i < data.length; i++) {
+                var replay = data[i];
+                var id = replay["id"];
+
+                if (replay["status"] == "Running") {
+                    runningRows.push(createTableRow(replay));
+                    runningRows.push(`<tr class="collapse" id="${selectorCloudwatch(id)}"></tr>`);
+                }
+                else if (replay["status"] == "Queued") {
+                    queuedRows.push(createTableRow(replay));
+                    queuedRows.push(`<tr class="collapse" id="${selectorCloudwatch(id)}"></tr>`);
+                }
+
+                // async adds cloudwatch data
+                getMetrics(replay)
+                .done(function(metrics) {
+                    console.log('adding cloudwatch data');
+                    $(`#${selectorCloudwatch(id)}`).html(metricsTemplate(metrics));
+                })
+                .fail(function(err) {
+                    console.log('cloudwatch failed');
+                });
+            }
+
+            $(".replay-table-body-running").append(runningRows.join(''));
+            $(".replay-table-body-queued").append(queuedRows.join(''));
+
+            $.each(data, function(index, replay) {
+                var id = replay["id"];
+                $(`#${selectorStop(id)}`).on("click", function() {
+                    stopReplay(id)
+                    .done(function() {
+                        console.log(`Stopped replay ${id}`);
+                    })
+                    .fail(function(err) {
+                        console.log(err);
+                        console.log(`Error stopping replay ${id}`);
+                    })
+                    .always(function() {
+                        updateStatus();
+                    });
+                });
+                $(`#${selectorAnalyze(id)}`).on("click", function() {
+                    openAnalysis(id);
+                });
+            });
+        }
+        else {
+            $(".replay-dashboard").replaceWith(replayDashboardEmptyTemplate());
+        }
+    },
+    500);
 }
 
-function fillTable(selector, data) {
-    $(selector).empty();
-    for(let i = 0; i < data.length; i++) {
-        createTableRow(selector, data[i]);
-    }
-}
-
-
-function createTableRow(selector, capture) {
-    console.log('creating row');
-    console.log(capture);
+function createTableRow(capture) {
     var id = capture["id"];
     var status = capture["status"];
     var rds = capture["rds"];
     var rdsRegion = capture["rdsRegion"];
     var startTimeMilli = capture["startTime"];
     var startTime = "Not Specified";
-    var tempStartTime = new Date(startTimeMilli);
     
     if (startTimeMilli) {
+        var tempStartTime = new Date(startTimeMilli);
         startTime = tempStartTime.customFormat("#MM#/#DD#/#YYYY# #hh#:#mm#:#ss# #AMPM#")
     }
     
     var endTimeMilli = capture["endTime"];
     var endTime = "Not Specified";
-    var tempEndTime = new Date(endTimeMilli);
     
     if (endTimeMilli) {
+        var tempEndTime = new Date(endTimeMilli);
         endTime = tempEndTime.customFormat("#MM#/#DD#/#YYYY# #hh#:#mm#:#ss# #AMPM#")
     }
     
-    createRow(selector, id, rds, rdsRegion, status, startTimeMilli, startTime, endTimeMilli, endTime);
-    var id = capture["id"];
-    $(`a#stopButton${id}`).on("click", function() {
-        stopCapture(id);
-        updateStatus();
-    });
-}
+    var btn = "",
+        icon = "";
 
-function createRow(selector, id, rds, rdsRegion, status, startTimeMilli, startTime, endTimeMilli, endTime) {
-     var body = {
-        rds: rds,
-        rdsRegion: rdsRegion,
-        startTime: startTimeMilli,
-        endTime: endTimeMilli,
-        metrics: ["CPUUtilization", "FreeStorageSpace", "WriteThroughput"]
-    };
-
-    var row = `
-            <tr data-toggle="collapse" data-target="#accordion${id}" class="clickable">
-                <td width="(100/12)%">${createIcon(status)}</td>
-                <td width="(100/4)%">${id}</td>
-                <td width="(100/6)%">${status}</td>
-                <td width="(100/6)%">${startTime}</td>
-                <td width="(100/6)%">${endTime}</td>
-                <td width="(100/6)%">${createButton(id, status)}</td>
-            </tr>`;
-    
-    $.ajax({
-         url: "/cloudwatch/average",
-        type: "POST",
-        headers: { "Content-Type": "application/json" },
-        data: JSON.stringify(body),
-        success: function(data) {
-            row += `
-            <tr class="collapse" id="accordion${id}">
-                <td colspan="6">
-                    <div>
-                        <ul class="stats-list">
-                            <li>CPU Utilization (percent): ${data[0]}</li>
-                            <li>Free Storage Space Available (bytes): ${data[1]}</li>
-                            <li>Write Throughput (bytes/sec): ${data[2]}</li>
-                        </ul>
-                    </div>
-                </td>
-            </tr>`;
-            addRowToHtml(selector, row, id);
-            },
-        error: function(err) {
-            addRowToHtml(selector, row, id);
-            console.log(err);
-        }
-    });
-}
-
-function addRowToHtml(selector, row, id) {
-    $(selector).append(row);
-        
-    $(`#stopButton${id}`).on("click", function() {
-        stopCapture(id);
-        updateStatus();
-    });
-    
-    $(`#${id}-analyze`).on("click", function() {
-        openAnalysis(id);
-    });
-}
-
-function createIcon(status) {
     if (status == "Running") {
-        return `<img src="../img/running.png" alt="running">`;
+        btn = `<a href="javascript:void(0)" id="${selectorStop(id)}" class="defaultLinkColor">Stop Capture</a>`;
+        icon = getRunningImageTemplate();
     }                
-    else if (status == "Queued") {
-        return `<img src="../img/queued.png" alt="queued">`;
-    }
     else if (status == "Finished") {
-        return `<img src="../img/finished.png" alt="finished">`;
+        btn = `<a href="analyze" id="${selectorAnalyze(id)}" class="defaultLinkColor">Analyze</a>`;
+        icon = getFinishedImageTemplate();
+    }
+    else if (status == "Queued") {
+        icon = getQueuedImageTemplate();
     }
     else {
-        return `<img src="../img/failed.png" alt="failed">`;
+        icon = getFailedImageTemplate();
+    }
+
+    var row = `
+    <tr data-toggle="collapse" data-target="#${selectorCloudwatch(id)}" class="clickable">
+        <td>${icon}</td>
+        <td>${id}</td>
+        <td>${status}</td>
+        <td>${startTime}</td>
+        <td>${endTime}</td>
+        <td>${btn}</td>
+    </tr>`;
+
+    return row;
+}
+
+function toggleDashboard() {
+    replayShown = $(".replay-row").is(":visible");
+    if (replayShown) {
+        $(".replay-row").hide();
+        $(".capture-row").show();
+        $("#toggle-btn").html("Show Replays");
+    }
+    else {
+        $(".replay-row").show();
+        $(".capture-row").hide();
+        $("#toggle-btn").html("Show Captures");
     }
 }
 
-function createButton(id, status) {
-    if (status == "Running") {
-        return `<a href="javascript:void(0)" id="stopButton${id}" class="defaultLinkColor">Stop Capture</a>`;
-    }
-    else if (status == "Finished") {
-        return `<a href="analyze" id="${id}-analyze" class="defaultLinkColor">Analyze</a>`;
-    }
+/* ----------------------- Selectors ----------------------------------------- */
+function selectorCloudwatch(id) {
+    return `cloudwatch-${id}`;
 }
 
-/* If you push the stop capture button, it ends immediately. */
+function selectorStop(id) {
+    return `stop-${id}`;
+}
+
+function selectorAnalyze(id) {
+    return `analyze-${id}`;
+}
+
+/* ----------------------- Template Functions -------------------------------- */
+function mainTemplate() {
+    return `
+    <div class="container main-dashboard">
+        <a id="toggle-btn" class="btn btn-default pull-right">Show Replays</a>
+        <div class="row capture-row">
+            <div class="col-lg-6 col-lg-offset-3">
+                <h4 class="text-center">Capture Dashboard</h4>
+                <hr>
+            </div>
+            <div class="col-lg-12">
+                <div class="capture-dashboard"></div>
+                <div class="captureLoadingIcon" style="display: none;" tabindex="-1" role="dialog">
+                    <div class="text-center">Loading...</div>
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row replay-row">
+            <div class="col-lg-6 col-lg-offset-3">
+                <h4 class="text-center">Replay Dashboard</h4>
+                <hr>
+            </div>
+            <div class="col-lg-12">
+                <div class="replay-dashboard"></div>
+                <div class="replayLoadingIcon" style="display: none;" tabindex="-1" role="dialog">
+                    <div class="text-center">Loading...</div>
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+    </div>`;
+}
+
+function captureDashboardTemplate() {
+    return `
+    <h4>Running</h4>
+    <hr>
+    <div class="margin-top panel z-depth-1">
+        <table class="capture-table table table-hover table-bordered" >
+            <thead class="thead-dark">
+                <tr class="">
+                    <th scope="col"> </th> 
+                    <th scope="col">Name</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Start Time</th>
+                    <th scope="col">End Time</th>
+                    <th scope="col"> </th>
+                </tr>
+            </thead>
+            <tbody class="capture-table-body-running">
+            </tbody>
+        </table>
+    </div>
+    <br>
+    <h4>Queued</h4>
+    <hr>
+    <div class="margin-top panel z-depth-1">
+        <table class="capture-table table table-hover table-bordered" >
+            <thead class="thead-dark">
+                <tr class="">
+                    <th scope="col"> </th> 
+                    <th scope="col">Name</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Start Time</th>
+                    <th scope="col">End Time</th>
+                    <th scope="col"> </th>
+                </tr>
+            </thead>
+            <tbody class="capture-table-body-queued">
+            </tbody>
+        </table>
+    </div>`;
+}
+
+function captureDashboardEmptyTemplate() {
+    return `
+    <p class="text-center">You have no captures currently running! Let's get started!</p>
+    <div class="text-center">
+        <a href="capture" class="btn btn-default">Start new capture</a>
+    </div>`;
+}
+
+function replayDashboardTemplate() {
+    return `
+    <h4>Running</h4>
+    <hr>
+    <div class="margin-top panel z-depth-1">
+        <table class="replay-table table table-hover table-bordered" >
+            <thead class="thead-dark">
+                <tr class="">
+                    <th scope="col"> </th> 
+                    <th scope="col">Name</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Start Time</th>
+                    <th scope="col">End Time</th>
+                    <th scope="col"> </th>
+                </tr>
+            </thead>
+            <tbody class="replay-table-body-running">
+            </tbody>
+        </table>
+    </div>
+    <br>
+    <h4>Queued</h4>
+    <hr>
+    <div class="margin-top panel z-depth-1">
+        <table class="replay-table table table-hover table-bordered" >
+            <thead class="thead-dark">
+                <tr class="">
+                    <th scope="col"> </th> 
+                    <th scope="col">Name</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Start Time</th>
+                    <th scope="col">End Time</th>
+                    <th scope="col"> </th>
+                </tr>
+            </thead>
+            <tbody class="replay-table-body-queued">
+            </tbody>
+        </table>
+    </div>`;
+}
+
+function replayDashboardEmptyTemplate() {
+    return `
+    <p class="text-center">You have no replays currently running! Let's get started!</p>
+    <div class="text-center">
+        <a href="replay" class="btn btn-default">Start new replay</a>
+    </div>`;
+}
+
+function metricsTemplate(metrics) {
+    return `
+    <td colspan="6">
+        <div>
+            <ul class="stats-list">
+                <li>CPU Utilization (percent): ${metrics[0]}</li>
+                <li>Free Storage Space Available (bytes): ${metrics[1]}</li>
+                <li>Write Throughput (bytes/sec): ${metrics[2]}</li>
+            </ul>
+        </div>
+    </td>`;
+}
+
+function getRunningImageTemplate() {
+    return `<i class="fa fa-circle-o-notch fa-spin" style="color:rgb(0,0,200);"></i>`;
+    // return `<img src="./img/running.png" alt="running">`;
+}
+
+function getFinishedImageTemplate() {
+    return `<img src="./img/finished.png" alt="finished">`;
+}
+
+function getQueuedImageTemplate() {
+    return `<i class="fa fa-clock-o" style="color:rgb(200,200,0);"></i>`;
+    // return `<img src="./img/queued.png" alt="queued">`;
+}
+
+function getFailedImageTemplate() {
+    return `<img src="./img/failed.png" alt="failed">`;
+}
+
+/* ----------------------- API Calls ----------------------------------------- */
+function getMetrics(capture) {
+    // adds required metrics field
+    capture["metrics"] = ["CPUUtilization", "FreeStorageSpace", "WriteThroughput"];
+
+    return $.ajax({
+        url: "/cloudwatch/average",
+        type: "POST",
+        headers: { "Content-Type": "application/json" },
+        // data: JSON.stringify(body)
+        data: JSON.stringify(capture)
+    });
+}
+
 function stopCapture(id) {
-    console.log(`Stopping capture: ${id}`);
-    var url = "/capture/stop";
     var body = {
         id: id
-    };
-    
-    $.ajax({
-        url: url,
+    };    
+    $(".capture-table-body-running").hide();
+    $(".capture-table-body-queued").hide();
+    $(".captureLoadingIcon").show();
+    return $.ajax({
+        url: "/capture/stop",
         type: "POST",
         headers: {
             "Content-Type": "application/json",
         },
-        data: JSON.stringify(body),
-        success: function() {
-            $("#lblStatus").html("Stopped Successfully.");
-            updateStatus();
-           // table.ajax.reload();
+        success: function(data) {            
+            location.reload();
         },
         error: function(err) {
-            console.log(err);
-            console.log("Error stopping capture on dashboard");
-        }
+            location.reload();
+        },
+        data: JSON.stringify(body)
     });
 }
 
-/* Formarts the time from milliseconds to month day year hour minutes seconds. */
+function stopReplay(id) {
+    var body = {
+        id: id
+    };
+    $(".replay-table-body-running").hide();
+    $(".replay-table-body-queued").hide();
+    $(".captureLoadingIcon").show();
+    return $.ajax({
+        url: "/replay/stop",
+        type: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        success: function(data) {            
+            location.reload();
+        },
+        error: function(err) {
+            location.reload();
+        },
+        data: JSON.stringify(body)
+    });
+}
+
+function getCaptures() {
+    return $.ajax({
+        url: "/capture/status",
+        type: "GET"
+    });
+}
+
+function getReplays() {
+    return $.ajax({
+        url: "/replay/status",
+        type: "GET"
+    });
+}
+
+/* ----------------------- Utility ------------------------------------------- */
+function openAnalysis(id) {
+    sessionStorage.setItem("defaultCapture", id);
+}
+
+function sortRunningFirst(cap1, cap2) {
+    if (cap1["status"] == "Running") return -1;
+    if (cap2["status"] == "Running") return 1;
+    return 0;
+}
+
 Date.prototype.customFormat = function(formatString){
   var YYYY,YY,MMMM,MMM,MM,M,DDDD,DDD,DD,D,hhhh,hhh,hh,h,mm,m,ss,s,ampm,AMPM,dMod,th;
   YY = ((YYYY=this.getFullYear())+"").slice(-2);
@@ -365,6 +516,92 @@ Date.prototype.customFormat = function(formatString){
   return formatString.replace("#hhhh#",hhhh).replace("#hhh#",hhh).replace("#hh#",hh).replace("#h#",h).replace("#mm#",mm).replace("#m#",m).replace("#ss#",ss).replace("#s#",s).replace("#ampm#",ampm).replace("#AMPM#",AMPM);
 };
 
-function openAnalysis(id) {
-    sessionStorage.setItem("defaultCapture", id);
+function getRndInteger(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) ) + min;
+}
+
+/* ----------------------- Testing ------------------------------------------- */
+function testDashboardTable() {
+    let testCaps = [];
+    for (let i = 0; i < 6; i++) testCaps.push(makeRandomCapture("TestCapture_" + i));
+
+    let testReps = [];
+    for (let i = 0; i < 3; i++) testReps.push(makeRandomReplay("TestReplay_" + i));
+
+    createCaptureDashboard(testCaps);
+    createReplayDashboard(testReps);
+}
+
+function makeRandomCapture(id) {
+    // all in millis
+    const one_day = 1000 * 60 * 60 * 24;
+    const now = new Date().getTime();
+
+    // startTime is in range: now +/- half day
+    let startTime = now + getRndInteger(0, one_day) - (one_day/2);
+    let endTime = startTime + getRndInteger(0, one_day);
+
+    let status = "";
+    if (startTime < now) {
+        status = "Running";
+    }
+    else if (startTime > now) {
+        status = "Queued";
+    }
+
+    return {
+        dbFileSize: getRndInteger(0, 200),
+        endTime: endTime,
+        fileSizeLimit: getRndInteger(0, 200),
+        filterStatements: [],
+        filterUsers: [],
+        id: id,
+        rds: "testdb",
+        rdsRegion: "US_WEST_1",
+        s3: "teamtitans-test-mycrt",
+        s3Region: "US_WEST_1",
+        startTime: startTime,
+        status: status,
+        transactionCount: getRndInteger(0, 200),
+        transactionLimit: getRndInteger(0, 200)
+    };
+}
+
+function makeRandomReplay(id) {
+    // all in millis
+    const one_day = 1000 * 60 * 60 * 24;
+    const now = new Date().getTime();
+
+    // startTime is in range: now +/- half day
+    let startTime = now + getRndInteger(0, one_day) - (one_day/2);
+    let endTime = startTime + getRndInteger(0, one_day);
+
+    let status = "";
+    if (startTime < now) {
+        status = "Running";
+    }
+    else if (startTime > now) {
+        status = "Queued";
+    }
+
+    return {
+        captureId: "ExampleCaptureId",
+        captureLogFileName: "test_capture-Workload.log",
+        database: null,
+        dbpassword: null,
+        dburl: null,
+        dbusername: null,
+        endTime: endTime,
+        filterStatements: [],
+        filterUsers: [],
+        id: id,
+        rds: "testdb",
+        rdsRegion: "US_WEST_1",
+        replayType: getRndInteger(0, 1) ? "Time Sensitive" : "Fast Mode",
+        s3: "teamtitans-test-mycrt",
+        s3Region: "US_WEST_1",
+        startTime: startTime,
+        status: status,
+        transactionLimit: 0
+    };
 }
