@@ -532,34 +532,53 @@ function populateTypeDropdown(selector) {
  * Populate region and rds/s3 dropdowns
  */
 function populateResourceDropdowns(rdsRegion, rdsSelector, s3Region, s3Selector) {
-    $.ajax({
-        url: "/resource/regions",
+
+    var requests = []; // Stores all ajax requests
+
+    requests.push($.ajax({
+        url: "/resource/regions/rds",
         type: "GET",
         beforeSend: function() {
             $(".startReplayLoadingIcon").show();
         },
-        complete: function() {
-            $(".startReplayLoadingIcon").hide();
-        },
         success: function(data) {
             $(`div.${rdsRegion}`).replaceWith(createDropdown("Select RDS Region", rdsRegion, data));
-            $(`div.${s3Region}`).replaceWith(createDropdown("Select S3 Region", s3Region, data));
 
             $(`.${rdsRegion}`).on("change", function() {
                 updateRDSDropdown(rdsSelector, rdsRegion);
             });
 
+            populateRDSDropdown(rdsSelector, rdsRegion);
+        },
+        error: function(err) {
+            console.log("Error populating rds region dropdown")
+            console.log(err);
+        }
+    }));
+
+    requests.push($.ajax({
+        url: "/resource/regions/s3",
+        type: "GET",
+        beforeSend: function() {
+            $(".startReplayLoadingIcon").show();
+        },
+        success: function(data) {
+            $(`div.${s3Region}`).replaceWith(createDropdown("Select S3 Region", s3Region, data));
+
             $(`.${s3Region}`).on("change", function() {
                 updateS3Dropdown(s3Selector, s3Region);
             });
 
-            populateRDSDropdown(rdsSelector, rdsRegion);
             populateS3Dropdown(s3Selector, s3Region);
         },
         error: function(err) {
-            console.log("Error populating region dropdowns")
+            console.log("Error populating s3 region dropdown")
             console.log(err);
         }
+    }));
+
+    $.when.apply(this, requests).done(function() {
+        $(".startReplayLoadingIcon").hide();
     });
 }
 
@@ -573,9 +592,6 @@ function populateRDSDropdown(selector, regionSelector) {
         type: "GET",
         beforeSend: function() {
             $(".startReplayLoadingIcon").show();
-        },
-        complete: function() {
-            $(".startReplayLoadingIcon").hide();
         },
         success: function(data) {
             $(`div.${selector}`).replaceWith(createDropdown("Select RDS Endpoint", selector, data));
@@ -619,9 +635,6 @@ function populateCapturesDropdown(selector) {
         type: "GET",
         beforeSend: function() {
             $(".startReplayLoadingIcon").show();
-        },
-        complete: function() {
-            $(".startReplayLoadingIcon").hide();
         },
         success: function(data) {
             console.log(data);

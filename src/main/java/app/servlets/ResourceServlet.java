@@ -23,6 +23,44 @@ import java.util.Collections;
 @RestController
 public class ResourceServlet {
 
+    public static ArrayList<Regions> rdsRegions = null;
+
+    public static ArrayList<Regions> s3Regions = null;
+
+    public static ArrayList<Regions> getRdsRegions() {
+        ArrayList<Regions> allRegions = new ArrayList<>();
+        Collections.addAll(allRegions, Regions.values());
+        allRegions.remove(Regions.valueOf("GovCloud"));
+        allRegions.remove(Regions.valueOf("CN_NORTH_1"));
+
+        ArrayList<Regions> populatedRegions = new ArrayList<>();
+
+        for(Regions region : allRegions) {
+            if (!new RDSManager(region.name()).getRDSInstances().isEmpty()) {
+                populatedRegions.add(region);
+            }
+        }
+
+        return populatedRegions;
+    }
+
+    public static ArrayList<Regions> getS3Regions() {
+        ArrayList<Regions> allRegions = new ArrayList<>();
+        Collections.addAll(allRegions, Regions.values());
+        allRegions.remove(Regions.valueOf("GovCloud"));
+        allRegions.remove(Regions.valueOf("CN_NORTH_1"));
+
+        ArrayList<Regions> populatedRegions = new ArrayList<>();
+
+        for(Regions region : allRegions) {
+            if (!new S3Manager(region.name()).getS3Buckets().isEmpty()) {
+                populatedRegions.add(region);
+            }
+        }
+
+        return populatedRegions;
+    }
+
     @RequestMapping(value = "/resource/rds/{region}", method = RequestMethod.GET)
     public ResponseEntity<Collection<String>> getRDSInstances(@PathVariable String region) {
 
@@ -41,7 +79,27 @@ public class ResourceServlet {
         ArrayList<Regions> regions = new ArrayList<>();
         Collections.addAll(regions, Regions.values());
         regions.remove(Regions.valueOf("GovCloud"));
+        regions.remove(Regions.valueOf("CN_NORTH_1"));
+
         return new ResponseEntity<>(regions.toArray(new Regions[regions.size()]), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/resource/regions/rds", method = RequestMethod.GET)
+    public ResponseEntity<Regions[]> getRegionsWithRDSInstances() {
+        if (rdsRegions == null) {
+            rdsRegions = getS3Regions();
+        }
+
+        return new ResponseEntity<>(rdsRegions.toArray(new Regions[rdsRegions.size()]), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/resource/regions/s3", method = RequestMethod.GET)
+    public ResponseEntity<Regions[]> getRegionsWithS3Instances() {
+        if (s3Regions == null) {
+            s3Regions = getS3Regions();
+        }
+
+        return new ResponseEntity<>(s3Regions.toArray(new Regions[s3Regions.size()]), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/resource/captures", method = RequestMethod.GET)
