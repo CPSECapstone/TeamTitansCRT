@@ -56,8 +56,8 @@ $(function() {
                     <label class="input-label">End Time:
                         <input class="${endTimeSelector} form-control" type="datetime-local" value="">
                     </label>
-                    ${createTextInput("Max Replay Size (mB):", fileSizeLimitSelector)}
-                    ${createTextInput("Max Number of Transactions:", transactionLimitSelector)}
+                    ${/*createTextInput("Max Replay Size (mB):", fileSizeLimitSelector)*/""}
+                    ${/*createTextInput("Max Number of Transactions:", transactionLimitSelector)*/""}
                     ${createTextInput("Database Commands to Ignore (comma delimited):", filterStatementsSelector)}
                     ${createTextInput("Database Users to Ignore (comma delimited):", filterUsersSelector)}
                 </div>
@@ -111,8 +111,8 @@ $(function() {
                 s3Region: $(`.${s3RegionSelector}`).val(),
                 startTime: startTime,
                 endTime: endTime,
-                fileSizeLimit: $(`.${fileSizeLimitSelector}`).val(),
-                transactionLimit: $(`.${transactionLimitSelector}`).val(),
+                // fileSizeLimit: $(`.${fileSizeLimitSelector}`).val(),
+                // transactionLimit: $(`.${transactionLimitSelector}`).val(),
                 filterStatements: $(`.${filterStatementsSelector}`).val().split(',').map(x => x.trim()),
                 filterUsers: $(`.${filterUsersSelector}`).val().split(',').map(x => x.trim()),
                 replayType: $(`.${typeSelector}`).val()
@@ -168,7 +168,7 @@ function testReplayList() {
             dbpassword: null,
             dburl: null,
             dbusername: null,
-            endTime: "2018-05-03",
+            endTime: 1520881274784,
             filterStatements: [],
             filterUsers: [],
             id: "MyReplay",
@@ -177,9 +177,8 @@ function testReplayList() {
             replayType: "Fast Mode",
             s3: "teamtitans-test-mycrt",
             s3Region: "US_WEST_1",
-            startTime: "2018-05-03",
-            status: "Finished",
-            transactionLimit: 0
+            startTime: 1520871274784,
+            status: "Finished"
         },
         {
             captureId: "test_capture",
@@ -188,18 +187,17 @@ function testReplayList() {
             dbpassword: null,
             dburl: null,
             dbusername: null,
-            endTime: "2018-05-03",
-            filterStatements: [],
+            endTime: 1520881274784,
+            filterStatements: ["SELECT"],
             filterUsers: [],
-            id: "MyReplay_2",
+            id: "MyReplay_2_FILTERED",
             rds: "testdb",
             rdsRegion: "US_WEST_1",
             replayType: "Fast Mode",
             s3: "teamtitans-test-mycrt",
             s3Region: "US_WEST_1",
-            startTime: "2018-05-03",
-            status: "Finished",
-            transactionLimit: 0
+            startTime: 1520871274784,
+            status: "Finished"
         }
     ]
     addAllToReplayList(data);
@@ -267,6 +265,20 @@ function addToReplayList(replay) {
     $(`#${id}-delete-link`).on("click", function() {
         deleteReplay(replay);
     });
+
+    // disables fields on finished or failed captures
+    var status = replay["status"]
+    if (status == 'Finished' || status == 'Failed') {
+        $(`#${id}-modal input`).attr("readonly", true);
+    }
+    else {
+        $(`#${id}-modal input`).attr("readonly", false);
+    }
+
+    // link delete button to modal
+    $(`#${id}-delete-link`).on("click", function() {
+        deleteReplay(replay);
+    });
 }
 
 function deleteReplay(replay) {
@@ -321,6 +333,7 @@ function createDeleteReplayModal(result, message) {
  * @return {string}
  */
 function createEditReplayModal(replay) {
+    /*
     var id = replay["id"];
     var status = replay["status"];
     
@@ -337,10 +350,43 @@ function createEditReplayModal(replay) {
     else {
         endTime = "";
     }
-
-    var fileSizeLimit = replay["fileSizeLimit"];
-    var transactionLimit = replay["transactionLimit"];
+    */
     
+    var id = replay["id"];
+    var status = replay["status"];
+    
+    // to be fixed with user set timezone
+    var startTime = new Date(replay["startTime"]);
+    // startTime.setHours(startTime.getHours() - 7); // daylight savings lol
+    console.log(startTime);
+    //startTime.setHours(startTime.getHours());
+    var tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
+    startTime = (new Date(startTime - tzoffset)).toISOString().slice(0, -1);
+    //startTime = startTime.toISOString().replace("Z", "");
+    console.log(startTime);
+    var endTime = replay["endTime"];
+    if (endTime != null) {
+        endTime = new Date(endTime);
+        endTime = (new Date(endTime - tzoffset)).toISOString().slice(0, -1);
+    }
+    else {
+        endTime = "";
+    }
+
+    var captureId = replay["captureId"];
+    var filterStatements = replay["filterStatements"];
+    var filterUsers = replay["filterUsers"];
+    var replayType = replay["replayType"];
+    
+    var footer = '';
+    if (status == "Queued" || status == "Running") {
+        footer += `<a id="${id}-save" class="btn btn-primary" data-dismiss="modal">Save</a>`;
+    }
+    else if (status == "Finished") {
+        footer += `<a href="analyze" id="${id}-analyze" class="btn btn-default">Analyze</a>`
+    }
+    footer += `<a class="btn btn-secondary" data-dismiss="modal">Close</a>`;
+
     footerDelete = `<a id="${id}-delete-link" class="btn btn-primary" data-dismiss="modal">Delete</a>`;
     footerDelete += `<a class="btn btn-secondary" data-dismiss="modal">Close</a>`;
     
@@ -353,19 +399,21 @@ function createEditReplayModal(replay) {
                     <h5 class="modal-title">${id}  - ${status}</h5>
                 </div>
                 <div class="modal-body">
+                    ${createTextInputValue("Capture Used:", "", captureId)}
+                    ${createTextInputValue("Replay Type:", "", replayType)}
                     <label class="input-label">Start Time:
                         <input class="txtStartTime form-control" type="datetime-local" value="${startTime}">
                     </label>
                     <label class="input-label">End Time:
                         <input class="txtEndTime form-control" type="datetime-local" value="${endTime}">
                     </label>
-                    ${createTextInputValue("Max Replay Size (mB):", "txtMaxSize", fileSizeLimit)}
-                    ${createTextInputValue("Max Number of Transactions:", "txtMaxTrans", transactionLimit)}
+                    ${/*createTextInputValue("Max Replay Size (mB):", "txtMaxSize", fileSizeLimit)*/""}
+                    ${/*createTextInputValue("Max Number of Transactions:", "txtMaxTrans", transactionLimit)*/""}
+                    ${createTextInputValue("Database Commands to Ignore (comma delimited):", "", filterStatements)}
+                    ${createTextInputValue("Database Users to Ignore (comma delimited):", "", filterUsers)}
                 </div>
                 <div class="modal-footer">
-                    ${status == "Finished" ? 
-                        `<a class="btn btn-secondary" data-dismiss="modal">Close</a>` : 
-                        `<a id="${id}-save" class="btn btn-primary" data-dismiss="modal">Save</a>`}
+                    ${footer}
                 </div>
             </div>
         </div>
@@ -385,6 +433,20 @@ function createEditReplayModal(replay) {
             </div>
         </div>
     </div>`;
+}
+
+function createReplayListItem(id, status, selector) {
+    return `
+    <li id="item-${id}" class="list-group-item">
+        ${createIcon(status)}
+        ${id}
+        <div class="pull-right">
+            <a data-toggle="modal" data-target="#${selector}-delete" class="pull-right" href="javascript:void(0)"><span class="glyphicon glyphicon-trash"></span></a>
+            <a data-toggle="modal" data-target="#${selector}" href="javascript:void(0)" class="pad-right">
+                ${status == 'Finished' || status == 'Failed' ? 'View' : 'Edit'}
+            </a>
+        </div>
+    </li>`;
 }
 
 /**
@@ -427,38 +489,6 @@ function updateReplay(id) {
             console.log(err);
         }
     });
-}
-
-function createReplayListItem(id, status, selector) {
-    /*
-        return `
-    <li id="item-${id}" class="list-group-item">
-        ${createIcon(status)}
-        ${id}
-        <div class="pull-right">
-            <a data-toggle="modal" data-target="#${selector}-delete" class="pull-right" href="javascript:void(0)"><span class="glyphicon glyphicon-trash"></span></a>
-            <a data-toggle="modal" data-target="#${selector}" href="javascript:void(0)" class="pad-right">
-                ${status == 'Finished' || status == 'Failed' ? 'View' : 'Edit'}
-            </a>
-        </div>
-    </li>`;
-
-        <a data-toggle="modal" data-target="#${selector}" href="javascript:void(0)" class="pull-right">
-        ${status == "Finished" ? "View" : "Edit"}
-        </a>
-     */
-
-    return `
-    <li id="item-${id}" class="list-group-item">
-        ${createIcon(status)}
-        ${id}
-        <div class="pull-right">
-            <a data-toggle="modal" data-target="#${selector}-delete" class="pull-right" href="javascript:void(0)"><span class="glyphicon glyphicon-trash"></span></a>
-            <a data-toggle="modal" data-target="#${selector}" href="javascript:void(0)" class="pad-right">
-                ${status == 'Finished' || status == 'Failed' ? 'View' : 'Edit'}
-            </a>
-        </div>
-    </li>`;
 }
 
 function createIcon(status) {
