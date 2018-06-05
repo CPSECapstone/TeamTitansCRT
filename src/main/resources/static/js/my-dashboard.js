@@ -37,10 +37,6 @@ function createCaptureDashboard(data) {
     setTimeout(function()
     {
         if (data.length > 0) {
-            $(".capture-dashboard").replaceWith(template_DashboardCapture());    
-            $(".capture-table-body-running").empty();
-            $(".capture-table-body-queued").empty();
-
             // sort running captures first
             data.sort(sortRunningFirst);
 
@@ -69,9 +65,16 @@ function createCaptureDashboard(data) {
                     console.log('cloudwatch failed');
                 });
             }
-
-            $(".capture-table-body-running").append(runningRows.join(''));
-            $(".capture-table-body-queued").append(queuedRows.join(''));
+            
+            $(".capture-dashboard").empty();
+            if (runningRows.length > 0) {
+                $(".capture-dashboard").append(template_RunningTable('capture-table', 'capture-table-body-running'));
+                $(".capture-table-body-running").append(runningRows.join(''));
+            }
+            if (queuedRows.length > 0) {
+                $(".capture-dashboard").append(template_QueuedTable('capture-table', 'capture-table-body-queued'));
+                $(".capture-table-body-queued").append(queuedRows.join(''));
+            }
 
             // add event handlers to each row
             $.each(data, function(index, capture) {
@@ -96,7 +99,7 @@ function createCaptureDashboard(data) {
             });
         }
         else {
-            $(".capture-dashboard").replaceWith(template_DashboardCaptureEmpty());
+            $(".capture-dashboard").replaceWith(template_DashboardEmpty('capture'));
         }
     },
     500);
@@ -106,10 +109,6 @@ function createReplayDashboard(data) {
     setTimeout(function()
     {
         if (data.length > 0) {
-            $(".replay-dashboard").replaceWith(template_DashboardReplay());    
-            $(".replay-table-body-running").empty();
-            $(".replay-table-body-queued").empty();
-
             // sort running replays first
             data.sort(sortRunningFirst);
 
@@ -139,9 +138,17 @@ function createReplayDashboard(data) {
                 });
             }
 
-            $(".replay-table-body-running").append(runningRows.join(''));
-            $(".replay-table-body-queued").append(queuedRows.join(''));
+            $(".replay-dashboard").empty();
+            if (runningRows.length > 0) {
+                $(".replay-dashboard").append(template_RunningTable('replay-table', 'replay-table-body-running'));
+                $(".replay-table-body-running").append(runningRows.join(''));
+            }
+            if (queuedRows.length > 0) {
+                $(".replay-dashboard").append(template_QueuedTable('replay-table', 'replay-table-body-queued'));
+                $(".replay-table-body-queued").append(queuedRows.join(''));
+            }
 
+            // add event handlers to each row
             $.each(data, function(index, replay) {
                 var id = replay["id"];
                 $(`#${selectorStop(id)}`).on("click", function() {
@@ -163,7 +170,7 @@ function createReplayDashboard(data) {
             });
         }
         else {
-            $(".replay-dashboard").replaceWith(template_DashboardReplayEmpty());
+            $(".replay-dashboard").replaceWith(template_DashboardEmpty('replay'));
         }
     },
     500);
@@ -282,36 +289,24 @@ function template_Main() {
     </div>`;
 }
 
-function template_DashboardCapture() {
-    return template_DashboardDefault('capture-table', 'capture-table-body-running', 'capture-table-body-queued');
-}
-
-function template_DashboardReplay() {
-    return template_DashboardDefault('replay-table', 'replay-table-body-running', 'replay-table-body-queued');
-}
-
-function template_DashboardCaptureEmpty() {
-    return template_DashboardCaptureEmpty('capture');
-}
-
-function template_DashboardReplayEmpty() {
-    return template_DashboardCaptureEmpty('replay');
-}
-
-function template_DashboardDefault(tableSelector, runningTbodySelector, queuedTbodySelector) {
+function template_RunningTable(tableSelector, runningTbodySelector) {
     return `
     <h4>Running</h4>
     <hr>
     <div class="margin-top panel z-depth-1">
         ${template_TableDefault(tableSelector, runningTbodySelector)}
-    </div>
-    <br>
+    </div>`;
+}
+
+function template_QueuedTable(tableSelector, queuedTbodySelector) {
+    return `
     <h4>Queued</h4>
     <hr>
     <div class="margin-top panel z-depth-1">
         ${template_TableDefault(tableSelector, queuedTbodySelector)}
     </div>`;
 }
+
 
 function template_TableDefault(tableSelector, tbodySelector) {
     return `
@@ -331,7 +326,7 @@ function template_TableHeader(headings) {
     return table;
 }
 
-function template_DashboardCaptureEmpty(type) {
+function template_DashboardEmpty(type) {
     return `
     <p class="text-center">You have no ${type}s currently running! Let's get started!</p>
     <div class="text-center">
@@ -503,7 +498,6 @@ function makeRandomCapture(id) {
     let status = "";
     if (startTime < now) {
         status = "Running";
-        // status = "Queued";
     }
     else if (startTime > now) {
         status = "Queued";
