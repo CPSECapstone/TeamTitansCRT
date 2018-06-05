@@ -1,10 +1,10 @@
 $(function() {
-    $(".content-placeholder").replaceWith(mainTemplate());
+    $(".content-placeholder").replaceWith(template_Main());
     $("#toggle-btn").on("click", function() {
         toggleDashboard();
     });
-    // testDashboardTable();
-    updateStatus();
+    testDashboardTable();
+    // updateStatus();
     $(".replay-row").hide();
 });
 
@@ -37,7 +37,7 @@ function createCaptureDashboard(data) {
     setTimeout(function()
     {
         if (data.length > 0) {
-            $(".capture-dashboard").replaceWith(captureDashboardTemplate());    
+            $(".capture-dashboard").replaceWith(template_DashboardCapture());    
             $(".capture-table-body-running").empty();
             $(".capture-table-body-queued").empty();
 
@@ -63,7 +63,7 @@ function createCaptureDashboard(data) {
                 getMetrics(capture)
                 .done(function(metrics) {
                     console.log('adding cloudwatch data');
-                    $(`#${selectorCloudwatch(id)}`).html(metricsTemplate(metrics));
+                    $(`#${selectorCloudwatch(id)}`).html(template_Metrics(metrics));
                 })
                 .fail(function(err) {
                     console.log('cloudwatch failed');
@@ -96,7 +96,7 @@ function createCaptureDashboard(data) {
             });
         }
         else {
-            $(".capture-dashboard").replaceWith(captureDashboardEmptyTemplate());
+            $(".capture-dashboard").replaceWith(template_DashboardCaptureEmpty());
         }
     },
     500);
@@ -106,7 +106,7 @@ function createReplayDashboard(data) {
     setTimeout(function()
     {
         if (data.length > 0) {
-            $(".replay-dashboard").replaceWith(replayDashboardTemplate());    
+            $(".replay-dashboard").replaceWith(template_DashboardReplay());    
             $(".replay-table-body-running").empty();
             $(".replay-table-body-queued").empty();
 
@@ -132,7 +132,7 @@ function createReplayDashboard(data) {
                 getMetrics(replay)
                 .done(function(metrics) {
                     console.log('adding cloudwatch data');
-                    $(`#${selectorCloudwatch(id)}`).html(metricsTemplate(metrics));
+                    $(`#${selectorCloudwatch(id)}`).html(template_Metrics(metrics));
                 })
                 .fail(function(err) {
                     console.log('cloudwatch failed');
@@ -163,7 +163,7 @@ function createReplayDashboard(data) {
             });
         }
         else {
-            $(".replay-dashboard").replaceWith(replayDashboardEmptyTemplate());
+            $(".replay-dashboard").replaceWith(template_DashboardReplayEmpty());
         }
     },
     500);
@@ -194,7 +194,7 @@ function createTableRow(capture) {
         icon = "";
 
     if (status == "Running") {
-        btn = `<a href="javascript:void(0)" id="${selectorStop(id)}" class="defaultLinkColor">Stop Capture</a>`;
+        btn = `<a href="javascript:void(0)" id="${selectorStop(id)}" class="defaultLinkColor">Stop Now</a>`;
         icon = getRunningImageTemplate();
     }                
     else if (status == "Finished") {
@@ -249,7 +249,7 @@ function selectorAnalyze(id) {
 }
 
 /* ----------------------- Template Functions -------------------------------- */
-function mainTemplate() {
+function template_Main() {
     return `
     <div class="container main-dashboard">
         <a id="toggle-btn" class="btn btn-default pull-right">Show Replays</a>
@@ -282,105 +282,64 @@ function mainTemplate() {
     </div>`;
 }
 
-function captureDashboardTemplate() {
+function template_DashboardCapture() {
+    return template_DashboardDefault('capture-table', 'capture-table-body-running', 'capture-table-body-queued');
+}
+
+function template_DashboardReplay() {
+    return template_DashboardDefault('replay-table', 'replay-table-body-running', 'replay-table-body-queued');
+}
+
+function template_DashboardCaptureEmpty() {
+    return template_DashboardCaptureEmpty('capture');
+}
+
+function template_DashboardReplayEmpty() {
+    return template_DashboardCaptureEmpty('replay');
+}
+
+function template_DashboardDefault(tableSelector, runningTbodySelector, queuedTbodySelector) {
     return `
     <h4>Running</h4>
     <hr>
     <div class="margin-top panel z-depth-1">
-        <table class="capture-table table table-hover table-bordered" >
-            <thead class="thead-dark">
-                <tr class="">
-                    <th scope="col"> </th> 
-                    <th scope="col">Name</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Start Time</th>
-                    <th scope="col">End Time</th>
-                    <th scope="col"> </th>
-                </tr>
-            </thead>
-            <tbody class="capture-table-body-running">
-            </tbody>
-        </table>
+        ${template_TableDefault(tableSelector, runningTbodySelector)}
     </div>
     <br>
     <h4>Queued</h4>
     <hr>
     <div class="margin-top panel z-depth-1">
-        <table class="capture-table table table-hover table-bordered" >
-            <thead class="thead-dark">
-                <tr class="">
-                    <th scope="col"> </th> 
-                    <th scope="col">Name</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Start Time</th>
-                    <th scope="col">End Time</th>
-                    <th scope="col"> </th>
-                </tr>
-            </thead>
-            <tbody class="capture-table-body-queued">
-            </tbody>
-        </table>
+        ${template_TableDefault(tableSelector, queuedTbodySelector)}
     </div>`;
 }
 
-function captureDashboardEmptyTemplate() {
+function template_TableDefault(tableSelector, tbodySelector) {
     return `
-    <p class="text-center">You have no captures currently running! Let's get started!</p>
+    <table class="${tableSelector} table table-hover table-bordered" >
+        ${template_TableHeader([' ', 'Name', 'Status', 'Start Time', 'End Time', ' '])}
+        <tbody class="${tbodySelector}">
+        </tbody>
+    </table>`;
+}
+
+function template_TableHeader(headings) {
+    let table = `<thead class="thead-dark"><tr class="">`;
+    for (let i = 0; i < headings.length; i++) {
+        table += `<th scope="col">${headings[i]}</th>`;
+    }
+    table += `</tr></thead>`;
+    return table;
+}
+
+function template_DashboardCaptureEmpty(type) {
+    return `
+    <p class="text-center">You have no ${type}s currently running! Let's get started!</p>
     <div class="text-center">
-        <a href="capture" class="btn btn-default">Start new capture</a>
+        <a href="${type}" class="btn btn-default">Start new ${type}</a>
     </div>`;
 }
 
-function replayDashboardTemplate() {
-    return `
-    <h4>Running</h4>
-    <hr>
-    <div class="margin-top panel z-depth-1">
-        <table class="replay-table table table-hover table-bordered" >
-            <thead class="thead-dark">
-                <tr class="">
-                    <th scope="col"> </th> 
-                    <th scope="col">Name</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Start Time</th>
-                    <th scope="col">End Time</th>
-                    <th scope="col"> </th>
-                </tr>
-            </thead>
-            <tbody class="replay-table-body-running">
-            </tbody>
-        </table>
-    </div>
-    <br>
-    <h4>Queued</h4>
-    <hr>
-    <div class="margin-top panel z-depth-1">
-        <table class="replay-table table table-hover table-bordered" >
-            <thead class="thead-dark">
-                <tr class="">
-                    <th scope="col"> </th> 
-                    <th scope="col">Name</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Start Time</th>
-                    <th scope="col">End Time</th>
-                    <th scope="col"> </th>
-                </tr>
-            </thead>
-            <tbody class="replay-table-body-queued">
-            </tbody>
-        </table>
-    </div>`;
-}
-
-function replayDashboardEmptyTemplate() {
-    return `
-    <p class="text-center">You have no replays currently running! Let's get started!</p>
-    <div class="text-center">
-        <a href="replay" class="btn btn-default">Start new replay</a>
-    </div>`;
-}
-
-function metricsTemplate(metrics) {
+function template_Metrics(metrics) {
     return `
     <td colspan="6">
         <div>
@@ -544,6 +503,7 @@ function makeRandomCapture(id) {
     let status = "";
     if (startTime < now) {
         status = "Running";
+        // status = "Queued";
     }
     else if (startTime > now) {
         status = "Queued";
