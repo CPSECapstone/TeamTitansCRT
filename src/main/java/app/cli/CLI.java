@@ -114,12 +114,10 @@ public class CLI {
         con.setRequestProperty("User-Agent", USER_AGENT);
         con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
         con.setRequestProperty("Content-Type","application/json");
-        System.out.println("Creating 'POST' request to URL : " + url);
         return con;
     }
 
     private static void sendConnectionPOST(HttpURLConnection con, String data) throws IOException {
-        System.out.println("Sending post data : " + data);
         con.setDoOutput(true);
         DataOutputStream wr = new DataOutputStream(con.getOutputStream());
         wr.writeBytes(data);
@@ -153,16 +151,8 @@ public class CLI {
         HttpURLConnection con = createConnectionGET(url);
 
         int responseCode = con.getResponseCode(); // HTTP Response Code
-
-        // printing request properties
-        /*
-        System.out.println("Response Code : " + responseCode);
-        System.out.println(con.getResponseMessage());
-        */
         if (responseCode >= 400) {
-            System.out.println("Response Code : " + responseCode);
-            System.out.println(con.getResponseMessage());
-            System.out.println(responseCode);
+            System.out.println("Error: " + responseCode + " " + con.getResponseMessage());
             throw new RuntimeException();
         }
 
@@ -173,17 +163,11 @@ public class CLI {
         HttpURLConnection con = createConnectionPOST(url);
 
         sendConnectionPOST(con, data);
-
         int responseCode = con.getResponseCode(); // HTTP Response Code
-
         if (responseCode >= 400) {
-            System.out.println(responseCode);
+            System.out.println("Error: " + responseCode + " " + con.getResponseMessage());
             throw new RuntimeException();
         }
-
-        // printing request properties
-        System.out.println("Response Code : " + responseCode);
-        System.out.println(con.getResponseMessage());
 
         return readResponse(con);
     }

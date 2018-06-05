@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.List;
 
 public class AnalysisCLI extends CLI{
-    public static String average(Capture capture, String... metrics)throws IOException, RuntimeException {
+    public static String average(Capture capture, String... metrics)throws RuntimeException {
         String rds = capture.getRds();
         String region = capture.getRdsRegion();
         Date startTime = capture.getStartTime();
@@ -39,7 +39,7 @@ public class AnalysisCLI extends CLI{
             startTime.setTime(startTime.getTime()-3600*200);
             capture.setStartTime(startTime);
             System.out.println(average(capture, metrics));
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
