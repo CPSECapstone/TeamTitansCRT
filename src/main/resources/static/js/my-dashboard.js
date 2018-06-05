@@ -3,8 +3,8 @@ $(function() {
     $("#toggle-btn").on("click", function() {
         toggleDashboard();
     });
-    testDashboardTable();
-    // updateStatus();
+    // testDashboardTable();
+    updateStatus();
     $(".replay-row").hide();
 });
 
