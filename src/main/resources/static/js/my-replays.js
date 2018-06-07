@@ -41,8 +41,8 @@ $(function() {
                 <div class="${s3Selector}"></div>
 
                 ${createTextInput("Replay Name:", replayNameSelector)}
-                ${createTextInputValue("Replay RDS Username:", usernameSelector, "admin")}
-                ${createPasswordInputValue("Replay RDS Password:", passwordSelector, "TeamTitans!")}
+                ${createTextInputValue("Replay RDS Username:", usernameSelector, "")}
+                ${createPasswordInputValue("Replay RDS Password:", passwordSelector, "")}
 
                 <div class="block">
                     <a data-toggle="collapse" href="#advanced">Advanced <span class="caret"></span></a>
